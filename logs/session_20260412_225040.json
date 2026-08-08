@@ -1,0 +1,53 @@
+[
+  {
+    "time": "2026-04-12T22:50:41.219352",
+    "type": "jarvis_response",
+    "data": "systems up."
+  },
+  {
+    "time": "2026-04-12T22:50:44.807649",
+    "type": "jarvis_response",
+    "data": "yep, listening."
+  },
+  {
+    "time": "2026-04-12T22:50:53.617895",
+    "type": "user_input",
+    "data": "please open Chrome"
+  },
+  {
+    "time": "2026-04-12T22:50:53.617895",
+    "type": "planner_input",
+    "data": "please open chrome"
+  },
+  {
+    "time": "2026-04-12T22:51:00.500616",
+    "type": "planner_decision",
+    "data": {
+      "action": null,
+      "response": "That hasn't been working well. Want me to try something else?"
+    }
+  },
+  {
+    "time": "2026-04-12T22:51:00.500616",
+    "type": "planner_output",
+    "data": {
+      "action": null,
+      "response": "That hasn't been working well. Want me to try something else?"
+    }
+  },
+  {
+    "time": "2026-04-12T22:51:00.501660",
+    "type": "jarvis_response",
+    "data": "That hasn't been working well. Want me to try something else?"
+  },
+  {
+    "time": "2026-04-12T22:51:11.532465",
+    "type": "user_input",
+    "data": "could you please exit for me"
+  },
+  {
+    "time": "2026-04-12T22:51:11.532465",
+    "type": "jarvis_response",
+    "data": "peace."
+  }
+]

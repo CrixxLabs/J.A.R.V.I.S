@@ -1,0 +1,133 @@
+[
+  {
+    "time": "2026-06-15T22:24:40.056888",
+    "type": "skill_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "name": "example_skill",
+      "priority": 60
+    }
+  },
+  {
+    "time": "2026-06-15T22:24:40.056888",
+    "type": "skills_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "count": 1
+    }
+  },
+  {
+    "time": "2026-06-15T22:24:40.804714",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Systems up."
+  },
+  {
+    "time": "2026-06-15T22:24:49.738336",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Ready. What do you need?"
+  },
+  {
+    "time": "2026-06-15T22:25:15.395486",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Alexa describe my screen"
+  },
+  {
+    "time": "2026-06-15T22:25:15.395486",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "alexa describe my screen"
+  },
+  {
+    "time": "2026-06-15T22:25:15.396994",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "screenshot_describe"
+      },
+      "response": "Looking at your screen."
+    }
+  },
+  {
+    "time": "2026-06-15T22:25:15.396994",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "screenshot_describe"
+      },
+      "response": "Looking at your screen."
+    }
+  },
+  {
+    "time": "2026-06-15T22:25:25.396929",
+    "type": "execution_result",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": "screenshot_describe",
+      "success": true,
+      "message": "This screen displays what seems to be a coding program interface, specifically for Python development. On the left side of the screen, a file browser can be seen labeled as \"J.A.R.V.I.S.\" displaying various Python files and folders. These elements are neatly arranged for easy navigation.\n\nIn the center of the screen, there is a Python code editor with lines of code shown. The code is written in various colors to differentiate between keywords and syntax, a common feature in code editors to enhance readability.\n\nThe bottom portion of the screen shows an output panel or console, where messages and technical information are displayed. This panel provides feedback about the program's execution, including any errors or status updates.\n\nOverall, the programs appear to offer an organized environment for coding in Python."
+    }
+  },
+  {
+    "time": "2026-06-15T22:25:25.397936",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "This screen displays what seems to be a coding program interface, specifically for Python development. On the left side of the screen, a file browser can be seen labeled as \"J.A.R.V.I.S.\" displaying various Python files and folders. These elements are neatly arranged for easy navigation. In the center of the screen, there is a Python code editor with lines of code shown. The code is written in various colors to differentiate between keywords and syntax, a common feature in code editors to enhance readability. The bottom portion of the screen shows an output panel or console, where messages and technical information are displayed. This panel provides feedback about the program's execution, including any errors or status updates. Overall, the programs appear to offer an organized environment for coding in Python."
+  },
+  {
+    "time": "2026-06-15T22:25:46.419850",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Going quiet."
+  },
+  {
+    "time": "2026-06-15T22:26:06.644196",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Ready. What do you need?"
+  },
+  {
+    "time": "2026-06-15T22:26:20.997979",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "exit for me exit for me"
+  },
+  {
+    "time": "2026-06-15T22:26:20.997979",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Alright. Catch you later."
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "generated_at": "2026-06-15T23:41:38.675446",
+  "finding": {
+    "type": "repeated_pattern",
+    "actions": [
+      "speak"
+    ],
+    "suggestion": "These actions are repeated back-to-back. Consider bundling into run_sequence."
+  },
+  "status": "pending_review",
+  "auto_apply": false,
+  "patch_idea": "These actions are repeated back-to-back. Consider bundling into run_sequence.",
+  "files_affected": [
+    "planner.py"
+  ]
+}

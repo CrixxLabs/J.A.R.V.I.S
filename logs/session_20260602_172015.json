@@ -1,0 +1,275 @@
+[
+  {
+    "time": "2026-06-02T17:20:16.545631",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Systems up."
+  },
+  {
+    "time": "2026-06-02T17:20:28.351351",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Ready. What do you need?"
+  },
+  {
+    "time": "2026-06-02T17:20:35.909722",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what is the meaning of"
+  },
+  {
+    "time": "2026-06-02T17:20:35.910721",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what is the meaning of"
+  },
+  {
+    "time": "2026-06-02T17:20:38.627475",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "The meaning of what? Please provide more context or specify what you want to know the meaning of."
+    }
+  },
+  {
+    "time": "2026-06-02T17:20:38.627475",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "The meaning of what? Please provide more context or specify what you want to know the meaning of."
+    }
+  },
+  {
+    "time": "2026-06-02T17:20:38.628474",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "The meaning of what? Please provide more context or specify what you want to know the meaning of."
+  },
+  {
+    "time": "2026-06-02T17:20:54.792278",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what is AI according"
+  },
+  {
+    "time": "2026-06-02T17:20:54.793230",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what is ai according"
+  },
+  {
+    "time": "2026-06-02T17:20:55.851961",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "assistant: AI according to what? Please provide more context or specify what you want to know about AI."
+    }
+  },
+  {
+    "time": "2026-06-02T17:20:55.851961",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "assistant: AI according to what? Please provide more context or specify what you want to know about AI."
+    }
+  },
+  {
+    "time": "2026-06-02T17:20:55.851961",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Assistant: AI according to what? Please provide more context or specify what you want to know about AI."
+  },
+  {
+    "time": "2026-06-02T17:21:11.434032",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what is the meaning of"
+  },
+  {
+    "time": "2026-06-02T17:21:11.438035",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what is the meaning of"
+  },
+  {
+    "time": "2026-06-02T17:21:13.662290",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "The meaning of what? Please provide more context or specify what you want to know the meaning of."
+    }
+  },
+  {
+    "time": "2026-06-02T17:21:13.662290",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "The meaning of what? Please provide more context or specify what you want to know the meaning of."
+    }
+  },
+  {
+    "time": "2026-06-02T17:21:13.663420",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "The meaning of what? Please provide more context or specify what you want to know the meaning of."
+  },
+  {
+    "time": "2026-06-02T17:21:28.550793",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what is the meaning of AI"
+  },
+  {
+    "time": "2026-06-02T17:21:28.550793",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what is the meaning of ai"
+  },
+  {
+    "time": "2026-06-02T17:21:31.133047",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "AI stands for Artificial Intelligence. It refers to the simulation of human intelligence in machines programmed to think and learn like humans."
+    }
+  },
+  {
+    "time": "2026-06-02T17:21:31.134053",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "AI stands for Artificial Intelligence. It refers to the simulation of human intelligence in machines programmed to think and learn like humans."
+    }
+  },
+  {
+    "time": "2026-06-02T17:21:31.134053",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "AI stands for Artificial Intelligence. It refers to the simulation of human intelligence in machines programmed to think and learn like humans."
+  },
+  {
+    "time": "2026-06-02T17:21:47.560149",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "are you"
+  },
+  {
+    "time": "2026-06-02T17:21:47.560149",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "are you"
+  },
+  {
+    "time": "2026-06-02T17:21:49.311792",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "assistant: are you a virtual assistant like me?"
+    }
+  },
+  {
+    "time": "2026-06-02T17:21:49.311792",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "assistant: are you a virtual assistant like me?"
+    }
+  },
+  {
+    "time": "2026-06-02T17:21:49.316310",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Assistant: are you a virtual assistant like me?"
+  },
+  {
+    "time": "2026-06-02T17:22:00.017535",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "are you good"
+  },
+  {
+    "time": "2026-06-02T17:22:00.017535",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "are you good"
+  },
+  {
+    "time": "2026-06-02T17:22:01.192806",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "assistant: are you good at answering questions about artificial intelligence and machine learning?"
+    }
+  }
+]

@@ -1,0 +1,99 @@
+[
+  {
+    "time": "2026-07-18T09:22:58.324514",
+    "type": "skill_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "name": "example_skill",
+      "priority": 60
+    }
+  },
+  {
+    "time": "2026-07-18T09:22:58.324514",
+    "type": "skills_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "count": 1
+    }
+  },
+  {
+    "time": "2026-07-18T09:23:01.587224",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Systems up."
+  },
+  {
+    "time": "2026-07-18T09:23:06.641025",
+    "type": "boot_syntax_ok",
+    "severity": "debug",
+    "module": "self_diagnostic",
+    "tags": [
+      "boot",
+      "syntax"
+    ],
+    "data": {
+      "passed_count": 42,
+      "warning_count": 0
+    }
+  },
+  {
+    "time": "2026-07-18T09:23:08.827569",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "What's the move?"
+  },
+  {
+    "time": "2026-07-18T09:23:37.849528",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "ok google"
+  },
+  {
+    "time": "2026-07-18T09:23:39.414406",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not Google Assistant, I'm Jarvis, your desktop assistant."
+    }
+  },
+  {
+    "time": "2026-07-18T09:23:39.414406",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not Google Assistant, I'm Jarvis, your desktop assistant."
+    }
+  },
+  {
+    "time": "2026-07-18T09:23:39.416920",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I'm not Google Assistant, I'm Jarvis, your desktop assistant."
+  },
+  {
+    "time": "2026-07-18T09:24:15.281044",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what is the meaning of your name what is the meaning of"
+  }
+]

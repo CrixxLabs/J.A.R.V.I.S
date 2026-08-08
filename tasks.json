@@ -1,0 +1,32 @@
+[
+  {
+    "id": "reminder_a13c3d38",
+    "type": "scheduled",
+    "scheduled_time": null,
+    "delay_seconds": 5,
+    "action": "speak",
+    "message": "test reminder",
+    "active": true,
+    "last_triggered": null,
+    "cooldown_minutes": 9999,
+    "repeat": false,
+    "label": "reminder: test reminder",
+    "entities": {
+      "datetime": "in 5 seconds"
+    }
+  },
+  {
+    "id": "reminder_3c9e1eaf",
+    "type": "scheduled",
+    "scheduled_time": null,
+    "delay_seconds": 10,
+    "action": "speak",
+    "message": "drink water in 10 seconds",
+    "active": true,
+    "last_triggered": null,
+    "cooldown_minutes": 9999,
+    "repeat": false,
+    "label": "reminder: drink water in 10 seconds",
+    "entities": {}
+  }
+]

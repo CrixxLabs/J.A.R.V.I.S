@@ -1,0 +1,37 @@
+[
+  {
+    "time": "2026-06-02T16:51:04.363662",
+    "type": "startup",
+    "severity": "info",
+    "module": "core",
+    "tags": [
+      "lifecycle"
+    ],
+    "data": {
+      "status": "Jarvis online",
+      "session": "20260602_165104"
+    }
+  },
+  {
+    "time": "2026-06-02T16:51:04.363662",
+    "type": "test_event",
+    "severity": "info",
+    "module": "test",
+    "tags": [
+      "check"
+    ],
+    "data": "hello"
+  },
+  {
+    "time": "2026-06-02T16:51:04.363662",
+    "type": "error",
+    "severity": "error",
+    "module": "test",
+    "tags": [
+      "error"
+    ],
+    "data": {
+      "message": "test error"
+    }
+  }
+]

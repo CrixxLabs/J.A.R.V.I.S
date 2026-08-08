@@ -1,0 +1,375 @@
+[
+  {
+    "time": "2026-06-20T00:28:45.614458",
+    "type": "skill_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "name": "example_skill",
+      "priority": 60
+    }
+  },
+  {
+    "time": "2026-06-20T00:28:45.614458",
+    "type": "skills_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "count": 1
+    }
+  },
+  {
+    "time": "2026-06-20T00:28:46.401657",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Systems up."
+  },
+  {
+    "time": "2026-06-20T00:28:51.665263",
+    "type": "boot_syntax_ok",
+    "severity": "debug",
+    "module": "self_diagnostic",
+    "tags": [
+      "boot",
+      "syntax"
+    ],
+    "data": {
+      "passed_count": 40,
+      "warning_count": 0
+    }
+  },
+  {
+    "time": "2026-06-20T00:29:18.990796",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "hey Jarvis"
+  },
+  {
+    "time": "2026-06-20T00:29:19.708036",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "hey jarvis"
+  },
+  {
+    "time": "2026-06-20T00:29:22.941951",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Hello, I'm here to help."
+    }
+  },
+  {
+    "time": "2026-06-20T00:29:22.941951",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Hello, I'm here to help."
+    }
+  },
+  {
+    "time": "2026-06-20T00:29:22.942836",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Hello, I'm here to help."
+  },
+  {
+    "time": "2026-06-20T00:29:37.827059",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how are you doing Jarvis"
+  },
+  {
+    "time": "2026-06-20T00:29:37.833613",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how are you doing jarvis"
+  },
+  {
+    "time": "2026-06-20T00:29:40.327301",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm functioning within normal parameters."
+    }
+  },
+  {
+    "time": "2026-06-20T00:29:40.327301",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm functioning within normal parameters."
+    }
+  },
+  {
+    "time": "2026-06-20T00:29:40.327301",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I'm functioning within normal parameters."
+  },
+  {
+    "time": "2026-06-20T00:30:01.308893",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how do you do Jarvis"
+  },
+  {
+    "time": "2026-06-20T00:30:01.311910",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how do you do jarvis"
+  },
+  {
+    "time": "2026-06-20T00:30:02.971194",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I use a combination of natural language processing and machine learning to understand and respond to voice commands."
+    }
+  },
+  {
+    "time": "2026-06-20T00:30:02.971194",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I use a combination of natural language processing and machine learning to understand and respond to voice commands."
+    }
+  },
+  {
+    "time": "2026-06-20T00:30:02.973194",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I use a combination of natural language processing and machine learning to understand and respond to voice commands."
+  },
+  {
+    "time": "2026-06-20T00:30:17.270946",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "do you use machine learning to work on"
+  },
+  {
+    "time": "2026-06-20T00:30:17.273058",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "do you use machine learning to work on"
+  },
+  {
+    "time": "2026-06-20T00:30:19.505442",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Yes, I utilize machine learning algorithms to improve my performance and provide more accurate responses."
+    }
+  },
+  {
+    "time": "2026-06-20T00:30:19.505442",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Yes, I utilize machine learning algorithms to improve my performance and provide more accurate responses."
+    }
+  },
+  {
+    "time": "2026-06-20T00:30:19.505442",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Yes, I utilize machine learning algorithms to improve my performance and provide more accurate responses."
+  },
+  {
+    "time": "2026-06-20T00:30:32.485905",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "it doesn't seem like you are using it"
+  },
+  {
+    "time": "2026-06-20T00:30:32.489447",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "it doesn't seem like you are using it"
+  },
+  {
+    "time": "2026-06-20T00:30:38.062134",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Understood. I'm still functioning and ready to assist you."
+    }
+  },
+  {
+    "time": "2026-06-20T00:30:38.062134",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Understood. I'm still functioning and ready to assist you."
+    }
+  },
+  {
+    "time": "2026-06-20T00:30:38.063134",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Understood. I'm still functioning and ready to assist you."
+  },
+  {
+    "time": "2026-06-20T00:30:54.681624",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how would you say I am doing right now"
+  },
+  {
+    "time": "2026-06-20T00:30:54.686172",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how would you say i am doing right now"
+  },
+  {
+    "time": "2026-06-20T00:30:59.161025",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "You seem to be coding in VS Code."
+    }
+  },
+  {
+    "time": "2026-06-20T00:30:59.161025",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "You seem to be coding in VS Code."
+    }
+  },
+  {
+    "time": "2026-06-20T00:30:59.162032",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "You seem to be coding in VS Code."
+  },
+  {
+    "time": "2026-06-20T00:31:20.330097",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Jarvis"
+  },
+  {
+    "time": "2026-06-20T00:31:20.336207",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "jarvis"
+  },
+  {
+    "time": "2026-06-20T00:31:21.914241",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm here and ready to assist you, Arju, with Brave open."
+    }
+  },
+  {
+    "time": "2026-06-20T00:31:21.914241",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm here and ready to assist you, Arju, with Brave open."
+    }
+  },
+  {
+    "time": "2026-06-20T00:31:21.915240",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I'm here and ready to assist you, Arju, with Brave open."
+  },
+  {
+    "time": "2026-06-20T00:31:56.568740",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Going quiet."
+  }
+]

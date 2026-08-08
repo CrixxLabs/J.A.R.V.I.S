@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-04-12T21:51:22.852512",
+  "finding": {
+    "type": "high_failure",
+    "action": "open_app",
+    "rate": 0.71,
+    "detail": "retry also failed",
+    "suggestion": "Consider adding a better fallback or alternative for 'open_app'"
+  },
+  "status": "pending_review",
+  "auto_apply": false,
+  "patch_idea": "Consider adding a better fallback or alternative for 'open_app'",
+  "files_affected": [
+    "executor.py",
+    "planner.py"
+  ]
+}

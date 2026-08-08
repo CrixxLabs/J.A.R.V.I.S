@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-04-14T20:34:50.662637",
+  "finding": {
+    "type": "unused_capability",
+    "action": "whatsapp_timetable_update",
+    "suggestion": "'whatsapp_timetable_update' has never been used. Consider promoting it in suggestions."
+  },
+  "status": "pending_review",
+  "auto_apply": false,
+  "patch_idea": "'whatsapp_timetable_update' has never been used. Consider promoting it in suggestions.",
+  "files_affected": [
+    "planner.py",
+    "jarvis.py"
+  ]
+}

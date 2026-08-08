@@ -1,0 +1,310 @@
+[
+  {
+    "time": "2026-06-02T17:47:34.254671",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Systems up."
+  },
+  {
+    "time": "2026-06-02T17:47:44.377540",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "What's the move?"
+  },
+  {
+    "time": "2026-06-02T17:47:50.303790",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what is the meaning of artificial"
+  },
+  {
+    "time": "2026-06-02T17:47:50.303790",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what is the meaning of artificial"
+  },
+  {
+    "time": "2026-06-02T17:47:52.652552",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "AI stands for Artificial Intelligence. It refers to the simulation of human intelligence in machines."
+    }
+  },
+  {
+    "time": "2026-06-02T17:47:52.652552",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "AI stands for Artificial Intelligence. It refers to the simulation of human intelligence in machines."
+    }
+  },
+  {
+    "time": "2026-06-02T17:47:52.653551",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "AI stands for Artificial Intelligence. It refers to the simulation of human intelligence in machines."
+  },
+  {
+    "time": "2026-06-02T17:48:07.762210",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how would you prefer a human who is thick as bitch"
+  },
+  {
+    "time": "2026-06-02T17:48:07.763214",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how would you prefer a human who is thick as bitch"
+  },
+  {
+    "time": "2026-06-02T17:48:09.941657",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I don't understand the context of your question."
+    }
+  },
+  {
+    "time": "2026-06-02T17:48:09.942159",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I don't understand the context of your question."
+    }
+  },
+  {
+    "time": "2026-06-02T17:48:09.942159",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I don't understand the context of your question."
+  },
+  {
+    "time": "2026-06-02T17:48:20.071498",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "at what do you understand as a context of my question"
+  },
+  {
+    "time": "2026-06-02T17:48:20.071498",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "at what do you understand as a context of my question"
+  },
+  {
+    "time": "2026-06-02T17:48:21.825114",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I understand context as relevant information surrounding a conversation or question."
+    }
+  },
+  {
+    "time": "2026-06-02T17:48:21.825114",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I understand context as relevant information surrounding a conversation or question."
+    }
+  },
+  {
+    "time": "2026-06-02T17:48:21.825114",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I understand context as relevant information surrounding a conversation or question."
+  },
+  {
+    "time": "2026-06-02T17:48:33.373902",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Shukriya Sunrise talking early"
+  },
+  {
+    "time": "2026-06-02T17:48:33.373902",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "shukriya sunrise talking early"
+  },
+  {
+    "time": "2026-06-02T17:48:34.518570",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"name\": \"Conversation Summary\", \"entities\": [ { \"type\": \"User\", \"text\": \"Shukriya Sunrise talking early\" } ] } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:48:34.518570",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"name\": \"Conversation Summary\", \"entities\": [ { \"type\": \"User\", \"text\": \"Shukriya Sunrise talking early\" } ] } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:48:34.518570",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "``` ] } ```"
+  },
+  {
+    "time": "2026-06-02T17:48:41.511517",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Nilkamal Malayalam"
+  },
+  {
+    "time": "2026-06-02T17:48:41.511517",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "nilkamal malayalam"
+  },
+  {
+    "time": "2026-06-02T17:48:43.105310",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"name\": \"Conversation Summary\", \"entities\": [ { \"type\": \"User\", \"text\": \"Nilkamal Malayalam\" } ] } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:48:43.105310",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"name\": \"Conversation Summary\", \"entities\": [ { \"type\": \"User\", \"text\": \"Nilkamal Malayalam\" } ] } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:48:43.105310",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "``` ] } ```"
+  },
+  {
+    "time": "2026-06-02T17:48:48.225040",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Malayalam Mana"
+  },
+  {
+    "time": "2026-06-02T17:48:48.225040",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "malayalam mana"
+  },
+  {
+    "time": "2026-06-02T17:48:48.921785",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I don't have enough context to understand your question."
+    }
+  },
+  {
+    "time": "2026-06-02T17:48:48.922288",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I don't have enough context to understand your question."
+    }
+  },
+  {
+    "time": "2026-06-02T17:48:48.923294",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I don't have enough context to understand your question."
+  },
+  {
+    "time": "2026-06-02T17:48:57.518243",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "kya is working for just shut down"
+  },
+  {
+    "time": "2026-06-02T17:48:57.518243",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Standing by."
+  }
+]

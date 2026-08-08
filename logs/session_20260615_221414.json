@@ -1,0 +1,379 @@
+[
+  {
+    "time": "2026-06-15T22:14:14.761067",
+    "type": "skill_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "name": "example_skill",
+      "priority": 60
+    }
+  },
+  {
+    "time": "2026-06-15T22:14:14.761067",
+    "type": "skills_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "count": 1
+    }
+  },
+  {
+    "time": "2026-06-15T22:14:15.094765",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Systems up."
+  },
+  {
+    "time": "2026-06-15T22:14:48.346623",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "What's the move?"
+  },
+  {
+    "time": "2026-06-15T22:14:54.702246",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how are you doing"
+  },
+  {
+    "time": "2026-06-15T22:14:54.702246",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how are you doing"
+  },
+  {
+    "time": "2026-06-15T22:14:56.973533",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm functioning properly, ready to assist you."
+    }
+  },
+  {
+    "time": "2026-06-15T22:14:56.973533",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm functioning properly, ready to assist you."
+    }
+  },
+  {
+    "time": "2026-06-15T22:14:56.975559",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I'm functioning properly, ready to assist you."
+  },
+  {
+    "time": "2026-06-15T22:15:04.972069",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how is the weather in Mumbai"
+  },
+  {
+    "time": "2026-06-15T22:15:04.973135",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how is the weather in mumbai"
+  },
+  {
+    "time": "2026-06-15T22:15:04.974133",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "weather",
+        "city": "Mumbai"
+      },
+      "response": ""
+    }
+  },
+  {
+    "time": "2026-06-15T22:15:04.974133",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "weather",
+        "city": "Mumbai"
+      },
+      "response": ""
+    }
+  },
+  {
+    "time": "2026-06-15T22:15:05.390467",
+    "type": "execution_result",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": "weather",
+      "success": true,
+      "message": "it's 31 degrees in Mumbai. feels like 36. broken clouds. humidity 66%."
+    }
+  },
+  {
+    "time": "2026-06-15T22:15:05.391409",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "It's 31 degrees in Mumbai. feels like 36. broken clouds. humidity 66%."
+  },
+  {
+    "time": "2026-06-15T22:15:15.733246",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how is my"
+  },
+  {
+    "time": "2026-06-15T22:15:15.734750",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how is my"
+  },
+  {
+    "time": "2026-06-15T22:15:16.590369",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I don't have any information about your personal details."
+    }
+  },
+  {
+    "time": "2026-06-15T22:15:16.590369",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I don't have any information about your personal details."
+    }
+  },
+  {
+    "time": "2026-06-15T22:15:16.591366",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I don't have any information about your personal details."
+  },
+  {
+    "time": "2026-06-15T22:15:29.703398",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "new terms doing"
+  },
+  {
+    "time": "2026-06-15T22:15:29.707915",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "new terms doing"
+  },
+  {
+    "time": "2026-06-15T22:15:30.994105",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"name\": \"Action\", \"entities\": [ { \"type\": \"User\", \"text\": \"new terms\" }, { \"type\": \"Assistant\", \"text\": \"explaining\" } ] } ```"
+    }
+  },
+  {
+    "time": "2026-06-15T22:15:30.994105",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"name\": \"Action\", \"entities\": [ { \"type\": \"User\", \"text\": \"new terms\" }, { \"type\": \"Assistant\", \"text\": \"explaining\" } ] } ```"
+    }
+  },
+  {
+    "time": "2026-06-15T22:15:30.995111",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "``` , ] } ```"
+  },
+  {
+    "time": "2026-06-15T22:15:38.205048",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how is my GPU doing"
+  },
+  {
+    "time": "2026-06-15T22:15:38.205048",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how is my gpu doing"
+  },
+  {
+    "time": "2026-06-15T22:15:39.064197",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I don't have any information about your personal details."
+    }
+  },
+  {
+    "time": "2026-06-15T22:15:39.064197",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I don't have any information about your personal details."
+    }
+  },
+  {
+    "time": "2026-06-15T22:15:39.065203",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I don't have any information about your personal details."
+  },
+  {
+    "time": "2026-06-15T22:16:14.280208",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "describe my screen"
+  },
+  {
+    "time": "2026-06-15T22:16:14.280208",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "describe my screen"
+  },
+  {
+    "time": "2026-06-15T22:16:16.778838",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I don't have any information about your personal details."
+    }
+  },
+  {
+    "time": "2026-06-15T22:16:16.778838",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I don't have any information about your personal details."
+    }
+  },
+  {
+    "time": "2026-06-15T22:16:16.779799",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I don't have any information about your personal details."
+  },
+  {
+    "time": "2026-06-15T22:16:34.699190",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "snake Jarvis"
+  },
+  {
+    "time": "2026-06-15T22:16:34.699190",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "snake jarvis"
+  },
+  {
+    "time": "2026-06-15T22:16:36.718041",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"name\": \"Action\", \"entities\": [ { \"type\": \"User\", \"text: snake\" }, { \"type\": \"Assistant\", \"text\": \"Jarvis\" } ] } ```"
+    }
+  },
+  {
+    "time": "2026-06-15T22:16:36.718041",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"name\": \"Action\", \"entities\": [ { \"type\": \"User\", \"text: snake\" }, { \"type\": \"Assistant\", \"text\": \"Jarvis\" } ] } ```"
+    }
+  },
+  {
+    "time": "2026-06-15T22:16:36.718041",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "``` , ] } ```"
+  }
+]

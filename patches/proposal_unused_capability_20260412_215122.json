@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-04-12T21:51:22.873588",
+  "finding": {
+    "type": "unused_capability",
+    "action": "list_folder",
+    "suggestion": "'list_folder' has never been used. Consider promoting it in suggestions."
+  },
+  "status": "pending_review",
+  "auto_apply": false,
+  "patch_idea": "'list_folder' has never been used. Consider promoting it in suggestions.",
+  "files_affected": [
+    "planner.py",
+    "jarvis.py"
+  ]
+}

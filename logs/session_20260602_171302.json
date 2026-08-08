@@ -1,0 +1,494 @@
+[
+  {
+    "time": "2026-06-02T17:13:02.664743",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Systems up."
+  },
+  {
+    "time": "2026-06-02T17:13:09.261865",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "What's the move?"
+  },
+  {
+    "time": "2026-06-02T17:13:15.772328",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what is artificial intelligence"
+  },
+  {
+    "time": "2026-06-02T17:13:15.773327",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what is artificial intelligence"
+  },
+  {
+    "time": "2026-06-02T17:13:16.971579",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"type: text\", \"text\": \"The simulation of human intelligence by machines, enabling them to think and learn like humans.\" } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:13:16.971579",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"type: text\", \"text\": \"The simulation of human intelligence by machines, enabling them to think and learn like humans.\" } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:13:16.973578",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "``` { \"type: text\", \"text\": \"The simulation of human intelligence by machines, enabling them to think and learn like humans.\" } ```"
+  },
+  {
+    "time": "2026-06-02T17:13:29.035123",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what is machine learning"
+  },
+  {
+    "time": "2026-06-02T17:13:29.035123",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what is machine learning"
+  },
+  {
+    "time": "2026-06-02T17:13:30.351904",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"type: text\", \"text\": \"A subset of artificial intelligence that enables machines to learn from data and improve their performance over time.\" } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:13:30.351904",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"type: text\", \"text\": \"A subset of artificial intelligence that enables machines to learn from data and improve their performance over time.\" } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:13:30.352904",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "``` { \"type: text\", \"text\": \"A subset of artificial intelligence that enables machines to learn from data and improve their performance over time.\" } ```"
+  },
+  {
+    "time": "2026-06-02T17:13:42.641819",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how would you write if you are"
+  },
+  {
+    "time": "2026-06-02T17:13:42.641819",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how would you write if you are"
+  },
+  {
+    "time": "2026-06-02T17:13:44.783378",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "You're referring to me, I'd write in a similar format as this conversation, providing information and answering questions to the best of my abilities."
+    }
+  },
+  {
+    "time": "2026-06-02T17:13:44.783378",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "You're referring to me, I'd write in a similar format as this conversation, providing information and answering questions to the best of my abilities."
+    }
+  },
+  {
+    "time": "2026-06-02T17:13:44.783378",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "You're referring to me, I'd write in a similar format as this conversation, providing information and answering questions to the best of my abilities."
+  },
+  {
+    "time": "2026-06-02T17:14:01.953766",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "so what are"
+  },
+  {
+    "time": "2026-06-02T17:14:01.954765",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "so what are"
+  },
+  {
+    "time": "2026-06-02T17:14:03.295969",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "You're referring to me, I am a virtual assistant, a computer program designed to simulate conversation with human-like intelligence."
+    }
+  },
+  {
+    "time": "2026-06-02T17:14:03.295969",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "You're referring to me, I am a virtual assistant, a computer program designed to simulate conversation with human-like intelligence."
+    }
+  },
+  {
+    "time": "2026-06-02T17:14:03.295969",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "You're referring to me, I am a virtual assistant, a computer program designed to simulate conversation with human-like intelligence."
+  },
+  {
+    "time": "2026-06-02T17:14:21.036593",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what baby talking about"
+  },
+  {
+    "time": "2026-06-02T17:14:21.037535",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what baby talking about"
+  },
+  {
+    "time": "2026-06-02T17:14:22.523448",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "You're referring to me, I am a virtual assistant, a computer program designed to simulate conversation with human-like intelligence."
+    }
+  },
+  {
+    "time": "2026-06-02T17:14:22.523448",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "You're referring to me, I am a virtual assistant, a computer program designed to simulate conversation with human-like intelligence."
+    }
+  },
+  {
+    "time": "2026-06-02T17:14:22.524955",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "You're referring to me, I am a virtual assistant, a computer program designed to simulate conversation with human-like intelligence."
+  },
+  {
+    "time": "2026-06-02T17:14:41.676164",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what were we talking about"
+  },
+  {
+    "time": "2026-06-02T17:14:41.677171",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what were we talking about"
+  },
+  {
+    "time": "2026-06-02T17:14:42.310235",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"type: text\", \"text\": \"Artificial intelligence and machine learning, with a focus on a virtual assistant like myself.\" } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:14:42.310235",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"type: text\", \"text\": \"Artificial intelligence and machine learning, with a focus on a virtual assistant like myself.\" } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:14:42.311189",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "``` { \"type: text\", \"text\": \"Artificial intelligence and machine learning, with a focus on a virtual assistant like myself.\" } ```"
+  },
+  {
+    "time": "2026-06-02T17:14:57.683088",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "could you give me some examples"
+  },
+  {
+    "time": "2026-06-02T17:14:57.684594",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "could you give me some examples"
+  },
+  {
+    "time": "2026-06-02T17:14:59.268881",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"type: text\", \"text\": \"Examples of AI in daily life include virtual assistants like myself, image recognition, speech recognition, and predictive text.\" } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:14:59.268881",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"type: text\", \"text\": \"Examples of AI in daily life include virtual assistants like myself, image recognition, speech recognition, and predictive text.\" } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:14:59.269880",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "``` { \"type: text\", \"text\": \"Examples of AI in daily life include virtual assistants like myself, image recognition, speech recognition, and predictive text.\" } ```"
+  },
+  {
+    "time": "2026-06-02T17:15:22.941905",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "could you summarise"
+  },
+  {
+    "time": "2026-06-02T17:15:22.945419",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "could you summarise"
+  },
+  {
+    "time": "2026-06-02T17:15:25.425569",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"type: text\", \"text\": \"Artificial intelligence and machine learning, with a focus on a virtual assistant like myself.\" } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:15:25.427571",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"type: text\", \"text\": \"Artificial intelligence and machine learning, with a focus on a virtual assistant like myself.\" } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:15:25.427571",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "``` { \"type: text\", \"text\": \"Artificial intelligence and machine learning, with a focus on a virtual assistant like myself.\" } ```"
+  },
+  {
+    "time": "2026-06-02T17:15:44.229888",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how to describe"
+  },
+  {
+    "time": "2026-06-02T17:15:44.229888",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how to describe"
+  },
+  {
+    "time": "2026-06-02T17:15:46.807411",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"type: text\", \"text\": \"A virtual assistant is a computer program designed to simulate conversation with human-like intelligence.\" } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:15:46.807411",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"type: text\", \"text\": \"A virtual assistant is a computer program designed to simulate conversation with human-like intelligence.\" } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:15:46.807411",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "``` { \"type: text\", \"text\": \"A virtual assistant is a computer program designed to simulate conversation with human-like intelligence.\" } ```"
+  },
+  {
+    "time": "2026-06-02T17:15:57.190652",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "ok EX"
+  },
+  {
+    "time": "2026-06-02T17:15:57.190652",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "ok ex"
+  },
+  {
+    "time": "2026-06-02T17:15:58.228924",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"type: text\", \"text\": \"Virtual assistants like me, Siri, Alexa, and Google Assistant, use AI to understand and respond to voice commands.\" } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:15:58.229924",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"type: text\", \"text\": \"Virtual assistants like me, Siri, Alexa, and Google Assistant, use AI to understand and respond to voice commands.\" } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:15:58.229924",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "``` { \"type: text\", \"text\": \"Virtual assistants like me, Siri, Alexa, and Google Assistant, use AI to understand and respond to voice commands.\" } ```"
+  },
+  {
+    "time": "2026-06-02T17:16:11.442379",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "exit for me"
+  },
+  {
+    "time": "2026-06-02T17:16:11.442379",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Going quiet."
+  }
+]

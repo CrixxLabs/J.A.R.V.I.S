@@ -1,0 +1,99 @@
+[
+  {
+    "time": "2026-08-07T11:01:42.636642",
+    "type": "skill_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "name": "example_skill",
+      "priority": 60
+    }
+  },
+  {
+    "time": "2026-08-07T11:01:42.636642",
+    "type": "skills_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "count": 1
+    }
+  },
+  {
+    "time": "2026-08-07T11:01:46.299538",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Systems up."
+  },
+  {
+    "time": "2026-08-07T11:01:53.407704",
+    "type": "boot_syntax_ok",
+    "severity": "debug",
+    "module": "self_diagnostic",
+    "tags": [
+      "boot",
+      "syntax"
+    ],
+    "data": {
+      "passed_count": 28,
+      "warning_count": 0
+    }
+  },
+  {
+    "time": "2026-08-07T11:01:57.117590",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Listening."
+  },
+  {
+    "time": "2026-08-07T11:02:20.295947",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "vivo mobile ringtone"
+  },
+  {
+    "time": "2026-08-07T11:02:22.067753",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Vivo mobile ringtones are customizable and can be changed in the phone's settings."
+    }
+  },
+  {
+    "time": "2026-08-07T11:02:22.067753",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Vivo mobile ringtones are customizable and can be changed in the phone's settings."
+    }
+  },
+  {
+    "time": "2026-08-07T11:02:22.068753",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Vivo mobile ringtones are customizable and can be changed in the phone's settings."
+  },
+  {
+    "time": "2026-08-07T11:02:33.902127",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Alright. Catch you later."
+  }
+]

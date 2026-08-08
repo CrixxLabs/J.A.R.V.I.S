@@ -1,0 +1,44 @@
+[
+  {
+    "time": "2026-06-02T17:31:41.235745",
+    "type": "skill_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "name": "example_skill",
+      "priority": 60
+    }
+  },
+  {
+    "time": "2026-06-02T17:31:41.235745",
+    "type": "skills_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "count": 1
+    }
+  },
+  {
+    "time": "2026-06-02T17:31:41.235745",
+    "type": "skill_triggered",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "skill": "example_skill",
+      "input": "run example demo skill"
+    }
+  },
+  {
+    "time": "2026-06-02T17:31:41.235745",
+    "type": "test_event",
+    "severity": "info",
+    "module": "test",
+    "tags": [
+      "phase1"
+    ],
+    "data": "Phase 1 verification"
+  }
+]

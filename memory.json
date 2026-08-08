@@ -1,0 +1,883 @@
+{
+  "facts": {
+    "app_use_chrome": "1776178925.0065627",
+    "action_use_open_app": {
+      "value": "1781546992.5417323",
+      "tags": [],
+      "priority": "normal",
+      "timestamp": "2026-06-15T23:39:52.554153"
+    },
+    "action_use_close_app": {
+      "value": "1781547020.2712526",
+      "tags": [],
+      "priority": "normal",
+      "timestamp": "2026-06-15T23:40:20.282775"
+    },
+    "conversation_summary_2026-06-02T17:08:57.527639": {
+      "value": "```\n{\n  \"type: text\",\n  \"text\": \"Virtual assistants like me, Siri, Alexa, and Google Assistant, use AI to understand and respond to voice commands.\"\n}\n```\n\nThis conversation started with a discussion about artificial intelligence, and the user asked for an example in daily life.",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-06-02T17:08:57.529427"
+    },
+    "conversation_summary_2026-06-02T17:11:04.622683": {
+      "value": "This conversation started with a discussion about artificial intelligence, where I defined it as the simulation of human intelligence by machines. The conversation then shifted to providing an example of artificial intelligence in daily life.",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-06-02T17:11:04.622683"
+    },
+    "conversation_summary_2026-06-02T17:14:22.513934": {
+      "value": "This conversation is about artificial intelligence and machine learning, with a focus on a virtual assistant like myself. The user asked questions about the nature of artificial intelligence and machine learning, and I provided definitions and explanations in a specific format.",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-06-02T17:14:22.513934"
+    },
+    "conversation_summary_2026-06-02T17:15:25.413549": {
+      "value": "We discussed artificial intelligence and machine learning, specifically a virtual assistant like myself. I provided examples of AI in daily life.",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-06-02T17:15:25.413549"
+    },
+    "conversation_summary_2026-06-02T17:21:49.302276": {
+      "value": "This conversation started with the user asking for the meaning of \"AI\" but no context was provided. The user then asked about the meaning of \"AI\" again, and I explained that AI stands for Artificial Intelligence. The conversation then shifted to the user asking if I am a virtual assistant like me.",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-06-02T17:21:49.302276"
+    },
+    "test_fact": {
+      "value": "Jarvis is becoming Iron Man",
+      "tags": [
+        "project"
+      ],
+      "priority": "high",
+      "timestamp": "2026-06-02T17:31:39.298761"
+    },
+    "conversation_summary_2026-06-02T17:31:41.223069": {
+      "value": "[\n  {\n    \"name\": \"Conversation Summary\",\n    \"entities\": [\n      {\n        \"type\": \"User\",\n        \"text\": \"Explain AI\"\n      },\n      {\n        \"type\": \"Assistant\",\n        \"text\": \"AI is simulation of intelligence\"\n      },\n      {\n        \"type\": \"User\",\n        \"text\": \"Give real life example\"\n      }\n    ]\n  }\n]",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-06-02T17:31:41.223069"
+    },
+    "conversation_summary_2026-06-02T17:48:43.094746": {
+      "value": "```\n{\n  \"name\": \"Conversation Summary\",\n  \"entities\": [\n    {\n      \"type\": \"User\",\n      \"text\": \"Shukriya Sunrise talking early\"\n    },\n    {\n      \"type\": \"User\",\n      \"text\": \"Nilkamal Malayalam\"\n    }\n  ]\n}\n```",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-06-02T17:48:43.094746"
+    },
+    "conversation_summary_2026-06-15T22:16:16.768117": {
+      "value": "This conversation started with a greeting, but the assistant clarified it couldn't access personal details. The user then asked about their GPU and screen, to which the assistant responded that it couldn't provide information due to lack of personal details.",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-06-15T22:16:16.769160"
+    },
+    "conversation_summary_2026-06-15T23:42:10.345697": {
+      "value": "We attempted to open Chrome and Karo, but Karo was not found. The conversation ended with an error message indicating that Karo is not a recognized app.",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-06-15T23:42:10.345697"
+    },
+    "conversation_summary_2026-06-15T23:42:55.737902": {
+      "value": "User experienced issues with an unknown app, received an error message, and then opened the Chrome browser.",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-06-15T23:42:55.737902"
+    },
+    "conversation_summary_2026-06-15T23:43:32.772928": {
+      "value": "This conversation began with the user expressing fatigue. The user then requested to open Chrome, which was done. Following that, the user asked to open Chrome again, which was also done. The conversation then shifted to a new topic, with the user inquiring about quantum computing, prompting a web search.",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-06-15T23:43:32.772928"
+    },
+    "conversation_summary_2026-06-15T23:44:00.782093": {
+      "value": "This conversation involved opening the Chrome browser, searching for information on quantum computing and Elon Musk, and confirming the assistant's status.",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-06-15T23:44:00.782093"
+    },
+    "conversation_summary_2026-06-20T00:30:38.050469": {
+      "value": "User inquired about Jarvis's status and functionality. Jarvis confirmed being functional and utilizing machine learning to improve responses. User questioned the effectiveness of machine learning, to which Jarvis replied he was still functioning.",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-06-20T00:30:38.050469"
+    }
+  },
+  "activity_log": [
+    {
+      "time": "2026-06-15T23:44:00.802925",
+      "type": "speak",
+      "detail": "```json ```",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-15T23:44:08.512017",
+      "type": "user_input",
+      "detail": "exit for me",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-15T23:44:08.537707",
+      "type": "speak",
+      "detail": "Alright. Catch you later.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-15T23:44:09.656882",
+      "type": "exit",
+      "detail": "user said goodbye",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:28:46.403170",
+      "type": "speak",
+      "detail": "Systems up.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:28:48.442359",
+      "type": "startup",
+      "detail": "Jarvis online",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:29:18.989282",
+      "type": "user_input",
+      "detail": "hey Jarvis",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:29:22.950482",
+      "type": "speak",
+      "detail": "Hello, I'm here to help.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:29:37.824957",
+      "type": "user_input",
+      "detail": "how are you doing Jarvis",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:29:40.334999",
+      "type": "speak",
+      "detail": "I'm functioning within normal parameters.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:30:01.307388",
+      "type": "user_input",
+      "detail": "how do you do Jarvis",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:30:02.980816",
+      "type": "speak",
+      "detail": "I use a combination of natural language processing and machi",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:30:17.268940",
+      "type": "user_input",
+      "detail": "do you use machine learning to work on",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:30:19.512976",
+      "type": "speak",
+      "detail": "Yes, I utilize machine learning algorithms to improve my per",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:30:32.484017",
+      "type": "user_input",
+      "detail": "it doesn't seem like you are using it",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:30:38.072645",
+      "type": "speak",
+      "detail": "Understood. I'm still functioning and ready to assist you.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:30:54.680622",
+      "type": "user_input",
+      "detail": "how would you say I am doing right now",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:30:59.170539",
+      "type": "speak",
+      "detail": "You seem to be coding in VS Code.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:31:20.328563",
+      "type": "user_input",
+      "detail": "Jarvis",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:31:21.926859",
+      "type": "speak",
+      "detail": "I'm here and ready to assist you, Arju, with Brave open.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:31:56.583771",
+      "type": "speak",
+      "detail": "Going quiet.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:32:14.041457",
+      "type": "speak",
+      "detail": "Alright. Catch you later.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:32:27.295939",
+      "type": "speak",
+      "detail": "Standing by.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-06-20T00:32:49.373992",
+      "type": "speak",
+      "detail": "Alright. Catch you later.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T08:59:12.252305",
+      "type": "speak",
+      "detail": "Systems up.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T08:59:15.680494",
+      "type": "startup",
+      "detail": "Jarvis online",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T08:59:51.500231",
+      "type": "speak",
+      "detail": "Alright. Catch you later.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T09:00:09.866866",
+      "type": "speak",
+      "detail": "Alright. Catch you later.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T09:00:28.583976",
+      "type": "speak",
+      "detail": "Going quiet.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T09:04:43.831429",
+      "type": "speak",
+      "detail": "Systems up.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T09:04:45.414712",
+      "type": "startup",
+      "detail": "Jarvis online",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T09:04:47.406871",
+      "type": "speak",
+      "detail": "What's the move?",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T09:05:28.372546",
+      "type": "speak",
+      "detail": "Standing by.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T09:05:30.243872",
+      "type": "speak",
+      "detail": "Listening.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T09:06:04.181047",
+      "type": "speak",
+      "detail": "Standing by.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T09:20:23.101971",
+      "type": "speak",
+      "detail": "Systems up.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T09:20:24.850726",
+      "type": "startup",
+      "detail": "Jarvis online",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T09:20:43.562470",
+      "type": "speak",
+      "detail": "Ready. What do you need?",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T09:23:01.623453",
+      "type": "speak",
+      "detail": "Systems up.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T09:23:03.480287",
+      "type": "startup",
+      "detail": "Jarvis online",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T09:23:08.842617",
+      "type": "speak",
+      "detail": "What's the move?",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T09:23:39.424310",
+      "type": "speak",
+      "detail": "I'm not Google Assistant, I'm Jarvis, your desktop assistant",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T09:24:18.155729",
+      "type": "speak",
+      "detail": "The name \"Jarvis\" is an acronym for \"Just A Rather Very Inte",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-07-18T09:24:52.517601",
+      "type": "speak",
+      "detail": "Standing by.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-07T11:01:46.300550",
+      "type": "speak",
+      "detail": "Systems up.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-07T11:01:49.008071",
+      "type": "startup",
+      "detail": "Jarvis online",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-07T11:01:57.141942",
+      "type": "speak",
+      "detail": "Listening.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-07T11:02:22.085783",
+      "type": "speak",
+      "detail": "Vivo mobile ringtones are customizable and can be changed in",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-07T11:02:33.935650",
+      "type": "speak",
+      "detail": "Alright. Catch you later.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-07T11:02:35.914583",
+      "type": "exit",
+      "detail": "user said goodbye",
+      "app": "",
+      "tags": []
+    }
+  ],
+  "context_history": [
+    {
+      "time": "2026-06-02T17:15:05.732120",
+      "app": "Brave",
+      "title": "Arena | Benchmark & Compare the Best AI Models - Brave"
+    },
+    {
+      "time": "2026-06-02T17:15:11.745483",
+      "app": "VS Code",
+      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
+    },
+    {
+      "time": "2026-06-02T17:40:34.515143",
+      "app": "Unknown",
+      "title": ""
+    },
+    {
+      "time": "2026-06-02T17:40:37.789748",
+      "app": "VS Code",
+      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
+    },
+    {
+      "time": "2026-06-02T17:41:16.808155",
+      "app": "Snipping Tool Overlay",
+      "title": "Snipping Tool Overlay"
+    },
+    {
+      "time": "2026-06-02T17:41:19.824929",
+      "app": "VS Code",
+      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
+    },
+    {
+      "time": "2026-06-15T22:15:45.149930",
+      "app": "Brave",
+      "title": "Arena | Benchmark & Compare the Best AI Models - Brave"
+    },
+    {
+      "time": "2026-06-15T22:16:09.180502",
+      "app": "VS Code",
+      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
+    },
+    {
+      "time": "2026-06-15T22:26:04.866519",
+      "app": "Brave",
+      "title": "Arena | Benchmark & Compare the Best AI Models - Brave"
+    },
+    {
+      "time": "2026-06-15T22:26:16.880810",
+      "app": "VS Code",
+      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
+    },
+    {
+      "time": "2026-06-15T23:37:33.544042",
+      "app": "Untitled - Notepad",
+      "title": "Untitled - Notepad"
+    },
+    {
+      "time": "2026-06-15T23:37:36.557063",
+      "app": "VS Code",
+      "title": "test.txt - J.A.R.V.I.S - Visual Studio Code"
+    },
+    {
+      "time": "2026-06-15T23:37:42.575988",
+      "app": "Chrome",
+      "title": "What’s new - Google Chrome"
+    },
+    {
+      "time": "2026-06-15T23:37:54.600660",
+      "app": "VS Code",
+      "title": "test.txt - J.A.R.V.I.S - Visual Studio Code"
+    },
+    {
+      "time": "2026-06-15T23:39:51.645045",
+      "app": "Chrome",
+      "title": "New tab - Google Chrome"
+    },
+    {
+      "time": "2026-06-15T23:40:21.665214",
+      "app": "VS Code",
+      "title": "test.txt - J.A.R.V.I.S - Visual Studio Code"
+    },
+    {
+      "time": "2026-06-20T00:31:19.439897",
+      "app": "Brave",
+      "title": "(1) Arena | Benchmark & Compare the Best AI Models - Brave"
+    },
+    {
+      "time": "2026-06-20T00:32:49.465694",
+      "app": "VS Code",
+      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
+    },
+    {
+      "time": "2026-06-20T00:33:04.482352",
+      "app": "Brave",
+      "title": "Arena | Benchmark & Compare the Best AI Models - Brave"
+    },
+    {
+      "time": "2026-07-18T08:59:21.255091",
+      "app": "VS Code",
+      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
+    }
+  ],
+  "session_notes": [],
+  "daily_stats": {
+    "2026-04-20": {
+      "brain_calls": 6
+    },
+    "2026-06-02": {
+      "brain_calls": 27,
+      "sessions": 4
+    },
+    "2026-06-15": {
+      "sessions": 3,
+      "brain_calls": 21,
+      "actions_executed": 18
+    },
+    "2026-06-16": {
+      "actions_executed": 1
+    },
+    "2026-06-20": {
+      "sessions": 1,
+      "brain_calls": 7
+    },
+    "2026-07-18": {
+      "sessions": 4,
+      "brain_calls": 2
+    },
+    "2026-08-07": {
+      "sessions": 1,
+      "brain_calls": 5,
+      "actions_executed": 1
+    }
+  },
+  "action_results": [
+    {
+      "time": "2026-04-14T17:17:21.906138",
+      "action": "whatsapp_read",
+      "success": true,
+      "detail": ""
+    },
+    {
+      "time": "2026-04-14T17:20:19.467763",
+      "action": "whatsapp_read",
+      "success": true,
+      "detail": ""
+    },
+    {
+      "time": "2026-04-14T20:07:30.964953",
+      "action": "whatsapp_read",
+      "success": true,
+      "detail": ""
+    },
+    {
+      "time": "2026-04-14T20:25:11.095916",
+      "action": "whatsapp_read",
+      "success": false,
+      "detail": ""
+    },
+    {
+      "time": "2026-04-14T20:31:24.298209",
+      "action": "whatsapp_read",
+      "success": true,
+      "detail": ""
+    },
+    {
+      "time": "2026-04-14T20:31:40.029692",
+      "action": "close_app",
+      "success": false,
+      "detail": ""
+    },
+    {
+      "time": "2026-04-14T20:32:05.049452",
+      "action": "open_app",
+      "success": true,
+      "detail": ""
+    },
+    {
+      "time": "2026-04-14T20:34:53.734074",
+      "action": "whatsapp_read",
+      "success": true,
+      "detail": ""
+    },
+    {
+      "time": "2026-04-14T20:51:45.672374",
+      "action": "whatsapp_read",
+      "success": true,
+      "detail": ""
+    },
+    {
+      "time": "2026-04-14T20:52:08.634830",
+      "action": "whatsapp_read",
+      "success": true,
+      "detail": ""
+    },
+    {
+      "time": "2026-04-14T22:11:58.709673",
+      "action": "whatsapp_read",
+      "success": true,
+      "detail": ""
+    },
+    {
+      "time": "2026-04-15T00:44:34.870810",
+      "action": "whatsapp_read",
+      "success": true,
+      "detail": "There's a Excel class update at 3:30pm."
+    },
+    {
+      "time": "2026-04-15T00:44:45.416269",
+      "action": "close_app",
+      "success": false,
+      "detail": "whatsapp for me is not running."
+    },
+    {
+      "time": "2026-04-15T00:44:53.550270",
+      "action": "close_app",
+      "success": true,
+      "detail": "Closed whatsapp."
+    },
+    {
+      "time": "2026-06-15T22:15:05.382309",
+      "action": "weather",
+      "success": true,
+      "detail": "it's 31 degrees in Mumbai. feels like 36. broken clouds. hum"
+    },
+    {
+      "time": "2026-06-15T22:25:25.381897",
+      "action": "screenshot_describe",
+      "success": true,
+      "detail": "This screen displays what seems to be a coding program inter"
+    },
+    {
+      "time": "2026-06-15T23:37:25.815870",
+      "action": "open_app",
+      "success": true,
+      "detail": "Opening notepad."
+    },
+    {
+      "time": "2026-06-15T23:37:34.164086",
+      "action": "close_app",
+      "success": true,
+      "detail": "Closed notepad."
+    },
+    {
+      "time": "2026-06-15T23:37:41.889423",
+      "action": "open_app",
+      "success": true,
+      "detail": "Opening chrome."
+    },
+    {
+      "time": "2026-06-15T23:37:54.321564",
+      "action": "close_app",
+      "success": true,
+      "detail": "Closed chrome."
+    },
+    {
+      "time": "2026-06-15T23:38:24.606974",
+      "action": "web_search",
+      "success": true,
+      "detail": "Pythonis a popular programming language.Pythoncan be used on"
+    },
+    {
+      "time": "2026-06-15T23:38:55.310843",
+      "action": "weather",
+      "success": true,
+      "detail": "it's 26 degrees in Bangalore. feels like 26. overcast clouds"
+    },
+    {
+      "time": "2026-06-15T23:39:06.165531",
+      "action": "weather",
+      "success": true,
+      "detail": "it's 15 degrees in Bahra. feels like 15. overcast clouds. hu"
+    },
+    {
+      "time": "2026-06-15T23:39:52.570206",
+      "action": "open_app",
+      "success": true,
+      "detail": "Opening chrome."
+    },
+    {
+      "time": "2026-06-15T23:40:01.229970",
+      "action": "close_app",
+      "success": false,
+      "detail": "chrome and open notepad is not running."
+    },
+    {
+      "time": "2026-06-15T23:40:11.658741",
+      "action": "close_app",
+      "success": false,
+      "detail": "chrome and open notepad is not running."
+    },
+    {
+      "time": "2026-06-15T23:40:20.292865",
+      "action": "close_app",
+      "success": true,
+      "detail": "Closed chrome."
+    },
+    {
+      "time": "2026-06-15T23:40:27.138660",
+      "action": "system_status",
+      "success": true,
+      "detail": "CPU 7%. RAM 66%. battery 100% charging. GPU 0% at 62°C with "
+    },
+    {
+      "time": "2026-06-15T23:40:52.136388",
+      "action": "web_search",
+      "success": true,
+      "detail": "Machinelearningis a branch of Artificial Intelligence that f"
+    },
+    {
+      "time": "2026-06-15T23:41:15.422363",
+      "action": "set_reminder",
+      "success": true,
+      "detail": "Reminder set for 10 seconds."
+    }
+  ],
+  "usage_freq": {
+    "whatsapp_read": {
+      "count": 12,
+      "contexts": [
+        "Arju has WhatsApp open.",
+        "Arju has WhatsApp open.",
+        "Arju is coding in VS Code.",
+        "Arju has WhatsApp open.",
+        "Arju has WhatsApp open.",
+        "Arju is coding in VS Code.",
+        "Arju is coding in VS Code.",
+        "Arju is coding in VS Code.",
+        "Arju has WhatsApp open.",
+        "Arju has WhatsApp open."
+      ]
+    },
+    "close_app": {
+      "count": 5,
+      "contexts": [
+        "Arju has WhatsApp open.",
+        "Arju has WhatsApp open.",
+        "Arju has \"Untitled - Notepad\" open.",
+        "Arju has Chrome open.",
+        "Arju has Chrome open."
+      ]
+    },
+    "open_app": {
+      "count": 4,
+      "contexts": [
+        "Arju has WhatsApp open.",
+        "Arju is coding in VS Code.",
+        "Arju is coding in VS Code.",
+        "Arju has Chrome open."
+      ]
+    },
+    "weather": {
+      "count": 3,
+      "contexts": [
+        "Arju is coding in VS Code.",
+        "Arju is coding in VS Code.",
+        "Arju is coding in VS Code."
+      ]
+    },
+    "screenshot_describe": {
+      "count": 1,
+      "contexts": [
+        "Arju is coding in VS Code."
+      ]
+    },
+    "web_search": {
+      "count": 2,
+      "contexts": [
+        "Arju is coding in VS Code.",
+        "Arju is coding in VS Code."
+      ]
+    },
+    "system_status": {
+      "count": 1,
+      "contexts": [
+        "Arju is coding in VS Code."
+      ]
+    },
+    "set_reminder": {
+      "count": 1,
+      "contexts": [
+        "Arju is coding in VS Code."
+      ]
+    }
+  },
+  "failure_log": {
+    "whatsapp_read": {
+      "count": 1,
+      "last": "2026-04-14T20:25:11.081381",
+      "detail": "retry also failed"
+    },
+    "close_app": {
+      "count": 7,
+      "last": "2026-06-15T23:40:11.677793",
+      "detail": "chrome and open notepad is not running."
+    },
+    "open_app": {
+      "count": 1,
+      "last": "2026-04-19T23:54:12.450278",
+      "detail": "Which app should I open?"
+    }
+  },
+  "preferences": {}
+}

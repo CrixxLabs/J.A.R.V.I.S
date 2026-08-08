@@ -1,0 +1,91 @@
+[
+  {
+    "time": "2026-06-02T17:40:34.507570",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Systems up."
+  },
+  {
+    "time": "2026-06-02T17:40:50.714480",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Yeah, I'm here."
+  },
+  {
+    "time": "2026-06-02T17:41:01.864055",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how are you doing Jarvis"
+  },
+  {
+    "time": "2026-06-02T17:41:01.864055",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how are you doing jarvis"
+  },
+  {
+    "time": "2026-06-02T17:41:03.437417",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"name\": \"Jarvis\", \"status\": \"online\" } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:41:03.437417",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"name\": \"Jarvis\", \"status\": \"online\" } ```"
+    }
+  },
+  {
+    "time": "2026-06-02T17:41:03.438418",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "```  ```"
+  },
+  {
+    "time": "2026-06-02T17:41:09.506512",
+    "type": "user_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how are you doing"
+  },
+  {
+    "time": "2026-06-02T17:41:09.512026",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how are you doing"
+  },
+  {
+    "time": "2026-06-02T17:41:11.435072",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "``` { \"name\": \"Jarvis\", \"status\": \"online\" } ```"
+    }
+  }
+]

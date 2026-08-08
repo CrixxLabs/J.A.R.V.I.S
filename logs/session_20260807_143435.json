@@ -1,0 +1,99 @@
+[
+  {
+    "time": "2026-08-07T14:34:36.198423",
+    "type": "skill_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "name": "example_skill",
+      "priority": 60
+    }
+  },
+  {
+    "time": "2026-08-07T14:34:36.198423",
+    "type": "skills_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "count": 1
+    }
+  },
+  {
+    "time": "2026-08-07T14:35:18.916207",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "hello?"
+  },
+  {
+    "time": "2026-08-07T14:35:21.167776",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Hello, I'm here to help."
+    }
+  },
+  {
+    "time": "2026-08-07T14:35:54.655082",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "wat are your capablities"
+  },
+  {
+    "time": "2026-08-07T14:35:56.397042",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I can assist with information, answer questions, and help with tasks."
+    }
+  },
+  {
+    "time": "2026-08-07T14:36:18.425039",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "so explain netwons first nd third law with example"
+  },
+  {
+    "time": "2026-08-07T14:36:18.425039",
+    "type": "skill_triggered",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "skill": "example_skill",
+      "input": "so explain netwons first nd third law with example"
+    }
+  },
+  {
+    "time": "2026-08-07T14:36:18.425039",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "skill": "example_skill",
+      "response": "This is an improved example skill. I now have access to conversation context!"
+    }
+  },
+  {
+    "time": "2026-08-07T14:36:30.479176",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "ok now explain to me"
+  }
+]
