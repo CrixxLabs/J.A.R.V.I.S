@@ -1,0 +1,380 @@
+[
+  {
+    "time": "2026-08-10T12:28:37.853867",
+    "type": "skill_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "name": "example_skill",
+      "priority": 60
+    }
+  },
+  {
+    "time": "2026-08-10T12:28:37.853867",
+    "type": "skills_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "count": 1
+    }
+  },
+  {
+    "time": "2026-08-10T12:28:40.382592",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Systems up."
+  },
+  {
+    "time": "2026-08-10T12:28:45.510157",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I evolved since last boot — jarvis_tts was updated."
+  },
+  {
+    "time": "2026-08-10T12:28:46.658633",
+    "type": "boot_syntax_ok",
+    "severity": "debug",
+    "module": "self_diagnostic",
+    "tags": [
+      "boot",
+      "syntax"
+    ],
+    "data": {
+      "passed_count": 36,
+      "warning_count": 0
+    }
+  },
+  {
+    "time": "2026-08-10T12:28:51.320050",
+    "type": "self_awareness_boot_scan",
+    "severity": "info",
+    "module": "self_awareness",
+    "tags": [
+      "boot",
+      "evolution"
+    ],
+    "data": {
+      "added": [],
+      "removed": [],
+      "modified": 1
+    }
+  },
+  {
+    "time": "2026-08-10T12:28:57.893398",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Listening."
+  },
+  {
+    "time": "2026-08-10T12:29:17.220086",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what has changed since last boot?"
+  },
+  {
+    "time": "2026-08-10T12:29:17.228475",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "self_changes"
+      },
+      "response": ""
+    }
+  },
+  {
+    "time": "2026-08-10T12:29:17.228475",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "self_changes"
+      },
+      "response": ""
+    }
+  },
+  {
+    "time": "2026-08-10T12:29:17.261213",
+    "type": "execution_result",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": "self_changes",
+      "success": true,
+      "message": "Since last boot, I 1 file(s) were modified."
+    }
+  },
+  {
+    "time": "2026-08-10T12:29:17.262112",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Since last boot, I 1 file(s) were modified."
+  },
+  {
+    "time": "2026-08-10T12:29:26.062612",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "start spotify"
+  },
+  {
+    "time": "2026-08-10T12:29:26.071291",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "open_app",
+        "app": "spotify"
+      },
+      "response": "Opening spotify."
+    }
+  },
+  {
+    "time": "2026-08-10T12:29:26.071291",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "open_app",
+        "app": "spotify"
+      },
+      "response": "Opening spotify."
+    }
+  },
+  {
+    "time": "2026-08-10T12:29:26.650736",
+    "type": "execution_result",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": "open_app",
+      "success": false,
+      "message": "Couldn't open that. Check if it's installed correctly."
+    }
+  },
+  {
+    "time": "2026-08-10T12:29:26.650736",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Couldn't open that. Check if it's installed correctly."
+  },
+  {
+    "time": "2026-08-10T12:29:34.210996",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "install spotify"
+  },
+  {
+    "time": "2026-08-10T12:29:34.218515",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "install_app",
+        "app": "spotify"
+      },
+      "response": ""
+    }
+  },
+  {
+    "time": "2026-08-10T12:29:34.218515",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "install_app",
+        "app": "spotify"
+      },
+      "response": ""
+    }
+  },
+  {
+    "time": "2026-08-10T12:29:38.337870",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Downloading Spotify now — takes a minute."
+  },
+  {
+    "time": "2026-08-10T12:31:25.688777",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Downloaded, installing now."
+  },
+  {
+    "time": "2026-08-10T12:31:39.067824",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Spotify installed."
+  },
+  {
+    "time": "2026-08-10T12:31:40.426353",
+    "type": "execution_result",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": "install_app",
+      "success": true,
+      "message": ""
+    }
+  },
+  {
+    "time": "2026-08-10T12:31:47.938260",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "save my spotify login."
+  },
+  {
+    "time": "2026-08-10T12:31:53.831180",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Use the auto_login_profiles.py module to save your Spotify login details securely."
+    }
+  },
+  {
+    "time": "2026-08-10T12:31:53.831180",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Use the auto_login_profiles.py module to save your Spotify login details securely."
+    }
+  },
+  {
+    "time": "2026-08-10T12:31:53.831180",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Use the auto_login_profiles.py module to save your Spotify login details securely."
+  },
+  {
+    "time": "2026-08-10T12:32:02.987044",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "save my spotify login."
+  },
+  {
+    "time": "2026-08-10T12:32:03.681056",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Use the auto_login_profiles.py module to save your Spotify login details securely."
+    }
+  },
+  {
+    "time": "2026-08-10T12:32:03.688256",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Use the auto_login_profiles.py module to save your Spotify login details securely."
+    }
+  },
+  {
+    "time": "2026-08-10T12:32:03.689257",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Use the auto_login_profiles.py module to save your Spotify login details securely."
+  },
+  {
+    "time": "2026-08-10T12:32:18.916160",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "login meter 45"
+  },
+  {
+    "time": "2026-08-10T12:32:19.913734",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "The auto_login_profiles.py module can help you manage and secure your login credentials, including those for Spotify. Ensure that your login information is stored safely using this module."
+    }
+  },
+  {
+    "time": "2026-08-10T12:32:19.913734",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "The auto_login_profiles.py module can help you manage and secure your login credentials, including those for Spotify. Ensure that your login information is stored safely using this module."
+    }
+  },
+  {
+    "time": "2026-08-10T12:32:19.913734",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "The auto_login_profiles.py module can help you manage and secure your login credentials, including those for Spotify. Ensure that your login information is stored safely using this module."
+  },
+  {
+    "time": "2026-08-10T12:32:43.266845",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Standing by."
+  }
+]

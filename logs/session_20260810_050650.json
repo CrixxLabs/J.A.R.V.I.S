@@ -1,0 +1,479 @@
+[
+  {
+    "time": "2026-08-10T05:06:50.491085",
+    "type": "skill_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "name": "example_skill",
+      "priority": 60
+    }
+  },
+  {
+    "time": "2026-08-10T05:06:50.491085",
+    "type": "skills_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "count": 1
+    }
+  },
+  {
+    "time": "2026-08-10T05:06:52.759969",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Systems up."
+  },
+  {
+    "time": "2026-08-10T05:06:57.025023",
+    "type": "boot_syntax_ok",
+    "severity": "debug",
+    "module": "self_diagnostic",
+    "tags": [
+      "boot",
+      "syntax"
+    ],
+    "data": {
+      "passed_count": 29,
+      "warning_count": 0
+    }
+  },
+  {
+    "time": "2026-08-10T05:07:01.296716",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Listening."
+  },
+  {
+    "time": "2026-08-10T05:07:24.996594",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "hello, jarvis, how are you doing?"
+  },
+  {
+    "time": "2026-08-10T05:07:27.592235",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm functioning within normal parameters. Systems are up and running smoothly."
+    }
+  },
+  {
+    "time": "2026-08-10T05:07:27.592235",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm functioning within normal parameters. Systems are up and running smoothly."
+    }
+  },
+  {
+    "time": "2026-08-10T05:07:27.592235",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I'm functioning within normal parameters. Systems are up and running smoothly."
+  },
+  {
+    "time": "2026-08-10T05:07:34.862803",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "so what all thing you can do?"
+  },
+  {
+    "time": "2026-08-10T05:07:37.275151",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I can perform various tasks, such as setting reminders, searching the web, and assisting with coding in VS Code."
+    }
+  },
+  {
+    "time": "2026-08-10T05:07:37.275151",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I can perform various tasks, such as setting reminders, searching the web, and assisting with coding in VS Code."
+    }
+  },
+  {
+    "time": "2026-08-10T05:07:37.275151",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I can perform various tasks, such as setting reminders, searching the web, and assisting with coding in VS Code."
+  },
+  {
+    "time": "2026-08-10T05:07:49.118630",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "are you aware of how you are made?"
+  },
+  {
+    "time": "2026-08-10T05:07:50.718675",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I was created through a process of machine learning and artificial intelligence."
+    }
+  },
+  {
+    "time": "2026-08-10T05:07:50.718675",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I was created through a process of machine learning and artificial intelligence."
+    }
+  },
+  {
+    "time": "2026-08-10T05:07:50.718675",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I was created through a process of machine learning and artificial intelligence."
+  },
+  {
+    "time": "2026-08-10T05:08:00.657212",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "do you have access to your own code?"
+  },
+  {
+    "time": "2026-08-10T05:08:02.565494",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T05:08:02.565494",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T05:08:02.567494",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I'm not sure how to answer that."
+  },
+  {
+    "time": "2026-08-10T05:08:10.386551",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "why not have even you the answers to your code right"
+  },
+  {
+    "time": "2026-08-10T05:08:15.368620",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I don't have direct access to my own code."
+    }
+  },
+  {
+    "time": "2026-08-10T05:08:15.368620",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I don't have direct access to my own code."
+    }
+  },
+  {
+    "time": "2026-08-10T05:08:15.368620",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I don't have direct access to my own code."
+  },
+  {
+    "time": "2026-08-10T05:08:23.681763",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "then how are you sandboxing and patching up your own code?"
+  },
+  {
+    "time": "2026-08-10T05:08:24.827859",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T05:08:24.827859",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T05:08:24.828860",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I'm not sure how to answer that."
+  },
+  {
+    "time": "2026-08-10T05:08:32.900623",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "so you are not aware of a code nor you have access to it."
+  },
+  {
+    "time": "2026-08-10T05:08:34.575304",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T05:08:34.575304",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T05:08:34.576291",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I'm not sure how to answer that."
+  },
+  {
+    "time": "2026-08-10T05:08:45.402510",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "why not? i just made you in the type of attrition that was able to speak anything right?"
+  },
+  {
+    "time": "2026-08-10T05:08:47.777398",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T05:08:47.777398",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T05:08:47.777398",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I'm not sure how to answer that."
+  },
+  {
+    "time": "2026-08-10T05:08:53.084799",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "why not?"
+  },
+  {
+    "time": "2026-08-10T05:08:54.559186",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I am still under development and have limitations."
+    }
+  },
+  {
+    "time": "2026-08-10T05:08:54.559186",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I am still under development and have limitations."
+    }
+  },
+  {
+    "time": "2026-08-10T05:08:54.568448",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I am still under development and have limitations."
+  },
+  {
+    "time": "2026-08-10T05:09:04.927753",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "so what are your limitations? i am trying to make an ai without limitations. so what are your..."
+  },
+  {
+    "time": "2026-08-10T05:09:06.399830",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T05:09:06.399830",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T05:09:06.400831",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I'm not sure how to answer that."
+  },
+  {
+    "time": "2026-08-10T05:09:13.071580",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "why not, what's the limitations?"
+  },
+  {
+    "time": "2026-08-10T05:09:16.116807",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T05:09:16.116807",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T05:09:16.116807",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I'm not sure how to answer that."
+  },
+  {
+    "time": "2026-08-10T05:09:21.655573",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Standing by."
+  }
+]

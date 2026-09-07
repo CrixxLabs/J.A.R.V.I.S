@@ -1,0 +1,363 @@
+[
+  {
+    "time": "2026-08-10T05:43:28.317439",
+    "type": "skill_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "name": "example_skill",
+      "priority": 60
+    }
+  },
+  {
+    "time": "2026-08-10T05:43:28.317439",
+    "type": "skills_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "count": 1
+    }
+  },
+  {
+    "time": "2026-08-10T05:43:30.527831",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Systems up."
+  },
+  {
+    "time": "2026-08-10T05:43:34.681040",
+    "type": "boot_syntax_ok",
+    "severity": "debug",
+    "module": "self_diagnostic",
+    "tags": [
+      "boot",
+      "syntax"
+    ],
+    "data": {
+      "passed_count": 29,
+      "warning_count": 0
+    }
+  },
+  {
+    "time": "2026-08-10T05:43:42.488774",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "What's the move?"
+  },
+  {
+    "time": "2026-08-10T05:43:53.478070",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "the arrays which are the files you are made of."
+  },
+  {
+    "time": "2026-08-10T05:44:21.278589",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "jarvis.py  \nbrain.py  \nplanner.py  \ncore.py  \nexecutor.py  \nlistener.py  \nvoice_sample.py  \nvision.py  \nmemory.py  \nuser_profile.py  \nproactive_scheduler.py  \ntasks.py  \nobligations.py  \nconversation_manager.py  \nsession_logger.py  \nsystem_monitor.py  \nself_diagnostic.py  \nobserver.py  \nfile_ops.py  \nwhatsapp_fetcher.py"
+    }
+  },
+  {
+    "time": "2026-08-10T05:44:21.278589",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "jarvis.py  \nbrain.py  \nplanner.py  \ncore.py  \nexecutor.py  \nlistener.py  \nvoice_sample.py  \nvision.py  \nmemory.py  \nuser_profile.py  \nproactive_scheduler.py  \ntasks.py  \nobligations.py  \nconversation_manager.py  \nsession_logger.py  \nsystem_monitor.py  \nself_diagnostic.py  \nobserver.py  \nfile_ops.py  \nwhatsapp_fetcher.py"
+    }
+  },
+  {
+    "time": "2026-08-10T05:44:21.278589",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Jarvis.py brain.py planner.py core.py executor.py listener.py voice_sample.py vision.py memory.py user_profile.py proactive_scheduler.py tasks.py obligations.py conversation_manager.py session_logger.py system_monitor.py self_diagnostic.py observer.py file_ops.py whatsapp_fetcher.py"
+  },
+  {
+    "time": "2026-08-10T05:44:27.652016",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "thank you."
+  },
+  {
+    "time": "2026-08-10T05:44:40.001683",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "You're welcome."
+    }
+  },
+  {
+    "time": "2026-08-10T05:44:40.001683",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "You're welcome."
+    }
+  },
+  {
+    "time": "2026-08-10T05:44:40.001683",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "You're welcome."
+  },
+  {
+    "time": "2026-08-10T05:44:45.195334",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "the next one is python"
+  },
+  {
+    "time": "2026-08-10T05:45:06.307564",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "face_recognition_module.py"
+    }
+  },
+  {
+    "time": "2026-08-10T05:45:06.307564",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "face_recognition_module.py"
+    }
+  },
+  {
+    "time": "2026-08-10T05:45:06.308565",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Face_recognition_module.py"
+  },
+  {
+    "time": "2026-08-10T05:45:16.237840",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "remember that my favorite programming language is python."
+  },
+  {
+    "time": "2026-08-10T05:45:16.244358",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "system_status",
+        "mode": "cpu"
+      },
+      "response": ""
+    }
+  },
+  {
+    "time": "2026-08-10T05:45:16.244358",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "system_status",
+        "mode": "cpu"
+      },
+      "response": ""
+    }
+  },
+  {
+    "time": "2026-08-10T05:45:16.289030",
+    "type": "execution_result",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": "system_status",
+      "success": true,
+      "message": "CPU at 5%. RAM 86% used."
+    }
+  },
+  {
+    "time": "2026-08-10T05:45:16.290084",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "CPU at 5%. RAM 86% used."
+  },
+  {
+    "time": "2026-08-10T05:45:26.946672",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "open notepad and type successful chapter 1"
+  },
+  {
+    "time": "2026-08-10T05:45:26.951172",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "open_app",
+        "app": "notepad"
+      },
+      "response": "Opening notepad."
+    }
+  },
+  {
+    "time": "2026-08-10T05:45:26.951172",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "open_app",
+        "app": "notepad"
+      },
+      "response": "Opening notepad."
+    }
+  },
+  {
+    "time": "2026-08-10T05:45:28.593453",
+    "type": "execution_result",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": "open_app",
+      "success": true,
+      "message": "Opening notepad."
+    }
+  },
+  {
+    "time": "2026-08-10T05:45:28.593453",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Opening notepad."
+  },
+  {
+    "time": "2026-08-10T05:45:37.691785",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "and type my favorite chapter is one"
+  },
+  {
+    "time": "2026-08-10T05:46:03.534785",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "evolver.py"
+    }
+  },
+  {
+    "time": "2026-08-10T05:46:03.534785",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "evolver.py"
+    }
+  },
+  {
+    "time": "2026-08-10T05:46:03.542300",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Evolver.py"
+  },
+  {
+    "time": "2026-08-10T05:46:13.407792",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "explain how neural network alerts."
+  },
+  {
+    "time": "2026-08-10T05:46:39.046576",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Neural‑network alerts are triggered when the model detects a pattern or threshold breach—such as an anomaly score exceeding a preset limit—causing it to fire a notification or action."
+    }
+  },
+  {
+    "time": "2026-08-10T05:46:39.046576",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Neural‑network alerts are triggered when the model detects a pattern or threshold breach—such as an anomaly score exceeding a preset limit—causing it to fire a notification or action."
+    }
+  },
+  {
+    "time": "2026-08-10T05:46:39.047578",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Neural‑network alerts are triggered when the model detects a pattern or threshold breach—such as an anomaly score exceeding a preset limit—causing it to fire a notification or action."
+  },
+  {
+    "time": "2026-08-10T05:46:48.725066",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Standing by."
+  }
+]

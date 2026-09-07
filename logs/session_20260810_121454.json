@@ -1,0 +1,154 @@
+[
+  {
+    "time": "2026-08-10T12:14:54.181689",
+    "type": "skill_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "name": "example_skill",
+      "priority": 60
+    }
+  },
+  {
+    "time": "2026-08-10T12:14:54.181689",
+    "type": "skills_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "count": 1
+    }
+  },
+  {
+    "time": "2026-08-10T12:14:56.632336",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Systems up."
+  },
+  {
+    "time": "2026-08-10T12:15:01.773134",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I evolved since last boot — gained a new module: jarvis_tts; 2 modules updated: core, jarvis."
+  },
+  {
+    "time": "2026-08-10T12:15:02.884453",
+    "type": "boot_syntax_ok",
+    "severity": "debug",
+    "module": "self_diagnostic",
+    "tags": [
+      "boot",
+      "syntax"
+    ],
+    "data": {
+      "passed_count": 36,
+      "warning_count": 0
+    }
+  },
+  {
+    "time": "2026-08-10T12:15:05.088523",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Listening."
+  },
+  {
+    "time": "2026-08-10T12:15:07.973533",
+    "type": "self_awareness_boot_scan",
+    "severity": "info",
+    "module": "self_awareness",
+    "tags": [
+      "boot",
+      "evolution"
+    ],
+    "data": {
+      "added": [
+        "jarvis_tts.py"
+      ],
+      "removed": [],
+      "modified": 2
+    }
+  },
+  {
+    "time": "2026-08-10T12:15:19.939605",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "hello jarvis"
+  },
+  {
+    "time": "2026-08-10T12:15:25.862447",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Hello! How can I assist you today?"
+    }
+  },
+  {
+    "time": "2026-08-10T12:15:25.862447",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Hello! How can I assist you today?"
+    }
+  },
+  {
+    "time": "2026-08-10T12:15:25.868092",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Hello! How can I assist you today?"
+  },
+  {
+    "time": "2026-08-10T12:15:38.708790",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "hello jarvis"
+  },
+  {
+    "time": "2026-08-10T12:15:39.523713",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Hello! How can I assist you today?"
+    }
+  },
+  {
+    "time": "2026-08-10T12:15:39.524361",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Hello! How can I assist you today?"
+    }
+  },
+  {
+    "time": "2026-08-10T12:15:39.524361",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Hello! How can I assist you today?"
+  }
+]

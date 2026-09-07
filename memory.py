@@ -1,9 +1,12 @@
 # memory.py — Extended Memory Module
 # Phase 1 upgrade: timestamps, tags, priority levels, smarter retrieval
 # Phase 6 additions: usage tracking, failure logging, preferences, session memory
+# Phase 6 NEW: light semantic recall layer (pure-Python TF-IDF cosine similarity)
 
 import json
 import os
+import re
+import math
 import datetime
 import threading
 
@@ -30,8 +33,10 @@ def _load():
 def _save(m):
     with _lock:
         try:
-            with open(MEMORY_FILE, "w", encoding="utf-8") as f:
+            tmp = MEMORY_FILE + ".tmp"
+            with open(tmp, "w", encoding="utf-8") as f:
                 json.dump(m, f, indent=2, ensure_ascii=False)
+            os.replace(tmp, MEMORY_FILE)
         except Exception as e:
             print(f"[memory save error] {e}")
 
@@ -393,3 +398,171 @@ def get_prediction_hint():
         if action not in recent and data.get("count", 0) >= 3:
             return action
     return ""
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PHASE 6 NEW: LIGHT SEMANTIC RECALL LAYER
+# Pure-Python TF-IDF cosine similarity — zero external dependencies.
+# Sits alongside the existing key-value store, does NOT replace it.
+# ══════════════════════════════════════════════════════════════════════════════
+
+_STOP_WORDS = frozenset((
+    "the", "a", "an", "is", "are", "was", "were", "be", "been", "being",
+    "have", "has", "had", "do", "does", "did", "will", "would", "could",
+    "should", "may", "might", "can", "shall", "to", "of", "in", "for",
+    "on", "with", "at", "by", "from", "as", "into", "through", "during",
+    "before", "after", "above", "below", "between", "and", "but", "or",
+    "nor", "not", "so", "yet", "both", "either", "neither", "each",
+    "every", "all", "any", "few", "more", "most", "other", "some",
+    "such", "no", "only", "own", "same", "than", "too", "very",
+    "just", "because", "if", "when", "where", "how", "what", "which",
+    "who", "whom", "this", "that", "these", "those", "i", "me", "my",
+    "we", "our", "you", "your", "he", "him", "his", "she", "her",
+    "it", "its", "they", "them", "their", "about", "up", "out",
+))
+
+
+def _tokenize(text: str) -> list:
+    """Lowercase, strip punctuation, remove stop words."""
+    if not text:
+        return []
+    tokens = re.findall(r"[a-z0-9]+", text.lower())
+    return [t for t in tokens if t not in _STOP_WORDS and len(t) > 1]
+
+
+def _build_tfidf_vectors(facts: dict) -> tuple:
+    """
+    Build TF-IDF vectors for all facts.
+    Returns (doc_list, vocab, idf, tfidf_matrix).
+    doc_list: list of (key, value_text) tuples
+    """
+    doc_list = []
+    for k, v in facts.items():
+        val = v.get("value", "") if isinstance(v, dict) else str(v)
+        combined = f"{k} {val}"
+        doc_list.append((k, combined))
+
+    if not doc_list:
+        return [], {}, {}, []
+
+    # Tokenize all docs
+    tokenized = [_tokenize(doc[1]) for doc in doc_list]
+    n_docs = len(tokenized)
+
+    # Build vocabulary
+    vocab = {}
+    for tokens in tokenized:
+        for t in set(tokens):
+            if t not in vocab:
+                vocab[t] = len(vocab)
+
+    if not vocab:
+        return doc_list, vocab, {}, []
+
+    # Compute IDF
+    doc_freq = [0] * len(vocab)
+    for tokens in tokenized:
+        for t in set(tokens):
+            if t in vocab:
+                doc_freq[vocab[t]] += 1
+
+    idf = {}
+    for term, idx in vocab.items():
+        idf[term] = math.log((n_docs + 1) / (doc_freq[idx] + 1)) + 1
+
+    # Compute TF-IDF matrix
+    tfidf_matrix = []
+    for tokens in tokenized:
+        tf = {}
+        for t in tokens:
+            if t in vocab:
+                tf[t] = tf.get(t, 0) + 1
+        vec = {}
+        for t, count in tf.items():
+            vec[t] = (count / len(tokens)) * idf.get(t, 1.0)
+        tfidf_matrix.append(vec)
+
+    return doc_list, vocab, idf, tfidf_matrix
+
+
+def _cosine_similarity(vec_a: dict, vec_b: dict) -> float:
+    """Cosine similarity between two sparse vectors (dicts)."""
+    if not vec_a or not vec_b:
+        return 0.0
+
+    common_keys = set(vec_a.keys()) & set(vec_b.keys())
+    if not common_keys:
+        return 0.0
+
+    dot = sum(vec_a[k] * vec_b[k] for k in common_keys)
+    mag_a = math.sqrt(sum(v * v for v in vec_a.values()))
+    mag_b = math.sqrt(sum(v * v for v in vec_b.values()))
+
+    if mag_a == 0 or mag_b == 0:
+        return 0.0
+
+    return dot / (mag_a * mag_b)
+
+
+def semantic_recall(query: str, top_n: int = 3) -> list:
+    """
+    Find the most semantically relevant facts for a natural language query.
+    Uses TF-IDF cosine similarity — no external ML libraries needed.
+
+    Returns a list of dicts: [{"key": ..., "value": ..., "score": ...}, ...]
+    """
+    if not query or not query.strip():
+        return []
+
+    m = _load()
+    facts = m.get("facts", {})
+    if not facts:
+        return []
+
+    doc_list, vocab, idf, tfidf_matrix = _build_tfidf_vectors(facts)
+    if not doc_list or not vocab:
+        return []
+
+    # Build query vector
+    query_tokens = _tokenize(query)
+    if not query_tokens:
+        return []
+
+    query_tf = {}
+    for t in query_tokens:
+        if t in vocab:
+            query_tf[t] = query_tf.get(t, 0) + 1
+
+    query_vec = {}
+    for t, count in query_tf.items():
+        query_vec[t] = (count / len(query_tokens)) * idf.get(t, 1.0)
+
+    if not query_vec:
+        return []
+
+    # Score all docs
+    scored = []
+    for i, (key, text) in enumerate(doc_list):
+        score = _cosine_similarity(query_vec, tfidf_matrix[i])
+        if score > 0:
+            val = facts[key]
+            val_text = val.get("value", "") if isinstance(val, dict) else str(val)
+            scored.append({
+                "key":   key,
+                "value": val_text,
+                "score": round(score, 4),
+            })
+
+    scored.sort(key=lambda x: x["score"], reverse=True)
+    return scored[:top_n]
+
+
+def semantic_recall_text(query: str, top_n: int = 3) -> str:
+    """
+    Convenience wrapper: returns a formatted string for LLM prompt injection.
+    """
+    results = semantic_recall(query, top_n)
+    if not results:
+        return ""
+    lines = [f"- {r['key']}: {r['value']}" for r in results]
+    return "Relevant memories:\n" + "\n".join(lines)

@@ -11,6 +11,11 @@ import requests
 from dotenv import load_dotenv
 import pytesseract
 
+# Reliability imports
+import status_registry
+from status_registry import SubsystemState, get_registry
+import error_handler
+
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
@@ -23,10 +28,21 @@ pytesseract.pytesseract.tesseract_cmd = os.getenv(
 
 def capture_screen():
     """Capture screenshot using mss — returns numpy array in BGR format for cv2."""
-    with mss() as sct:
-        # mss returns BGRA format — convert to BGR for cv2 compatibility
-        screenshot = np.array(sct.grab(sct.monitors[1]))
-        return cv2.cvtColor(screenshot, cv2.COLOR_BGRA2BGR)
+    try:
+        with mss() as sct:
+            # mss returns BGRA format — convert to BGR for cv2 compatibility
+            screenshot = np.array(sct.grab(sct.monitors[1]))
+            img = cv2.cvtColor(screenshot, cv2.COLOR_BGRA2BGR)
+            return img
+    except Exception as exc:
+        # If capture fails, it degrades both Gemini screen read and Tesseract OCR
+        error_handler.log_and_demote(
+            subsystem="TESSERACT_OCR",
+            exception=exc,
+            context="Capture screen mss interface",
+            demote_to=SubsystemState.OFFLINE
+        )
+        raise exc
 
 
 def screenshot_to_base64():
@@ -40,8 +56,15 @@ def screenshot_to_base64():
 
 def describe_screen(prompt="describe what you see"):
     """Send screenshot to Gemini for description."""
+    registry = get_registry()
+
     if not GEMINI_API_KEY:
         print("[Vision] No Gemini API key — falling back to OCR")
+        registry.set_status(
+            "GEMINI",
+            SubsystemState.DISABLED,
+            "Gemini API key is empty in environment"
+        )
         return "Gemini API key not configured. Using OCR fallback."
 
     try:
@@ -63,6 +86,7 @@ def describe_screen(prompt="describe what you see"):
         }
 
         res = requests.post(url, json=payload, timeout=15)
+        res.raise_for_status()
         data = res.json()
 
         # Debug: print full response if it fails
@@ -75,26 +99,57 @@ def describe_screen(prompt="describe what you see"):
                 print(f"[Vision] Gemini error: {error_msg}")
                 
                 if "API_KEY_INVALID" in error_msg or "API key not valid" in error_msg:
+                    registry.set_status(
+                        "GEMINI",
+                        SubsystemState.DEGRADED,
+                        "Invalid API Key verified by Gemini API endpoint"
+                    )
                     return "Your Gemini API key is invalid. Get a new one from https://aistudio.google.com/apikey"
                 
+                registry.set_status(
+                    "GEMINI",
+                    SubsystemState.DEGRADED,
+                    f"Gemini API returned error: {error_msg}"
+                )
                 return f"Gemini API error: {error_msg}"
             
+            registry.set_status(
+                "GEMINI",
+                SubsystemState.DEGRADED,
+                "Gemini API payload lacks candidates"
+            )
             return "Could not describe the screen."
 
-        # Extract text from response
+        # Extract text from response and mark GEMINI status READY
         text = data["candidates"][0]["content"]["parts"][0]["text"]
+        registry.set_status(
+            "GEMINI",
+            SubsystemState.READY,
+            "Gemini Vision responding normally"
+        )
         return text.strip()
 
-    except requests.exceptions.Timeout:
-        print("[Vision] Gemini request timed out")
+    except requests.exceptions.Timeout as timeout_exc:
+        error_handler.log_and_demote(
+            subsystem="GEMINI",
+            exception=timeout_exc,
+            context="Gemini vision endpoint timeout",
+            demote_to=SubsystemState.DEGRADED
+        )
         return "Screen description timed out. Falling back to OCR."
-    except Exception as e:
-        print(f"[Vision] Error: {e}")
+    except Exception as exc:
+        error_handler.log_and_demote(
+            subsystem="GEMINI",
+            exception=exc,
+            context="Querying Gemini Vision endpoint",
+            demote_to=SubsystemState.DEGRADED
+        )
         return "Screen description failed. Falling back to OCR."
 
 
 def read_screen():
     """OCR fallback — reads actual text from screen using pytesseract."""
+    registry = get_registry()
     try:
         img = capture_screen()
         
@@ -107,14 +162,26 @@ def read_screen():
         # Extract text using pytesseract
         text = pytesseract.image_to_string(thresh).strip()
         
+        # Mark READY if we successfully pass through pytesseract calls
+        registry.set_status(
+            "TESSERACT_OCR",
+            SubsystemState.READY,
+            "Pytesseract engine parsed successfully"
+        )
+
         if not text:
             return "No text detected on screen."
         
         # Return first 500 chars
         return text[:500]
         
-    except Exception as e:
-        print(f"[Vision] OCR error: {e}")
+    except Exception as exc:
+        error_handler.log_and_demote(
+            subsystem="TESSERACT_OCR",
+            exception=exc,
+            context="Pytesseract local OCR fallback engine",
+            demote_to=SubsystemState.OFFLINE
+        )
         return "OCR failed."
 
 
@@ -125,6 +192,7 @@ def analyze_screen_context():
         description = describe_screen("Describe the current screen in detail, including any text, apps, or important elements.")
         context = conversation_manager.get_context_block()
         return f"Screen: {description}\n\nContext: {context}"
-    except Exception as e:
-        print(f"[Vision] analyze_screen_context error: {e}")
+    except Exception as exc:
+        # Don't demote here as describe_screen handles its own status; just fallback safely
+        print(f"[Vision] analyze_screen_context error: {exc}")
         return describe_screen("Describe what you see on this screen.")

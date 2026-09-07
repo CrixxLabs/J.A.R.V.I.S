@@ -13,6 +13,11 @@ import pyautogui
 import pytesseract
 from mss import mss
 
+# Reliability imports
+import status_registry
+from status_registry import SubsystemState, get_registry
+import error_handler
+
 try:
     import pygetwindow as gw
     _GW_AVAILABLE = True
@@ -85,6 +90,7 @@ def extract_whatsapp_text() -> str:
     Capture the current screen, OCR it, and return clean readable text.
     Priority lines (those containing links) are surfaced first.
     """
+    registry = get_registry()
     try:
         with mss() as sct:
             img = np.array(sct.grab(sct.monitors[1]))
@@ -117,10 +123,21 @@ def extract_whatsapp_text() -> str:
         merged = _deduplicate(priority_lines + content_lines)
         result = "\n".join(merged).strip()
         print(f"[DEBUG][whatsapp_fetcher] extracted {len(result)} chars from OCR")
+
+        registry.set_status(
+            "TESSERACT_OCR",
+            SubsystemState.READY,
+            "WhatsApp OCR extraction succeeded"
+        )
         return result or "No readable WhatsApp text found."
 
     except Exception as exc:
-        print(f"[DEBUG][whatsapp_fetcher] OCR error: {exc}")
+        error_handler.log_and_demote(
+            subsystem="TESSERACT_OCR",
+            exception=exc,
+            context="WhatsApp screen OCR text extraction",
+            demote_to=SubsystemState.DEGRADED
+        )
         return "WhatsApp OCR failed."
 
 

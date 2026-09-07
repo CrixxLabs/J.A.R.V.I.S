@@ -1,0 +1,231 @@
+[
+  {
+    "time": "2026-08-10T10:41:28.184180",
+    "type": "skill_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "name": "example_skill",
+      "priority": 60
+    }
+  },
+  {
+    "time": "2026-08-10T10:41:28.184180",
+    "type": "skills_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "count": 1
+    }
+  },
+  {
+    "time": "2026-08-10T10:41:30.745766",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Systems up."
+  },
+  {
+    "time": "2026-08-10T10:41:37.320401",
+    "type": "boot_syntax_ok",
+    "severity": "debug",
+    "module": "self_diagnostic",
+    "tags": [
+      "boot",
+      "syntax"
+    ],
+    "data": {
+      "passed_count": 29,
+      "warning_count": 0
+    }
+  },
+  {
+    "time": "2026-08-10T10:41:47.820771",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "What's the move?"
+  },
+  {
+    "time": "2026-08-10T10:41:59.824938",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "i'm going to explain how we want to do it."
+  },
+  {
+    "time": "2026-08-10T10:42:00.907231",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm ready to listen and understand your explanation. Please go ahead and share your thoughts, and I'll do my best to comprehend and provide feedback or assistance as needed."
+    }
+  },
+  {
+    "time": "2026-08-10T10:42:00.907231",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm ready to listen and understand your explanation. Please go ahead and share your thoughts, and I'll do my best to comprehend and provide feedback or assistance as needed."
+    }
+  },
+  {
+    "time": "2026-08-10T10:42:00.908236",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I'm ready to listen and understand your explanation. Please go ahead and share your thoughts, and I'll do my best to comprehend and provide feedback or assistance as needed."
+  },
+  {
+    "time": "2026-08-10T10:42:15.645545",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what is the time right now?"
+  },
+  {
+    "time": "2026-08-10T10:42:15.659292",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "It's 10:42 AM."
+    }
+  },
+  {
+    "time": "2026-08-10T10:42:15.659292",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "It's 10:42 AM."
+    }
+  },
+  {
+    "time": "2026-08-10T10:42:15.659292",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "It's 10:42 AM."
+  },
+  {
+    "time": "2026-08-10T10:42:25.184385",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "exploring quantum computing in detail."
+  },
+  {
+    "time": "2026-08-10T10:42:25.881579",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Exploring quantum computing in detail can be a fascinating and complex topic, involving the study of quantum mechanics and its applications in computing. Quantum computing has the potential to revolutionize the way we process information, with potential applications in fields such as cryptography, optimization, and simulation. Would you like to discuss the basics of quantum computing, such as qubits and superposition, or dive into more advanced topics like quantum algorithms and quantum error correction?"
+    }
+  },
+  {
+    "time": "2026-08-10T10:42:25.881579",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Exploring quantum computing in detail can be a fascinating and complex topic, involving the study of quantum mechanics and its applications in computing. Quantum computing has the potential to revolutionize the way we process information, with potential applications in fields such as cryptography, optimization, and simulation. Would you like to discuss the basics of quantum computing, such as qubits and superposition, or dive into more advanced topics like quantum algorithms and quantum error correction?"
+    }
+  },
+  {
+    "time": "2026-08-10T10:42:25.881579",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Exploring quantum computing in detail can be a fascinating and complex topic, involving the study of quantum mechanics and its applications in computing. Quantum computing has the potential to revolutionize the way we process information, with potential applications in fields such as cryptography, optimization, and simulation. Would you like to discuss the basics of quantum computing, such as qubits and superposition, or dive into more advanced topics like quantum algorithms and quantum error correction?"
+  },
+  {
+    "time": "2026-08-10T10:42:46.605724",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "open photoshop"
+  },
+  {
+    "time": "2026-08-10T10:42:46.609236",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "open_app",
+        "app": "photoshop"
+      },
+      "response": "Opening photoshop."
+    }
+  },
+  {
+    "time": "2026-08-10T10:42:46.609236",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "open_app",
+        "app": "photoshop"
+      },
+      "response": "Opening photoshop."
+    }
+  },
+  {
+    "time": "2026-08-10T10:42:47.189682",
+    "type": "execution_result",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": "open_app",
+      "success": false,
+      "message": "Couldn't open that. Check if it's installed correctly."
+    }
+  },
+  {
+    "time": "2026-08-10T10:42:47.189682",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Couldn't open that. Check if it's installed correctly."
+  },
+  {
+    "time": "2026-08-10T10:42:59.228827",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Standing by."
+  }
+]

@@ -32,6 +32,11 @@ from file_ops import search_files, rename_file as _rename_file
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+# Reliability imports
+import status_registry
+from status_registry import SubsystemState, get_registry
+import error_handler
+
 # Spotify (safe optional)
 try:
     import spotipy
@@ -90,7 +95,9 @@ AVAILABLE_ACTIONS = {
     ],
     "apps": [
         "open any app by name", "open files by name",
-        "list files in a folder", "type text into any input"
+        "list files in a folder", "type text into any input",
+        "install apps via winget with real-time progress",
+        "auto-login to supported apps with saved credentials",
     ],
     "media": [
         "play / pause / skip music", "volume up / down / mute",
@@ -129,14 +136,22 @@ AVAILABLE_ACTIONS = {
         "remember a fact about the user",
         "forget a profile entry",
     ],
+    "self_awareness": [
+        "scan own codebase and detect abilities",
+        "report changes since last boot",
+    ],
+    "credentials": [
+        "save login credentials securely (Windows DPAPI)",
+        "list saved app credentials",
+        "delete saved credentials for an app",
+    ],
 }
 
-# ── Phase 5: flat action list for validation ──
 AVAILABLE_ACTIONS_LIST = [
     "open_app", "close_app", "join_meeting", "system_control", "play_music",
     "send_message", "read_screen", "web_search",
-    "type_text", "media", "scroll","generate_image",
-    "generate_video",  "click", "screenshot_describe",
+    "type_text", "media", "scroll", "generate_image",
+    "generate_video", "click", "screenshot_describe",
     "system_info", "system_status", "datetime", "summarize_url", "remember", "recall",
     "weather", "news", "set_reminder", "send_whatsapp", "send_email",
     "lock_pc", "shutdown_pc", "restart_pc", "morning_briefing",
@@ -150,6 +165,16 @@ AVAILABLE_ACTIONS_LIST = [
     "run_diagnostic",
     # User profile
     "profile_query", "profile_forget", "profile_remember",
+    # Iron Man automation
+    "install_app",              # install an app via winget
+    "install_and_login",        # install + open + auto-login
+    "open_and_login",           # just launch + auto-login (app already installed)
+    "save_login",               # save credentials for an app
+    "list_logins",              # show what credentials are saved
+    "delete_login",             # remove saved credentials for an app
+    "self_scan",                # rescan own codebase
+    "self_capabilities",        # report current abilities
+    "self_changes",             # report what changed since last boot
 ]
 
 def get_capabilities_text():
@@ -164,9 +189,11 @@ def get_capabilities_text():
 _spotify = None
 def get_spotify():
     global _spotify
+    registry = get_registry()
     if _spotify:
         return _spotify
-    if not SPOTIFY_CLIENT_ID:
+    if not SPOTIFY_CLIENT_ID or not SPOTIFY_CLIENT_SECRET:
+        registry.set_status("SPOTIFY", SubsystemState.DISABLED, "SPOTIFY_CLIENT_ID or SECRET missing in .env")
         return None
     try:
         auth = SpotifyOAuth(
@@ -177,109 +204,116 @@ def get_spotify():
             cache_path=os.path.join(BASE_DIR, ".spotify_cache")
         )
         _spotify = spotipy.Spotify(auth_manager=auth)
+        registry.set_status("SPOTIFY", SubsystemState.READY, "Spotify OAuth linked successfully")
         return _spotify
     except Exception as e:
-        print(f"[Spotify] {e}")
+        error_handler.log_and_demote("SPOTIFY", e, "Spotify client connection initialization", SubsystemState.DEGRADED)
         return None
 
 def spotify_play(query):
     sp = get_spotify()
     if not sp:
-        return "Spotify's not set up. add client ID and secret to .env."
+        return "Spotify is not configured. Add your Spotify client ID and secret to the .env file."
     try:
         results = sp.search(q=query, limit=1, type="track")
-        tracks  = results["tracks"]["items"]
+        tracks  = results.get("tracks", {}).get("items", [])
         if not tracks:
-            return f"couldn't find {query} on Spotify"
+            return f"Couldn't find '{query}' on Spotify."
         t       = tracks[0]
         devices = sp.devices().get("devices", [])
         if not devices:
-            return "no active Spotify device. open Spotify on your PC first."
+            return "No active Spotify devices found. Please open Spotify on your PC first."
         sp.start_playback(device_id=devices[0]["id"], uris=[t["uri"]])
         time.sleep(1)
-        check = sp.current_playback()
-        if not check or not check.get("is_playing"):
-            return "Spotify didn't start playing."
         log_activity("spotify_play", t["name"])
-        return f"playing {t['name']} by {t['artists'][0]['name']}."
+        get_registry().set_status("SPOTIFY", SubsystemState.READY, f"Playing {t['name']}")
+        return f"Playing {t['name']} by {t['artists'][0]['name']}."
     except Exception as e:
-        print(f"[Spotify play] {e}")
-        return "had trouble with Spotify"
+        error_handler.log_and_demote("SPOTIFY", e, f"Spotify search and play for query '{query}'", SubsystemState.DEGRADED)
+        return "I had trouble starting playback on Spotify."
 
 def spotify_control(cmd):
     sp = get_spotify()
     if not sp:
-        return "Spotify's not connected"
+        return "Spotify is not connected."
     try:
-        if cmd == "pause":   sp.pause_playback();   return "paused."
-        if cmd == "resume":  sp.start_playback();   return "resuming."
-        if cmd == "next":    sp.next_track();       return "next track."
-        if cmd == "prev":    sp.previous_track();   return "going back."
+        if cmd == "pause":   sp.pause_playback();   return "Paused Spotify."
+        if cmd == "resume":  sp.start_playback();   return "Resuming Spotify."
+        if cmd == "next":    sp.next_track();       return "Skipping to next track."
+        if cmd == "prev":    sp.previous_track();   return "Going back to previous track."
         if cmd == "like":
             cur = sp.current_playback()
             if cur and cur.get("item"):
                 sp.current_user_saved_tracks_add([cur["item"]["id"]])
-                return f"liked {cur['item']['name']}."
-            return "nothing's playing"
+                return f"Liked {cur['item']['name']}."
+            return "Nothing is currently playing on Spotify."
         if cmd == "current":
             cur = sp.current_playback()
             if cur and cur.get("item"):
-                return f"playing {cur['item']['name']} by {cur['item']['artists'][0]['name']}."
-            return "nothing's playing"
+                return f"Currently playing {cur['item']['name']} by {cur['item']['artists'][0]['name']}."
+            return "Nothing is currently playing on Spotify."
+        return "Invalid Spotify control command."
     except Exception as e:
-        print(f"[Spotify control] {e}")
-        return "Spotify error"
+        error_handler.log_and_demote("SPOTIFY", e, f"Spotify command direct execution: '{cmd}'", SubsystemState.DEGRADED)
+        return "Spotify control action failed."
 
 
 # ── Google Calendar ──
 def get_cal_service():
-    if not os.path.exists(GCAL_CREDS_FILE):
+    registry = get_registry()
+    if not os.path.exists(GCAL_CREDS_FILE) and not os.path.exists(GCAL_TOKEN_FILE):
+        registry.set_status("CALENDAR", SubsystemState.DISABLED, "Calendar credential files missing")
         return None
-    creds = None
-    if os.path.exists(GCAL_TOKEN_FILE):
-        creds = Credentials.from_authorized_user_file(GCAL_TOKEN_FILE, GCAL_SCOPES)
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow  = InstalledAppFlow.from_client_secrets_file(GCAL_CREDS_FILE, GCAL_SCOPES)
-            creds = flow.run_local_server(port=0)
-        with open(GCAL_TOKEN_FILE, "w") as f:
-            f.write(creds.to_json())
-    return build("calendar", "v3", credentials=creds)
+    try:
+        creds = None
+        if os.path.exists(GCAL_TOKEN_FILE):
+            creds = Credentials.from_authorized_user_file(GCAL_TOKEN_FILE, GCAL_SCOPES)
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            elif os.path.exists(GCAL_CREDS_FILE):
+                flow  = InstalledAppFlow.from_client_secrets_file(GCAL_CREDS_FILE, GCAL_SCOPES)
+                creds = flow.run_local_server(port=0)
+            if creds:
+                with open(GCAL_TOKEN_FILE, "w") as f:
+                    f.write(creds.to_json())
+        if creds:
+            svc = build("calendar", "v3", credentials=creds)
+            registry.set_status("CALENDAR", SubsystemState.READY, "Calendar API active")
+            return svc
+        return None
+    except Exception as e:
+        error_handler.log_and_demote("CALENDAR", e, "Establishing Google Calendar endpoint auth", SubsystemState.DEGRADED)
+        return None
 
 def calendar_today():
     try:
         svc = get_cal_service()
         if not svc:
-            return "Google Calendar isn't connected."
+            return "Google Calendar is not connected. Please add your credentials.json file."
         now = datetime.datetime.utcnow().isoformat() + "Z"
         end = (datetime.datetime.utcnow() + datetime.timedelta(days=1)).isoformat() + "Z"
         evts = svc.events().list(calendarId="primary", timeMin=now, timeMax=end,
                                   maxResults=5, singleEvents=True, orderBy="startTime"
                                   ).execute().get("items", [])
         if not evts:
-            return "nothing on your calendar today."
+            return "You have nothing on your calendar today."
         lines = []
         for e in evts:
             start = e["start"].get("dateTime", e["start"].get("date", ""))
             t = datetime.datetime.fromisoformat(start).strftime("%I:%M %p") if "T" in start else "all day"
             lines.append(f"{e['summary']} at {t}")
-        return "today you've got — " + ", ".join(lines) + "."
+        return "Today on your calendar: " + ", ".join(lines) + "."
     except Exception as e:
-        print(f"[Calendar] {e}")
-        return "couldn't fetch calendar"
+        error_handler.log_and_demote("CALENDAR", e, "Querying calendar primary resource events", SubsystemState.DEGRADED)
+        return "I couldn't fetch your calendar events."
 
 def calendar_add(title, date_str, time_str="09:00"):
     try:
         svc = get_cal_service()
         if not svc:
-            return "Google Calendar isn't connected."
-        try:
-            dt = datetime.datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
-        except Exception as e:
-            print(f"[executor error] {e}")
-            return _stable_failure("Invalid date format.")
+            return "Google Calendar is not connected."
+        dt = datetime.datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
         end_dt = dt + datetime.timedelta(hours=1)
         svc.events().insert(calendarId="primary", body={
             "summary": title,
@@ -287,10 +321,10 @@ def calendar_add(title, date_str, time_str="09:00"):
             "end":     {"dateTime": end_dt.isoformat(), "timeZone": "Asia/Kolkata"},
         }).execute()
         log_activity("calendar_add", title)
-        return f"added {title} to your calendar."
+        return f"Successfully added '{title}' to your calendar."
     except Exception as e:
-        print(f"[Calendar add] {e}")
-        return "couldn't add that"
+        error_handler.log_and_demote("CALENDAR", e, f"Inserting calendar entity '{title}'", SubsystemState.DEGRADED)
+        return "I couldn't add that event to your calendar."
 
 
 # ── Web & content ──
@@ -301,10 +335,31 @@ def web_search(query):
         res     = requests.get(url, headers=headers, timeout=8)
         soup    = BeautifulSoup(res.text, "html.parser")
         results = [r.get_text(strip=True) for r in soup.select(".result__snippet")[:4] if r.get_text(strip=True)]
-        return " | ".join(results)[:1500] if results else "No results."
+
+        if not results:
+            return "I couldn't find anything on that."
+
+        raw_snippets = " | ".join(results)[:1500]
+        raw_snippets = re.sub(r"\s+", " ", raw_snippets)
+        raw_snippets = raw_snippets.replace(" | ", ". ")
+
+        if _ask_fn:
+            try:
+                resp = _ask_fn(
+                    f"Based on this web search for '{query}', give a natural short answer "
+                    f"in 2-3 sentences. Don't quote raw text:\n\n{raw_snippets}"
+                )
+                summary = resp[1] if isinstance(resp, tuple) else resp
+                if summary and len(summary.strip()) > 10:
+                    return summary.strip()
+            except Exception as exc:
+                print(f"[Search] LLM summarize failed: {exc}")
+
+        return raw_snippets[:400]
+
     except Exception as e:
         print(f"[Search] {e}")
-        return "search failed"
+        return "Search failed."
 
 def get_weather(city):
     try:
@@ -393,9 +448,11 @@ def list_folder(folder="Downloads"):
 
 # ── Email + WhatsApp ──
 def send_email(to, subject, body):
+    registry = get_registry()
+    if not GMAIL_ADDRESS or not GMAIL_PASSWORD:
+        registry.set_status("EMAIL", SubsystemState.DISABLED, "GMAIL_ADDRESS or PASSWORD not set in .env")
+        return "Email is not set up. Add your GMAIL_ADDRESS and GMAIL_PASSWORD to your .env file."
     try:
-        if not GMAIL_ADDRESS:
-            return "email's not set up. add GMAIL_ADDRESS and GMAIL_PASSWORD to .env."
         msg = MIMEMultipart()
         msg["From"] = GMAIL_ADDRESS
         msg["To"]   = to
@@ -405,20 +462,23 @@ def send_email(to, subject, body):
             srv.login(GMAIL_ADDRESS, GMAIL_PASSWORD)
             srv.sendmail(GMAIL_ADDRESS, to, msg.as_string())
         log_activity("email_sent", to)
-        return f"email sent to {to}."
+        registry.set_status("EMAIL", SubsystemState.READY, "Gmail SMTP validated")
+        return f"Email sent successfully to {to}."
     except Exception as e:
-        print(f"[Email] {e}")
-        return "email failed"
+        error_handler.log_and_demote("EMAIL", e, f"Gmail SMTP mailing to {to}", SubsystemState.DEGRADED)
+        return "Email failed to send. Check SMTP settings."
 
 def send_whatsapp(phone, message):
+    registry = get_registry()
     try:
         now = datetime.datetime.now()
         pywhatkit.sendwhatmsg(phone, message, now.hour, now.minute + 2, wait_time=15, tab_close=True)
         log_activity("whatsapp_sent", phone)
+        registry.set_status("WHATSAPP_SEND", SubsystemState.READY, "WhatsApp Web automated queue active")
         return f"WhatsApp queued to {phone}."
     except Exception as e:
-        print(f"[WhatsApp] {e}")
-        return "couldn't send WhatsApp"
+        error_handler.log_and_demote("WHATSAPP_SEND", e, f"pywhatkit messaging pipeline to {phone}", SubsystemState.DEGRADED)
+        return "Couldn't send WhatsApp message."
 
 
 # ── PC control ──
@@ -1058,6 +1118,348 @@ def confirm_portal_proposals() -> str:
         return "Something went wrong adding the obligations."
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# NEW: IRON MAN AUTOMATION ACTIONS
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _make_speech_progress_callback(app_name: str):
+    """
+    Create a progress callback that speaks intelligent updates as install/login
+    events happen. Uses smart throttling — doesn't spam the user with every event.
+    """
+    state = {
+        "last_spoken":     "",
+        "last_download":   -1,
+        "install_started": False,
+    }
+
+    def _cb(event: str, data: dict):
+        if _speak_fn is None:
+            return
+
+        try:
+            # ── Install events ─────────────────────────────────────────────
+            if event == "resolving":
+                pass  # too fast to bother speaking
+
+            elif event == "starting":
+                if not state["install_started"]:
+                    state["install_started"] = True
+                    msg = f"Downloading {app_name} now — takes a minute."
+                    _speak_fn(msg)
+                    state["last_spoken"] = msg
+
+            elif event == "downloading":
+                percent = data.get("percent", 0)
+                # Only speak at 50% (once) so we don't spam
+                if percent >= 50 and state["last_download"] < 50:
+                    state["last_download"] = percent
+                    _speak_fn("Halfway there.")
+
+            elif event == "installing":
+                if "installing" not in state["last_spoken"]:
+                    _speak_fn("Downloaded, installing now.")
+                    state["last_spoken"] = "installing"
+
+            elif event == "success":
+                _speak_fn(f"{app_name} installed.")
+                state["last_spoken"] = "installed"
+
+            elif event == "already":
+                _speak_fn(f"{app_name} is already installed.")
+
+            elif event == "failed":
+                reason = data.get("reason", "Unknown error")
+                _speak_fn(f"Install failed. {reason}")
+
+            # ── Launch + login events ──────────────────────────────────────
+            elif event == "launching":
+                app = data.get("app", app_name)
+                _speak_fn(f"Opening {app}.")
+
+            elif event == "waiting_for_window":
+                pass  # silent
+
+            elif event == "window_found":
+                pass  # silent, we'll speak about login next
+
+            elif event == "no_login_needed":
+                _speak_fn(f"{app_name} is open. Ready when you are.")
+
+            elif event == "checking_credentials":
+                pass  # silent
+
+            elif event == "credentials_loaded":
+                _speak_fn(f"I see the login screen. Signing you in.")
+
+            elif event == "no_credentials":
+                _speak_fn(
+                    f"{app_name} is open, but I don't have your login saved. "
+                    f"Say 'save my {app_name} login' to set it up."
+                )
+
+            elif event == "logging_in":
+                pass  # already announced
+
+            elif event == "login_step":
+                pass  # too granular
+
+            elif event == "login_step_failed":
+                reason = data.get("reason", "")
+                _speak_fn(f"Login step failed. {reason}")
+
+            elif event == "verifying_login":
+                pass  # silent
+
+            elif event == "login_success":
+                app = data.get("app", app_name)
+                _speak_fn(f"You're logged into {app}.")
+
+            elif event == "login_unverified":
+                reason = data.get("reason", "")
+                _speak_fn(
+                    f"I tried logging in but couldn't confirm it worked. "
+                    f"Check the window and log in manually if needed."
+                )
+
+            elif event == "launch_failed":
+                reason = data.get("reason", "")
+                _speak_fn(f"Couldn't open {app_name}. {reason}")
+
+            elif event == "window_never_appeared":
+                _speak_fn(f"{app_name} didn't open in time. Something may be wrong.")
+
+        except Exception as cb_exc:
+            print(f"[DEBUG][executor] progress callback error: {cb_exc}")
+
+    return _cb
+
+
+def _handle_install_app(action: dict) -> tuple:
+    """Install an app via winget with live speech progress."""
+    try:
+        import login_orchestrator
+        import auto_login_profiles
+
+        app_name = (action.get("app", "") or action.get("query", "")).strip()
+        if not app_name:
+            return _stable_failure("Which app should I install?")
+
+        display_name = app_name
+        profile = auto_login_profiles.get_profile(app_name)
+        if profile:
+            display_name = profile.get("display_name", app_name)
+
+        callback = _make_speech_progress_callback(display_name)
+        result = login_orchestrator.install_only(app_name, progress_callback=callback)
+
+        if result.get("success"):
+            log_activity("install_app", display_name)
+            _stable_learn_action("install_app")
+            return _stable_success("")
+        else:
+            return _stable_failure(result.get("message", "Install failed."))
+
+    except Exception as exc:
+        print(f"[DEBUG][executor] install_app error: {exc}")
+        return _stable_failure(f"Something went wrong: {exc}")
+
+
+def _handle_install_and_login(action: dict) -> tuple:
+    """Install + launch + auto-login in one flow."""
+    try:
+        import login_orchestrator
+        import auto_login_profiles
+
+        app_name = (action.get("app", "") or action.get("query", "")).strip()
+        if not app_name:
+            return _stable_failure("Which app should I install and log into?")
+
+        display_name = app_name
+        profile = auto_login_profiles.get_profile(app_name)
+        if profile:
+            display_name = profile.get("display_name", app_name)
+
+        callback = _make_speech_progress_callback(display_name)
+        result = login_orchestrator.install_and_setup(app_name, progress_callback=callback)
+
+        if result.get("success"):
+            log_activity("install_and_login", display_name)
+            _stable_learn_action("install_and_login")
+            return _stable_success("")
+        else:
+            return _stable_failure(result.get("message", "Setup failed."))
+
+    except Exception as exc:
+        print(f"[DEBUG][executor] install_and_login error: {exc}")
+        return _stable_failure(f"Something went wrong: {exc}")
+
+
+def _handle_open_and_login(action: dict) -> tuple:
+    """Launch already-installed app and auto-login."""
+    try:
+        import login_orchestrator
+        import auto_login_profiles
+
+        app_name = (action.get("app", "") or "").strip()
+        if not app_name:
+            return _stable_failure("Which app?")
+
+        display_name = app_name
+        profile = auto_login_profiles.get_profile(app_name)
+        if profile:
+            display_name = profile.get("display_name", app_name)
+
+        callback = _make_speech_progress_callback(display_name)
+        result = login_orchestrator.launch_and_login(app_name, progress_callback=callback)
+
+        if result.get("success"):
+            log_activity("open_and_login", display_name)
+            _stable_learn_action("open_and_login")
+            return _stable_success("")
+        else:
+            return _stable_failure(result.get("message", "Couldn't complete."))
+
+    except Exception as exc:
+        print(f"[DEBUG][executor] open_and_login error: {exc}")
+        return _stable_failure(f"Something went wrong: {exc}")
+
+
+def _handle_save_login(action: dict) -> tuple:
+    """
+    Save credentials for an app.
+    Expects action to have 'app', 'username', 'password' already collected
+    by the jarvis.py dialog flow.
+    """
+    try:
+        import credential_vault
+
+        app_name = (action.get("app", "") or "").strip()
+        username = (action.get("username", "") or "").strip()
+        password = action.get("password", "") or ""
+
+        if not app_name:
+            return _stable_failure("Which app is this for?")
+        if not username:
+            return _stable_failure("I need a username or email.")
+        if not password:
+            return _stable_failure("I need a password.")
+
+        result = credential_vault.save_credential(app_name, username, password)
+        if result["success"]:
+            log_activity("save_login", app_name)
+            return _stable_success(
+                f"Saved. I'll use it next time you open {app_name}."
+            )
+        else:
+            return _stable_failure(result["message"])
+
+    except Exception as exc:
+        print(f"[DEBUG][executor] save_login error: {exc}")
+        return _stable_failure(f"Couldn't save that: {exc}")
+
+
+def _handle_list_logins(action: dict) -> tuple:
+    """List all saved app credentials."""
+    try:
+        import credential_vault
+
+        apps = credential_vault.list_saved_apps()
+        if not apps:
+            return _stable_success("You haven't saved any app logins yet.")
+
+        pretty = ", ".join(app.replace("_", " ").title() for app in apps)
+        return _stable_success(f"I have login credentials saved for: {pretty}.")
+
+    except Exception as exc:
+        print(f"[DEBUG][executor] list_logins error: {exc}")
+        return _stable_failure("Couldn't check saved logins.")
+
+
+def _handle_delete_login(action: dict) -> tuple:
+    """Delete saved credentials for an app."""
+    try:
+        import credential_vault
+
+        app_name = (action.get("app", "") or "").strip()
+        if not app_name:
+            return _stable_failure("Which app's login should I forget?")
+
+        result = credential_vault.delete_credential(app_name)
+        if result["success"]:
+            log_activity("delete_login", app_name)
+            return _stable_success(result["message"])
+        else:
+            return _stable_failure(result["message"])
+
+    except Exception as exc:
+        print(f"[DEBUG][executor] delete_login error: {exc}")
+        return _stable_failure(f"Couldn't remove that: {exc}")
+
+
+def _handle_self_scan(action: dict) -> tuple:
+    """Force a self-awareness rescan."""
+    try:
+        import self_awareness
+        scan = self_awareness.force_rescan()
+        total = scan.get("total_files", 0)
+        funcs = scan.get("total_functions", 0)
+        changes = scan.get("changes", {})
+
+        summary = f"Scanned myself. {total} files, {funcs} public functions."
+
+        added = changes.get("added", [])
+        modified = changes.get("modified", [])
+        removed = changes.get("removed", [])
+
+        if added:
+            summary += f" I gained {len(added)} new file(s): {', '.join(added)}."
+        if modified:
+            summary += f" {len(modified)} file(s) were updated."
+        if removed:
+            summary += f" {len(removed)} file(s) were removed."
+
+        return _stable_success(summary)
+
+    except Exception as exc:
+        print(f"[DEBUG][executor] self_scan error: {exc}")
+        return _stable_failure("Couldn't scan myself.")
+
+
+def _handle_self_capabilities(action: dict) -> tuple:
+    """Report current capabilities based on file scan."""
+    try:
+        import self_awareness
+        summary = self_awareness.get_ability_summary()
+        if not summary:
+            return _stable_failure("I haven't scanned my abilities yet.")
+        if len(summary) > 800:
+            return _stable_success(
+                summary[:800] + "... and more. Check the console for the full list."
+            )
+        return _stable_success(summary)
+
+    except Exception as exc:
+        print(f"[DEBUG][executor] self_capabilities error: {exc}")
+        return _stable_failure("Couldn't check my abilities.")
+
+
+def _handle_self_changes(action: dict) -> tuple:
+    """Report what changed since last boot."""
+    try:
+        import self_awareness
+        summary = self_awareness.get_change_summary()
+        return _stable_success(summary)
+
+    except Exception as exc:
+        print(f"[DEBUG][executor] self_changes error: {exc}")
+        return _stable_failure("Couldn't check for changes.")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# MAIN EXECUTE
+# ══════════════════════════════════════════════════════════════════════════════
+
 def execute(action, speak_fn=None):
     global _pending_confirm
     if not action:
@@ -1240,9 +1642,27 @@ def execute(action, speak_fn=None):
             return _stable_success("Done.")
         if act == "morning_briefing":
             return _stable_success(morning_briefing())
-        if act in {"send_whatsapp", "send_email", "spotify_play", "spotify_control",
-                   "calendar_today", "calendar_add"}:
-            return _stable_failure("That feature is disabled for now.")
+
+        # ── Safe Gated Reconnected Actions (Phase 4 Re-wired) ──────────────────
+        if act == "send_whatsapp":
+            res = send_whatsapp(action.get("phone", ""), action.get("message", ""))
+            return _stable_success(res)
+        if act == "send_email":
+            res = send_email(action.get("to", ""), action.get("subject", ""), action.get("body", ""))
+            return _stable_success(res)
+        if act == "spotify_play":
+            res = spotify_play(action.get("query", action.get("song", "")))
+            return _stable_success(res)
+        if act == "spotify_control":
+            res = spotify_control(action.get("command", action.get("cmd", "pause")))
+            return _stable_success(res)
+        if act == "calendar_today":
+            res = calendar_today()
+            return _stable_success(res)
+        if act == "calendar_add":
+            res = calendar_add(action.get("title", ""), action.get("date", ""), action.get("time", "09:00"))
+            return _stable_success(res)
+
         if act == "exit":
             return _stable_success("")
         if act == "generate_image":
@@ -1254,19 +1674,15 @@ def execute(action, speak_fn=None):
                 action.get("prompt", ""), int(action.get("duration", 5))
             ))
 
-        # ── Layer 1: Obligation actions ───────────────────────────────────────
+        # ── Obligation actions ────────────────────────────────────────────────
         if act == "add_obligation":
             return _handle_add_obligation(action)
-
         if act == "query_obligations":
             return _handle_query_obligations(action)
-
         if act == "portal_scan":
             return _handle_portal_scan(action, speak_fn=speak_fn)
-
         if act == "mark_obligation_done":
             return _handle_mark_obligation_done(action)
-        # ─────────────────────────────────────────────────────────────────────
 
         # ── Self-diagnostic ───────────────────────────────────────────────────
         if act == "run_diagnostic":
@@ -1292,7 +1708,6 @@ def execute(action, speak_fn=None):
             except Exception as exc:
                 print(f"[DEBUG][executor] run_diagnostic error: {exc}")
                 return _stable_failure("Couldn't run the diagnostic. Check the console.")
-        # ─────────────────────────────────────────────────────────────────────
 
         # ── User profile actions ──────────────────────────────────────────────
         if act == "profile_query":
@@ -1327,7 +1742,26 @@ def execute(action, speak_fn=None):
             except Exception as exc:
                 print(f"[DEBUG][executor] profile_remember error: {exc}")
                 return _stable_failure("Couldn't save that.")
-        # ─────────────────────────────────────────────────────────────────────
+
+        # ── Iron Man automation actions ───────────────────────────────────────
+        if act == "install_app":
+            return _handle_install_app(action)
+        if act == "install_and_login":
+            return _handle_install_and_login(action)
+        if act == "open_and_login":
+            return _handle_open_and_login(action)
+        if act == "save_login":
+            return _handle_save_login(action)
+        if act == "list_logins":
+            return _handle_list_logins(action)
+        if act == "delete_login":
+            return _handle_delete_login(action)
+        if act == "self_scan":
+            return _handle_self_scan(action)
+        if act == "self_capabilities":
+            return _handle_self_capabilities(action)
+        if act == "self_changes":
+            return _handle_self_changes(action)
 
         return _stable_failure("Unsupported action.")
     except Exception as exc:
@@ -1337,6 +1771,17 @@ def execute(action, speak_fn=None):
 
 def execute_with_retry(action, speak_fn=None, max_retries=1):
     action_name = action.get("action", "unknown") if isinstance(action, dict) else "unknown"
+
+    # ── Don't retry install/login flows or generative jobs ─────────────────
+    _NO_RETRY_ACTIONS = {
+        "install_app", "install_and_login", "open_and_login",
+        "save_login", "list_logins", "delete_login",
+        "self_scan", "self_capabilities", "self_changes",
+        "generate_video", "generate_image",
+    }
+    if action_name in _NO_RETRY_ACTIONS:
+        return execute(action, speak_fn)
+
     result = execute(action, speak_fn)
     if result[0]:
         return result

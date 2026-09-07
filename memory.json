@@ -2,10 +2,10 @@
   "facts": {
     "app_use_chrome": "1776178925.0065627",
     "action_use_open_app": {
-      "value": "1781546992.5417323",
+      "value": "1786337388.0845096",
       "tags": [],
       "priority": "normal",
-      "timestamp": "2026-06-15T23:39:52.554153"
+      "timestamp": "2026-08-10T10:19:48.085513"
     },
     "action_use_close_app": {
       "value": "1781547020.2712526",
@@ -124,471 +124,542 @@
       ],
       "priority": "normal",
       "timestamp": "2026-06-20T00:30:38.050469"
+    },
+    "conversation_summary_2026-08-10T04:45:10.468170": {
+      "value": "I'm a desktop assistant designed to assist users with various tasks, including coding, answering questions, and providing information. I can be used in a variety of scenarios, including coding in VS Code, answering questions, and more.",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-08-10T04:45:10.469177"
+    },
+    "conversation_summary_2026-08-10T04:45:46.207180": {
+      "value": "You initially asked about using me for tasks beyond coding in VS Code. I explained that I can provide information, answer questions, and assist with various tasks. You then left the conversation briefly, and upon returning, you inquired about my activities. I responded by closing the app.",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-08-10T04:45:46.208472"
+    },
+    "conversation_summary_2026-08-10T04:56:47.661455": {
+      "value": "We discussed Albert Einstein, and I sent you 4 facts about him and showed you the 4 latest emails.",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-08-10T04:56:47.662525"
+    },
+    "conversation_summary_2026-08-10T05:08:15.364619": {
+      "value": "This conversation began with the user inquiring about Jarvis's status and capabilities. Jarvis explained its functions and then performed a task in VS Code. The user asked about Jarvis's creation and access to its own code, to which Jarvis replied that it does not have direct access to its own code.",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-08-10T05:08:15.365667"
+    },
+    "conversation_summary_2026-08-10T05:08:47.764805": {
+      "value": "I was created to assist users, but I don't have direct access to my own code. I'm still under development and have limitations.",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-08-10T05:08:47.765784"
+    },
+    "conversation_summary_2026-08-10T05:09:16.104291": {
+      "value": "This conversation began with the user asking if I'm aware of a code or have access to it. I replied that I'm not aware of any code and can only speak within my limitations. The user then asked about my limitations, but I couldn't provide a clear answer.",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-08-10T05:09:16.105289"
+    },
+    "conversation_summary_2026-08-10T05:46:39.029807": {
+      "value": "The conversation covered Jarvis's core files (",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-08-10T05:46:39.030842"
+    },
+    "conversation_summary_2026-08-10T10:19:55.799677": {
+      "value": "{\"action\": \"inform\", \"message\": \"I am functioning well today. How can I assist you further?\"}",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-08-10T10:19:55.800252"
+    },
+    "conversation_summary_2026-08-10T12:00:19.109695": {
+      "value": "The conversation started with the user inquiring about changes since the previous boot, prompting the assistant to update the system state. The user then mentioned something about the last book, which was logged as an event. The conversation repeated with the user asking about changes since the last boot and referencing the last book, with the assistant updating the system state and checking reminders in response. The assistant performed actions to update the system state and check reminders multiple times.",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-08-10T12:00:19.110700"
+    },
+    "action_use_install_app": {
+      "value": "1786345300.4004226",
+      "tags": [],
+      "priority": "normal",
+      "timestamp": "2026-08-10T12:31:40.401436"
     }
   },
   "activity_log": [
     {
-      "time": "2026-06-15T23:44:00.802925",
-      "type": "speak",
-      "detail": "```json ```",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-15T23:44:08.512017",
-      "type": "user_input",
-      "detail": "exit for me",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-15T23:44:08.537707",
-      "type": "speak",
-      "detail": "Alright. Catch you later.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-15T23:44:09.656882",
+      "time": "2026-08-10T10:43:02.718268",
       "type": "exit",
       "detail": "user said goodbye",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-06-20T00:28:46.403170",
+      "time": "2026-08-10T11:38:47.945142",
       "type": "speak",
       "detail": "Systems up.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-06-20T00:28:48.442359",
+      "time": "2026-08-10T11:38:50.927922",
       "type": "startup",
       "detail": "Jarvis online",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-06-20T00:29:18.989282",
-      "type": "user_input",
-      "detail": "hey Jarvis",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-20T00:29:22.950482",
-      "type": "speak",
-      "detail": "Hello, I'm here to help.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-20T00:29:37.824957",
-      "type": "user_input",
-      "detail": "how are you doing Jarvis",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-20T00:29:40.334999",
-      "type": "speak",
-      "detail": "I'm functioning within normal parameters.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-20T00:30:01.307388",
-      "type": "user_input",
-      "detail": "how do you do Jarvis",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-20T00:30:02.980816",
-      "type": "speak",
-      "detail": "I use a combination of natural language processing and machi",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-20T00:30:17.268940",
-      "type": "user_input",
-      "detail": "do you use machine learning to work on",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-20T00:30:19.512976",
-      "type": "speak",
-      "detail": "Yes, I utilize machine learning algorithms to improve my per",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-20T00:30:32.484017",
-      "type": "user_input",
-      "detail": "it doesn't seem like you are using it",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-20T00:30:38.072645",
-      "type": "speak",
-      "detail": "Understood. I'm still functioning and ready to assist you.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-20T00:30:54.680622",
-      "type": "user_input",
-      "detail": "how would you say I am doing right now",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-20T00:30:59.170539",
-      "type": "speak",
-      "detail": "You seem to be coding in VS Code.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-20T00:31:20.328563",
-      "type": "user_input",
-      "detail": "Jarvis",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-20T00:31:21.926859",
-      "type": "speak",
-      "detail": "I'm here and ready to assist you, Arju, with Brave open.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-20T00:31:56.583771",
-      "type": "speak",
-      "detail": "Going quiet.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-20T00:32:14.041457",
-      "type": "speak",
-      "detail": "Alright. Catch you later.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-20T00:32:27.295939",
-      "type": "speak",
-      "detail": "Standing by.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-06-20T00:32:49.373992",
-      "type": "speak",
-      "detail": "Alright. Catch you later.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-07-18T08:59:12.252305",
+      "time": "2026-08-10T11:44:36.947947",
       "type": "speak",
       "detail": "Systems up.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-07-18T08:59:15.680494",
+      "time": "2026-08-10T11:44:37.933499",
       "type": "startup",
       "detail": "Jarvis online",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-07-18T08:59:51.500231",
-      "type": "speak",
-      "detail": "Alright. Catch you later.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-07-18T09:00:09.866866",
-      "type": "speak",
-      "detail": "Alright. Catch you later.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-07-18T09:00:28.583976",
-      "type": "speak",
-      "detail": "Going quiet.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-07-18T09:04:43.831429",
-      "type": "speak",
-      "detail": "Systems up.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-07-18T09:04:45.414712",
-      "type": "startup",
-      "detail": "Jarvis online",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-07-18T09:04:47.406871",
-      "type": "speak",
-      "detail": "What's the move?",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-07-18T09:05:28.372546",
-      "type": "speak",
-      "detail": "Standing by.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-07-18T09:05:30.243872",
+      "time": "2026-08-10T11:44:43.190151",
       "type": "speak",
       "detail": "Listening.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-07-18T09:06:04.181047",
-      "type": "speak",
-      "detail": "Standing by.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-07-18T09:20:23.101971",
+      "time": "2026-08-10T11:48:42.103015",
       "type": "speak",
       "detail": "Systems up.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-07-18T09:20:24.850726",
+      "time": "2026-08-10T11:48:43.012715",
       "type": "startup",
       "detail": "Jarvis online",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-07-18T09:20:43.562470",
+      "time": "2026-08-10T11:48:48.730858",
+      "type": "speak",
+      "detail": "What's the move?",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T11:52:23.503818",
+      "type": "speak",
+      "detail": "Systems up.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T11:52:26.689888",
+      "type": "startup",
+      "detail": "Jarvis online",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T11:52:43.114439",
+      "type": "speak",
+      "detail": "Listening.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T11:53:07.662490",
+      "type": "speak",
+      "detail": "Hello! How can I assist you today?",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T11:53:18.234065",
+      "type": "speak",
+      "detail": "I understand you're curious about why one might go snowboard",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T11:58:58.365010",
+      "type": "speak",
+      "detail": "Systems up.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T11:59:01.159965",
+      "type": "startup",
+      "detail": "Jarvis online",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T11:59:13.181717",
       "type": "speak",
       "detail": "Ready. What do you need?",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-07-18T09:23:01.623453",
+      "time": "2026-08-10T11:59:35.391982",
       "type": "speak",
-      "detail": "Systems up.",
+      "detail": "I'm not sure how to answer that.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-07-18T09:23:03.480287",
-      "type": "startup",
-      "detail": "Jarvis online",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-07-18T09:23:08.842617",
+      "time": "2026-08-10T11:59:49.284230",
       "type": "speak",
-      "detail": "What's the move?",
+      "detail": "I'm not sure how to answer that.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-07-18T09:23:39.424310",
+      "time": "2026-08-10T12:00:00.528540",
       "type": "speak",
-      "detail": "I'm not Google Assistant, I'm Jarvis, your desktop assistant",
+      "detail": "I'm not sure how to answer that.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-07-18T09:24:18.155729",
+      "time": "2026-08-10T12:00:09.998406",
       "type": "speak",
-      "detail": "The name \"Jarvis\" is an acronym for \"Just A Rather Very Inte",
+      "detail": "I'm not sure how to answer that.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-07-18T09:24:52.517601",
+      "time": "2026-08-10T12:00:19.129765",
+      "type": "speak",
+      "detail": "I'm not sure how to answer that.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T12:00:27.867580",
+      "type": "speak",
+      "detail": "It seems like there might be a misunderstanding. Could you p",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T12:00:41.022529",
       "type": "speak",
       "detail": "Standing by.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-07T11:01:46.300550",
+      "time": "2026-08-10T12:00:43.994677",
+      "type": "exit",
+      "detail": "user said goodbye",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T12:14:56.633622",
       "type": "speak",
       "detail": "Systems up.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-07T11:01:49.008071",
+      "time": "2026-08-10T12:14:59.540621",
       "type": "startup",
       "detail": "Jarvis online",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-07T11:01:57.141942",
+      "time": "2026-08-10T12:15:01.774140",
+      "type": "speak",
+      "detail": "I evolved since last boot — gained a new module: jarvis_tts;",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T12:15:05.088523",
       "type": "speak",
       "detail": "Listening.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-07T11:02:22.085783",
+      "time": "2026-08-10T12:15:25.869093",
       "type": "speak",
-      "detail": "Vivo mobile ringtones are customizable and can be changed in",
+      "detail": "Hello! How can I assist you today?",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-07T11:02:33.935650",
+      "time": "2026-08-10T12:15:39.524919",
       "type": "speak",
-      "detail": "Alright. Catch you later.",
+      "detail": "Hello! How can I assist you today?",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-07T11:02:35.914583",
+      "time": "2026-08-10T12:28:40.384593",
+      "type": "speak",
+      "detail": "Systems up.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T12:28:43.268770",
+      "type": "startup",
+      "detail": "Jarvis online",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T12:28:45.511141",
+      "type": "speak",
+      "detail": "I evolved since last boot — jarvis_tts was updated.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T12:28:57.894462",
+      "type": "speak",
+      "detail": "Listening.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T12:29:17.263111",
+      "type": "speak",
+      "detail": "Since last boot, I 1 file(s) were modified.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T12:29:26.651757",
+      "type": "speak",
+      "detail": "Couldn't open that. Check if it's installed correctly.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T12:29:38.337870",
+      "type": "speak",
+      "detail": "Downloading Spotify now — takes a minute.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T12:31:25.688777",
+      "type": "speak",
+      "detail": "Downloaded, installing now.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T12:31:39.067824",
+      "type": "speak",
+      "detail": "Spotify installed.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T12:31:40.393350",
+      "type": "install_app",
+      "detail": "Spotify",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T12:31:53.831895",
+      "type": "speak",
+      "detail": "Use the auto_login_profiles.py module to save your Spotify l",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T12:32:03.689257",
+      "type": "speak",
+      "detail": "Use the auto_login_profiles.py module to save your Spotify l",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T12:32:19.914732",
+      "type": "speak",
+      "detail": "The auto_login_profiles.py module can help you manage and se",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T12:32:43.267844",
+      "type": "speak",
+      "detail": "Standing by.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-10T12:32:47.087211",
       "type": "exit",
       "detail": "user said goodbye",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-27T20:11:17.621498",
+      "type": "speak",
+      "detail": "Systems up.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-27T20:11:19.103675",
+      "type": "startup",
+      "detail": "Jarvis online",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-27T20:11:21.230002",
+      "type": "speak",
+      "detail": "I evolved since last boot — gained 4 new modules; 12 modules",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-08-27T20:12:03.850360",
+      "type": "speak",
+      "detail": "What's the move?",
       "app": "",
       "tags": []
     }
   ],
   "context_history": [
     {
-      "time": "2026-06-02T17:15:05.732120",
+      "time": "2026-08-10T11:58:58.351482",
       "app": "Brave",
       "title": "Arena | Benchmark & Compare the Best AI Models - Brave"
     },
     {
-      "time": "2026-06-02T17:15:11.745483",
-      "app": "VS Code",
-      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
+      "time": "2026-08-10T11:59:16.366556",
+      "app": "Voice call",
+      "title": "Voice call"
     },
     {
-      "time": "2026-06-02T17:40:34.515143",
-      "app": "Unknown",
-      "title": ""
-    },
-    {
-      "time": "2026-06-02T17:40:37.789748",
-      "app": "VS Code",
-      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
-    },
-    {
-      "time": "2026-06-02T17:41:16.808155",
-      "app": "Snipping Tool Overlay",
-      "title": "Snipping Tool Overlay"
-    },
-    {
-      "time": "2026-06-02T17:41:19.824929",
-      "app": "VS Code",
-      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
-    },
-    {
-      "time": "2026-06-15T22:15:45.149930",
+      "time": "2026-08-10T11:59:25.377841",
       "app": "Brave",
       "title": "Arena | Benchmark & Compare the Best AI Models - Brave"
     },
     {
-      "time": "2026-06-15T22:16:09.180502",
+      "time": "2026-08-10T12:14:56.620808",
       "app": "VS Code",
       "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
     },
     {
-      "time": "2026-06-15T22:26:04.866519",
+      "time": "2026-08-10T12:15:26.636848",
       "app": "Brave",
       "title": "Arena | Benchmark & Compare the Best AI Models - Brave"
     },
     {
-      "time": "2026-06-15T22:26:16.880810",
+      "time": "2026-08-10T12:15:50.654417",
       "app": "VS Code",
       "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
     },
     {
-      "time": "2026-06-15T23:37:33.544042",
-      "app": "Untitled - Notepad",
-      "title": "Untitled - Notepad"
-    },
-    {
-      "time": "2026-06-15T23:37:36.557063",
-      "app": "VS Code",
-      "title": "test.txt - J.A.R.V.I.S - Visual Studio Code"
-    },
-    {
-      "time": "2026-06-15T23:37:42.575988",
-      "app": "Chrome",
-      "title": "What’s new - Google Chrome"
-    },
-    {
-      "time": "2026-06-15T23:37:54.600660",
-      "app": "VS Code",
-      "title": "test.txt - J.A.R.V.I.S - Visual Studio Code"
-    },
-    {
-      "time": "2026-06-15T23:39:51.645045",
-      "app": "Chrome",
-      "title": "New tab - Google Chrome"
-    },
-    {
-      "time": "2026-06-15T23:40:21.665214",
-      "app": "VS Code",
-      "title": "test.txt - J.A.R.V.I.S - Visual Studio Code"
-    },
-    {
-      "time": "2026-06-20T00:31:19.439897",
-      "app": "Brave",
-      "title": "(1) Arena | Benchmark & Compare the Best AI Models - Brave"
-    },
-    {
-      "time": "2026-06-20T00:32:49.465694",
-      "app": "VS Code",
-      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
-    },
-    {
-      "time": "2026-06-20T00:33:04.482352",
+      "time": "2026-08-10T12:29:58.406350",
       "app": "Brave",
       "title": "Arena | Benchmark & Compare the Best AI Models - Brave"
     },
     {
-      "time": "2026-07-18T08:59:21.255091",
+      "time": "2026-08-10T12:30:16.423777",
+      "app": "PowerShell",
+      "title": "Administrator: Windows PowerShell"
+    },
+    {
+      "time": "2026-08-10T12:30:31.437546",
+      "app": "Brave",
+      "title": "Prime Agent: Autonomous Agent Framework - Google Gemini - Brave"
+    },
+    {
+      "time": "2026-08-10T12:30:49.446748",
+      "app": "PowerShell",
+      "title": "Administrator: Windows PowerShell"
+    },
+    {
+      "time": "2026-08-10T12:30:52.456157",
       "app": "VS Code",
       "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
+    },
+    {
+      "time": "2026-08-10T12:30:55.468415",
+      "app": "Search",
+      "title": "Search"
+    },
+    {
+      "time": "2026-08-10T12:31:01.483197",
+      "app": "VS Code",
+      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
+    },
+    {
+      "time": "2026-08-10T12:31:04.490800",
+      "app": "Brave",
+      "title": "Attention Required! | Cloudflare - Brave"
+    },
+    {
+      "time": "2026-08-10T12:31:13.499770",
+      "app": "YouTube",
+      "title": "youtube.com/watch?v=NLdXH4wmqvY - Brave"
+    },
+    {
+      "time": "2026-08-10T12:31:31.508497",
+      "app": "Brave",
+      "title": "Prime Agent: Autonomous Agent Framework - Google Gemini - Brave"
+    },
+    {
+      "time": "2026-08-10T12:31:37.519975",
+      "app": "VS Code",
+      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
+    },
+    {
+      "time": "2026-08-10T12:31:40.531231",
+      "app": "IObit Uninstaller",
+      "title": "IObit Uninstaller"
+    },
+    {
+      "time": "2026-08-10T12:31:43.538594",
+      "app": "VS Code",
+      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
+    },
+    {
+      "time": "2026-08-10T12:32:46.557879",
+      "app": "Brave",
+      "title": "Arena | Benchmark & Compare the Best AI Models - Brave"
     }
   ],
   "session_notes": [],
   "daily_stats": {
-    "2026-04-20": {
-      "brain_calls": 6
-    },
-    "2026-06-02": {
-      "brain_calls": 27,
-      "sessions": 4
-    },
     "2026-06-15": {
       "sessions": 3,
       "brain_calls": 21,
@@ -609,63 +680,17 @@
       "sessions": 1,
       "brain_calls": 5,
       "actions_executed": 1
+    },
+    "2026-08-10": {
+      "sessions": 15,
+      "brain_calls": 55,
+      "actions_executed": 12
+    },
+    "2026-08-27": {
+      "sessions": 1
     }
   },
   "action_results": [
-    {
-      "time": "2026-04-14T17:17:21.906138",
-      "action": "whatsapp_read",
-      "success": true,
-      "detail": ""
-    },
-    {
-      "time": "2026-04-14T17:20:19.467763",
-      "action": "whatsapp_read",
-      "success": true,
-      "detail": ""
-    },
-    {
-      "time": "2026-04-14T20:07:30.964953",
-      "action": "whatsapp_read",
-      "success": true,
-      "detail": ""
-    },
-    {
-      "time": "2026-04-14T20:25:11.095916",
-      "action": "whatsapp_read",
-      "success": false,
-      "detail": ""
-    },
-    {
-      "time": "2026-04-14T20:31:24.298209",
-      "action": "whatsapp_read",
-      "success": true,
-      "detail": ""
-    },
-    {
-      "time": "2026-04-14T20:31:40.029692",
-      "action": "close_app",
-      "success": false,
-      "detail": ""
-    },
-    {
-      "time": "2026-04-14T20:32:05.049452",
-      "action": "open_app",
-      "success": true,
-      "detail": ""
-    },
-    {
-      "time": "2026-04-14T20:34:53.734074",
-      "action": "whatsapp_read",
-      "success": true,
-      "detail": ""
-    },
-    {
-      "time": "2026-04-14T20:51:45.672374",
-      "action": "whatsapp_read",
-      "success": true,
-      "detail": ""
-    },
     {
       "time": "2026-04-14T20:52:08.634830",
       "action": "whatsapp_read",
@@ -791,6 +816,60 @@
       "action": "set_reminder",
       "success": true,
       "detail": "Reminder set for 10 seconds."
+    },
+    {
+      "time": "2026-08-10T04:46:18.257625",
+      "action": "web_search",
+      "success": true,
+      "detail": "Inthis post, we have curated the most common types of progra"
+    },
+    {
+      "time": "2026-08-10T05:33:25.398433",
+      "action": "open_app",
+      "success": false,
+      "detail": "Couldn't open notepad and type the subject complete.."
+    },
+    {
+      "time": "2026-08-10T05:45:16.275164",
+      "action": "system_status",
+      "success": true,
+      "detail": "CPU at 5%. RAM 86% used."
+    },
+    {
+      "time": "2026-08-10T05:45:28.582871",
+      "action": "open_app",
+      "success": true,
+      "detail": "Opening notepad."
+    },
+    {
+      "time": "2026-08-10T10:19:48.093029",
+      "action": "open_app",
+      "success": true,
+      "detail": "Opening notepad."
+    },
+    {
+      "time": "2026-08-10T10:42:47.176648",
+      "action": "open_app",
+      "success": false,
+      "detail": "Couldn't open photoshop."
+    },
+    {
+      "time": "2026-08-10T12:29:17.246834",
+      "action": "self_changes",
+      "success": true,
+      "detail": "Since last boot, I 1 file(s) were modified."
+    },
+    {
+      "time": "2026-08-10T12:29:26.632676",
+      "action": "open_app",
+      "success": false,
+      "detail": "Couldn't open spotify."
+    },
+    {
+      "time": "2026-08-10T12:31:40.409956",
+      "action": "install_app",
+      "success": true,
+      "detail": ""
     }
   ],
   "usage_freq": {
@@ -820,12 +899,14 @@
       ]
     },
     "open_app": {
-      "count": 4,
+      "count": 6,
       "contexts": [
         "Arju has WhatsApp open.",
         "Arju is coding in VS Code.",
         "Arju is coding in VS Code.",
-        "Arju has Chrome open."
+        "Arju has Chrome open.",
+        "Arju has \"*This is Your Pompt - Notepad\" open.",
+        "Arju has \"*This is Your Pompt - Notepad\" open."
       ]
     },
     "weather": {
@@ -843,19 +924,33 @@
       ]
     },
     "web_search": {
+      "count": 3,
+      "contexts": [
+        "Arju is coding in VS Code.",
+        "Arju is coding in VS Code.",
+        "Arju is coding in VS Code."
+      ]
+    },
+    "system_status": {
       "count": 2,
       "contexts": [
         "Arju is coding in VS Code.",
         "Arju is coding in VS Code."
       ]
     },
-    "system_status": {
+    "set_reminder": {
       "count": 1,
       "contexts": [
         "Arju is coding in VS Code."
       ]
     },
-    "set_reminder": {
+    "self_changes": {
+      "count": 1,
+      "contexts": [
+        "Arju is coding in VS Code."
+      ]
+    },
+    "install_app": {
       "count": 1,
       "contexts": [
         "Arju is coding in VS Code."
@@ -874,9 +969,9 @@
       "detail": "chrome and open notepad is not running."
     },
     "open_app": {
-      "count": 1,
-      "last": "2026-04-19T23:54:12.450278",
-      "detail": "Which app should I open?"
+      "count": 7,
+      "last": "2026-08-10T12:29:26.644192",
+      "detail": "Couldn't open spotify."
     }
   },
   "preferences": {}

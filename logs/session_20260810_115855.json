@@ -1,0 +1,289 @@
+[
+  {
+    "time": "2026-08-10T11:58:55.899806",
+    "type": "skill_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "name": "example_skill",
+      "priority": 60
+    }
+  },
+  {
+    "time": "2026-08-10T11:58:55.900819",
+    "type": "skills_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "count": 1
+    }
+  },
+  {
+    "time": "2026-08-10T11:58:58.363004",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Systems up."
+  },
+  {
+    "time": "2026-08-10T11:59:04.472398",
+    "type": "boot_syntax_ok",
+    "severity": "debug",
+    "module": "self_diagnostic",
+    "tags": [
+      "boot",
+      "syntax"
+    ],
+    "data": {
+      "passed_count": 35,
+      "warning_count": 0
+    }
+  },
+  {
+    "time": "2026-08-10T11:59:13.180657",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Ready. What do you need?"
+  },
+  {
+    "time": "2026-08-10T11:59:29.768325",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "did something change after the previous boot?"
+  },
+  {
+    "time": "2026-08-10T11:59:35.389955",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T11:59:35.389955",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T11:59:35.390962",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I'm not sure how to answer that."
+  },
+  {
+    "time": "2026-08-10T11:59:48.634978",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "it's hard to change the since last boot."
+  },
+  {
+    "time": "2026-08-10T11:59:49.283215",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T11:59:49.283215",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T11:59:49.283215",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I'm not sure how to answer that."
+  },
+  {
+    "time": "2026-08-10T11:59:59.767406",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "see you in the last book."
+  },
+  {
+    "time": "2026-08-10T12:00:00.527994",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T12:00:00.527994",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T12:00:00.527994",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I'm not sure how to answer that."
+  },
+  {
+    "time": "2026-08-10T12:00:09.354175",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "change since our last boot."
+  },
+  {
+    "time": "2026-08-10T12:00:09.984842",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T12:00:09.984842",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T12:00:09.997421",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I'm not sure how to answer that."
+  },
+  {
+    "time": "2026-08-10T12:00:17.459899",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "that's what it is that you have."
+  },
+  {
+    "time": "2026-08-10T12:00:19.128258",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T12:00:19.128258",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm not sure how to answer that."
+    }
+  },
+  {
+    "time": "2026-08-10T12:00:19.128258",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I'm not sure how to answer that."
+  },
+  {
+    "time": "2026-08-10T12:00:26.521751",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "instals fortify"
+  },
+  {
+    "time": "2026-08-10T12:00:27.866520",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "It seems like there might be a misunderstanding. Could you please provide more context or clarify your request? For instance, are you referring to installing Fortinet's security software, or perhaps discussing some other installation related topic?"
+    }
+  },
+  {
+    "time": "2026-08-10T12:00:27.866520",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "It seems like there might be a misunderstanding. Could you please provide more context or clarify your request? For instance, are you referring to installing Fortinet's security software, or perhaps discussing some other installation related topic?"
+    }
+  },
+  {
+    "time": "2026-08-10T12:00:27.867051",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "It seems like there might be a misunderstanding. Could you please provide more context or clarify your request? For instance, are you referring to installing Fortinet's security software, or perhaps discussing some other installation related topic?"
+  },
+  {
+    "time": "2026-08-10T12:00:41.014991",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Standing by."
+  }
+]

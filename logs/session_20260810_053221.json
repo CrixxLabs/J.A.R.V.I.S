@@ -1,0 +1,285 @@
+[
+  {
+    "time": "2026-08-10T05:32:21.095006",
+    "type": "skill_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "name": "example_skill",
+      "priority": 60
+    }
+  },
+  {
+    "time": "2026-08-10T05:32:21.095006",
+    "type": "skills_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "count": 1
+    }
+  },
+  {
+    "time": "2026-08-10T05:32:23.369228",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Systems up."
+  },
+  {
+    "time": "2026-08-10T05:32:27.721348",
+    "type": "boot_syntax_ok",
+    "severity": "debug",
+    "module": "self_diagnostic",
+    "tags": [
+      "boot",
+      "syntax"
+    ],
+    "data": {
+      "passed_count": 29,
+      "warning_count": 0
+    }
+  },
+  {
+    "time": "2026-08-10T05:32:32.220376",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Yeah, I'm here."
+  },
+  {
+    "time": "2026-08-10T05:32:46.446086",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "so jarvis what do you know about yourself or do you know what all files you are made of?"
+  },
+  {
+    "time": "2026-08-10T05:32:48.965037",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I couldn't figure that out."
+    }
+  },
+  {
+    "time": "2026-08-10T05:32:48.965037",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I couldn't figure that out."
+    }
+  },
+  {
+    "time": "2026-08-10T05:32:48.966229",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I couldn't figure that out."
+  },
+  {
+    "time": "2026-08-10T05:32:55.188632",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "do you know what all files you are made of?"
+  },
+  {
+    "time": "2026-08-10T05:32:55.676194",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I couldn't figure that out."
+    }
+  },
+  {
+    "time": "2026-08-10T05:32:55.676194",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I couldn't figure that out."
+    }
+  },
+  {
+    "time": "2026-08-10T05:32:55.676194",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I couldn't figure that out."
+  },
+  {
+    "time": "2026-08-10T05:33:03.405555",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "do you know what files you are made of?"
+  },
+  {
+    "time": "2026-08-10T05:33:03.936172",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I couldn't figure that out."
+    }
+  },
+  {
+    "time": "2026-08-10T05:33:03.936172",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I couldn't figure that out."
+    }
+  },
+  {
+    "time": "2026-08-10T05:33:03.937164",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I couldn't figure that out."
+  },
+  {
+    "time": "2026-08-10T05:33:13.699380",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "write a complex python script to scrap outside and explain the logic step by step."
+  },
+  {
+    "time": "2026-08-10T05:33:15.843209",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I couldn't figure that out."
+    }
+  },
+  {
+    "time": "2026-08-10T05:33:15.843209",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I couldn't figure that out."
+    }
+  },
+  {
+    "time": "2026-08-10T05:33:15.854727",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I couldn't figure that out."
+  },
+  {
+    "time": "2026-08-10T05:33:24.827721",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "open notepad and type the subject complete."
+  },
+  {
+    "time": "2026-08-10T05:33:24.833705",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "open_app",
+        "app": "notepad and type the subject complete."
+      },
+      "response": "Opening notepad and type the subject complete.."
+    }
+  },
+  {
+    "time": "2026-08-10T05:33:24.833705",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "open_app",
+        "app": "notepad and type the subject complete."
+      },
+      "response": "Opening notepad and type the subject complete.."
+    }
+  },
+  {
+    "time": "2026-08-10T05:33:25.421853",
+    "type": "execution_result",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": "open_app",
+      "success": false,
+      "message": "Couldn't open notepad and type the subject complete.."
+    }
+  },
+  {
+    "time": "2026-08-10T05:33:25.422847",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Couldn't open notepad and type the subject complete.."
+  },
+  {
+    "time": "2026-08-10T05:33:38.962025",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "CPU at 26.5%. RAM 83.6% used. Battery 100% charging."
+  },
+  {
+    "time": "2026-08-10T05:33:49.766548",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "CPU at 12.4%. RAM 83.3% used. Battery 100% charging."
+  },
+  {
+    "time": "2026-08-10T05:33:56.080570",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Standing by."
+  }
+]

@@ -1,7 +1,8 @@
-# tasks.py — Task & Reminder System (Phase 2 Upgrade)
+# tasks.py — Task & Reminder System (Phase 2 Upgrade + Phase 6 Persistence Fix)
 # Stores goals, evaluates conditions, triggers actions automatically
 # Now supports natural language reminders + conversation context
 # Module 2: entities dict accepted by add_reminder for exact time scheduling
+# Phase 6: Absolute fire_at timestamps + boot-time re-hydration of reminders
 
 import json
 import os
@@ -25,6 +26,7 @@ def init(speak_fn, action_fn):
     _speak_cb  = speak_fn
     _action_cb = action_fn
     _load_tasks()
+    _rehydrate_reminders()
     threading.Thread(target=_task_loop, daemon=True).start()
     print("[Tasks] Task engine started with reminder support.")
 
@@ -42,8 +44,10 @@ def _load_tasks():
 
 def _save_tasks():
     try:
-        with open(TASKS_FILE, "w") as f:
+        tmp = TASKS_FILE + ".tmp"
+        with open(tmp, "w") as f:
             json.dump(_tasks, f, indent=2)
+        os.replace(tmp, TASKS_FILE)
     except Exception as e:
         print(f"[Tasks] save error: {e}")
 
@@ -167,6 +171,82 @@ def _trigger_task(task):
         _speak_cb(f"reminder — {message}")
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# PHASE 6: REMINDER RE-HYDRATION ENGINE
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _spawn_reminder_thread(task, delay_seconds):
+    """Spawn a daemon thread that sleeps then fires the reminder."""
+    message = task.get("message", "something")
+
+    def _delayed():
+        time.sleep(delay_seconds)
+        with _lock:
+            # Check if still active (might have been cancelled)
+            for t in _tasks:
+                if t.get("id") == task.get("id") and t.get("active", True):
+                    t["active"] = False
+                    _save_tasks()
+                    break
+        if _speak_cb:
+            _speak_cb(f"hey Arju — {message}")
+        log_activity("reminder_fired", message[:40])
+
+    threading.Thread(target=_delayed, daemon=True).start()
+
+
+def _rehydrate_reminders():
+    """
+    Called once at boot after _load_tasks().
+    Finds all active reminders with a fire_at timestamp and:
+      - If fire_at is in the future → spawn a fresh countdown thread
+      - If fire_at already passed   → fire immediately (missed reminder)
+    """
+    now = datetime.datetime.now()
+    rehydrated = 0
+    missed = 0
+
+    with _lock:
+        for task in _tasks:
+            if not task.get("active", True):
+                continue
+            if "reminder" not in task.get("id", ""):
+                continue
+
+            fire_at_str = task.get("fire_at", "")
+            if not fire_at_str:
+                # Legacy reminder without fire_at — skip, it's dead
+                continue
+
+            try:
+                fire_at = datetime.datetime.fromisoformat(fire_at_str)
+            except Exception:
+                continue
+
+            remaining = (fire_at - now).total_seconds()
+
+            if remaining > 0:
+                # Future reminder — re-spawn the countdown
+                _spawn_reminder_thread(task, remaining)
+                rehydrated += 1
+                print(f"[Tasks] Re-hydrated reminder '{task.get('label', '')}' — fires in {remaining:.0f}s")
+            else:
+                # Missed reminder — fire immediately
+                task["active"] = False
+                missed += 1
+                message = task.get("message", "something")
+                print(f"[Tasks] Missed reminder detected: '{message}' — firing now")
+                if _speak_cb:
+                    _speak_cb(f"hey Arju — you had a reminder that expired while I was off: {message}")
+                log_activity("reminder_missed_fired", message[:40])
+
+        if missed > 0 or rehydrated > 0:
+            _save_tasks()
+
+    if rehydrated or missed:
+        print(f"[Tasks] Re-hydration complete: {rehydrated} future, {missed} missed")
+
+
 # ── Public API for Reminders ──────────────────────────────────────────────────
 
 def add_reminder(message: str, seconds: int = 3600, entities: dict = None) -> str:
@@ -174,19 +254,20 @@ def add_reminder(message: str, seconds: int = 3600, entities: dict = None) -> st
     Add a timed reminder.
 
     Module 2 addition: accepts optional entities dict from NER.
-    If entities contains datetime info and seconds wasn't already
-    resolved by planner._resolve_reminder_seconds, this function
-    leaves seconds as-is (planner handles resolution before calling here).
-    The entities param is stored for future use / logging only.
+    Phase 6 fix: stores absolute fire_at timestamp so reminders survive reboots.
     """
     task_id = str(uuid.uuid4())[:8]
     seconds = max(int(seconds), 1)   # safety floor
+
+    now = datetime.datetime.now()
+    fire_at = now + datetime.timedelta(seconds=seconds)
 
     task = {
         "id":               f"reminder_{task_id}",
         "type":             "scheduled",
         "scheduled_time":   None,
         "delay_seconds":    seconds,
+        "fire_at":          fire_at.isoformat(),
         "action":           "speak",
         "message":          message,
         "active":           True,
@@ -194,15 +275,11 @@ def add_reminder(message: str, seconds: int = 3600, entities: dict = None) -> st
         "cooldown_minutes": 9999,
         "repeat":           False,
         "label":            f"reminder: {message[:30]}",
-        "entities":         entities or {},   # stored for logging/future use
+        "entities":         entities or {},
     }
 
-    def _delayed():
-        time.sleep(seconds)
-        if _speak_cb:
-            _speak_cb(f"hey Arju — {message}")
-
-    threading.Thread(target=_delayed, daemon=True).start()
+    # Spawn the countdown thread for this session
+    _spawn_reminder_thread(task, seconds)
 
     with _lock:
         _tasks.append(task)

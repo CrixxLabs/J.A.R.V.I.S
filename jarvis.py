@@ -1,3 +1,8 @@
+# jarvis.py — Main Entry Point & Core Event Loop
+# =======================================================================
+# Initializes hardware, starts observers, handles vocal transactions,
+# and coordinates planner dispatches and experience verification logging.
+
 import asyncio
 import datetime
 import os
@@ -26,46 +31,71 @@ import listener
 from memory import log_failure, log_usage
 from session_logger import log_event, save_session
 
+# ── Reliability imports (Phase 2-5) ───────────────────────────────────────────
+import status_registry
+from status_registry import SubsystemState, get_registry
+import error_handler
+import self_model
+
+# ── Optional: F5-TTS module ───────────────────────────────────────────────────
+try:
+    import jarvis_tts
+    _JARVIS_TTS_AVAILABLE = True
+except Exception as _tts_err:
+    _JARVIS_TTS_AVAILABLE = False
+    print(f"[jarvis] F5-TTS module not available: {_tts_err}")
+
+# ── self-awareness module ────────────────────────────────────────────────
+try:
+    import self_awareness
+    _SELF_AWARENESS_READY = True
+except Exception as _sa_err:
+    _SELF_AWARENESS_READY = False
+    print(f"[jarvis] self_awareness not available: {_sa_err}")
+
 load_dotenv()
 
 VOICE = "en-US-GuyNeural"
+USE_F5_TTS = os.getenv("USE_F5_TTS", "false").lower() == "true"
+
 stop_speaking = False
 is_speaking = False
 _startup_done = False
 ACTIVE = False
 last_active = time.time()
 
-try:
-    pygame.mixer.init()
-except Exception as exc:
-    print(f"[DEBUG][audio] mixer init failed: {exc}")
+_pending_save_login = None
+
+
+def _ensure_mixer():
+    """Ensure pygame mixer is ready."""
+    try:
+        if not pygame.mixer.get_init():
+            pygame.mixer.init()
+            return True
+        return True
+    except Exception as exc:
+        print(f"[DEBUG][audio] mixer init failed: {exc}")
+        return False
+
+
+_ensure_mixer()
 
 
 _STRIP_PHRASES = [
-    "certainly!",
-    "certainly,",
-    "of course!",
-    "of course,",
-    "absolutely!",
-    "absolutely,",
+    "certainly!", "certainly,",
+    "of course!", "of course,",
+    "absolutely!", "absolutely,",
     "great question",
-    "i'd be happy to",
-    "i'd be glad to",
+    "i'd be happy to", "i'd be glad to",
     "i'm happy to help",
-    "as an ai",
-    "as a language model",
-    "i think",
-    "i believe",
-    "i'm sorry",
-    "i apologize",
-    "sorry about that",
-    "please note that",
-    "it's worth noting",
+    "as an ai", "as a language model",
+    "i think", "i believe",
+    "i'm sorry", "i apologize", "sorry about that",
+    "please note that", "it's worth noting",
     "i hope this helps",
-    "let me know if",
-    "feel free to ask",
-    "would you like me to",
-    "do you want me to",
+    "let me know if", "feel free to ask",
+    "would you like me to", "do you want me to",
     "should i",
 ]
 
@@ -83,16 +113,14 @@ BYES = [
 ]
 
 EXIT_KEYWORDS = [
-    "exit",
-    "bye",
-    "goodbye",
-    "shut down",
-    "shutdown",
-    "sleep",
-    "turn off",
-    "quit",
-    "close jarvis",
+    "exit", "bye", "goodbye", "shut down", "shutdown",
+    "sleep", "turn off", "quit", "close jarvis",
 ]
+
+INTERRUPT_WORDS = {
+    "stop", "shut up", "quiet", "silence", "wait", "hold on",
+    "jarvis stop", "stop jarvis", "shut it", "cancel",
+}
 
 FOLLOW_UP_YES = {"yes", "yeah", "yep", "join", "do it", "go ahead", "sure"}
 FOLLOW_UP_NO = {"no", "nope", "don't", "dont", "cancel", "stop"}
@@ -117,8 +145,94 @@ def jarvisify_response(text):
     return result or text
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# SMART ERROR HINTS
+# ══════════════════════════════════════════════════════════════════════════════
+
+_ERROR_HINTS = {
+    "open_app": {
+        "not found":     "That app isn't installed. Say 'install [app name]' and I'll get it for you.",
+        "cannot find":   "That app isn't installed. Say 'install [app name]' and I'll get it for you.",
+        "winerror 2":    "That app isn't installed. Say 'install [app name]' and I'll get it for you.",
+        "access denied": "Windows blocked me from opening that. You might need admin rights.",
+        "permission":    "Windows blocked me from opening that. You might need admin rights.",
+        "default":       "Couldn't open that. Check if it's installed correctly.",
+    },
+    "install_app": {
+        "not found":     "Couldn't find that app in Windows' catalog. Try a different name.",
+        "network":       "Couldn't download — check your internet connection.",
+        "administrator": "That install needs admin rights. Run Jarvis as administrator.",
+        "default":       "Install failed. Check the console for details.",
+    },
+    "close_app": {
+        "not running": "That app isn't running right now.",
+        "access denied": "Windows blocked me from closing that.",
+        "default":     "Couldn't close that. It may have already exited.",
+    },
+    "web_search": {
+        "connection":  "No internet connection. Want me to retry when you're back online?",
+        "timeout":     "The search took too long. Might be a slow network.",
+        "default":     "Search failed. Try rephrasing your query.",
+    },
+    "send_email": {
+        "auth":        "Email login failed. Check your Gmail credentials in the .env file.",
+        "connection":  "Couldn't reach Gmail. Check your internet connection.",
+        "default":     "Email couldn't be sent. Check your Gmail setup.",
+    },
+    "set_reminder": {
+        "default":     "Couldn't set that reminder. Try being more specific about the time.",
+    },
+    "join_meeting": {
+        "no link":     "I couldn't find the meeting link. Try opening WhatsApp first.",
+        "default":     "Couldn't join the meeting. The link might be invalid or expired.",
+    },
+    "weather": {
+        "connection":  "Can't reach the weather service. Check your internet.",
+        "default":     "Couldn't fetch the weather right now.",
+    },
+    "default": {
+        "connection":  "No internet connection available.",
+        "timeout":     "That took too long. Want me to try again?",
+        "permission":  "Windows blocked that action. You might need admin rights.",
+        "not found":   "Couldn't find what you're looking for.",
+        "default":     "Something went wrong. Check the console for details.",
+    },
+}
+
+
+def _get_smart_error_message(action_name: str, raw_error: str) -> str:
+    if not raw_error:
+        return "Something went wrong."
+
+    err_lower = raw_error.lower()
+    action_hints = _ERROR_HINTS.get(action_name, {})
+
+    for keyword, hint in action_hints.items():
+        if keyword == "default":
+            continue
+        if keyword in err_lower:
+            return hint
+
+    generic = _ERROR_HINTS["default"]
+    for keyword, hint in generic.items():
+        if keyword == "default":
+            continue
+        if keyword in err_lower:
+            return hint
+
+    if "default" in action_hints:
+        return action_hints["default"]
+
+    return generic["default"]
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SPEAK WITH INTERRUPT SUPPORT
+# ══════════════════════════════════════════════════════════════════════════════
+
 def speak(text):
     global stop_speaking, is_speaking
+
     clean_lines = []
     for line in (text or "").splitlines():
         line = line.strip()
@@ -143,6 +257,56 @@ def speak(text):
     stop_speaking = False
     is_speaking = True
 
+    listener.reset_interrupt()
+    listener.start_interrupt_watcher()
+
+    registry = get_registry()
+
+    def _play_audio_file(path):
+        global is_speaking
+        try:
+            if not _ensure_mixer():
+                return
+            pygame.mixer.music.load(path)
+            pygame.mixer.music.play()
+
+            while pygame.mixer.music.get_busy():
+                if stop_speaking or listener.check_interrupt():
+                    pygame.mixer.music.stop()
+                    print("[Speak] Interrupted by user")
+                    break
+                pygame.time.Clock().tick(15)
+
+        except Exception as play_exc:
+            print(f"[DEBUG][speak] audio playback failed: {play_exc}")
+        finally:
+            try:
+                if os.path.exists(path):
+                    os.unlink(path)
+            except Exception:
+                pass
+            is_speaking = False
+            listener.stop_interrupt_watcher()
+
+    # F5-TTS Option
+    if USE_F5_TTS and _JARVIS_TTS_AVAILABLE:
+        try:
+            if hasattr(jarvis_tts, "generate_speech_wav") and callable(getattr(jarvis_tts, "generate_speech_wav")):
+                wav_path = jarvis_tts.generate_speech_wav(final_text)
+                if wav_path:
+                    registry.set_status("VOICE_TTS", SubsystemState.READY, "F5-TTS active")
+                    _play_audio_file(wav_path)
+                    return
+            elif hasattr(jarvis_tts, "speak_jarvis") and callable(getattr(jarvis_tts, "speak_jarvis")):
+                registry.set_status("VOICE_TTS", SubsystemState.DEGRADED, "F5-TTS direct playback (no interrupt)")
+                jarvis_tts.speak_jarvis(final_text)
+                is_speaking = False
+                listener.stop_interrupt_watcher()
+                return
+        except Exception as exc:
+            error_handler.log_and_demote("VOICE_TTS", exc, "F5-TTS speak pipeline", SubsystemState.DEGRADED)
+
+    # Edge-TTS Option
     try:
         async def _tts():
             tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
@@ -152,55 +316,38 @@ def speak(text):
             return tmp.name
 
         mp3_path = asyncio.run(_tts())
-
-        def _play_audio(path):
-            global is_speaking
-            try:
-                pygame.mixer.music.load(path)
-                pygame.mixer.music.play()
-                while pygame.mixer.music.get_busy():
-                    if stop_speaking:
-                        pygame.mixer.music.stop()
-                        break
-                    pygame.time.Clock().tick(15)
-            except Exception as play_exc:
-                print(f"[DEBUG][speak] audio playback failed: {play_exc}")
-            finally:
-                try:
-                    if os.path.exists(path):
-                        os.unlink(path)
-                except Exception:
-                    pass
-                is_speaking = False
-
-        threading.Thread(target=_play_audio, args=(mp3_path,), daemon=True).start()
+        registry.set_status("VOICE_TTS", SubsystemState.READY, "Edge-TTS OK")
+        _play_audio_file(mp3_path)
 
     except Exception as exc:
         print(f"[DEBUG][speak] edge_tts failed: {exc}")
+        registry.set_status("VOICE_TTS", SubsystemState.DEGRADED, f"Edge-TTS failed: {exc}")
+
+        # SAPI fallback
         try:
             speaker = win32com.client.Dispatch("SAPI.SpVoice")
             speaker.Speak(final_text)
+            registry.set_status("VOICE_TTS", SubsystemState.DEGRADED, "SAPI fallback OK")
         except Exception as fallback_exc:
             print(f"[DEBUG][speak] SAPI fallback failed: {fallback_exc}")
+            registry.set_status("VOICE_TTS", SubsystemState.OFFLINE, f"All TTS failed: {fallback_exc}")
         finally:
             is_speaking = False
+            listener.stop_interrupt_watcher()
+
+
+def was_interrupted() -> bool:
+    return listener.check_interrupt()
 
 
 def listen(timeout=12, phrase_time_limit=20):
-    """Voice capture using personalized listener from listener.py"""
     return listener.listen_for_command(timeout, phrase_time_limit)
 
 
 def _preprocess_command(command: str) -> str:
-    """
-    Preprocessing step between listen() and planner.ask().
-    Detects Malayalam input and translates to English.
-    """
     if not command:
         return command
-
     processed, was_translated = core.preprocess_malayalam(command)
-
     if was_translated:
         print(f"[jarvis][ML→EN] '{command}' → '{processed}'")
         log_event("malayalam_translated", {
@@ -208,39 +355,201 @@ def _preprocess_command(command: str) -> str:
             "translated": processed,
         })
         memory.log_activity("malayalam_input", command[:60])
-
     return processed
 
 
 def wake_word_detect():
-    """Clap detection using listener.py"""
     return listener.detect_double_clap()
 
 
-# ── Diagnostic trigger phrases (handled pre-LLM for reliability) ──────────────
+def _is_interrupt_only_command(command: str) -> bool:
+    if not command:
+        return False
+    normalized = command.strip().lower().rstrip(".,!?")
+    return normalized in INTERRUPT_WORDS
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SECURE PASSWORD DIALOG
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _show_password_dialog(app_name: str, username: str) -> str:
+    result = {"password": ""}
+
+    def _dialog_thread():
+        try:
+            import tkinter as tk
+            from tkinter import ttk
+
+            root = tk.Tk()
+            root.title(f"Jarvis — Save {app_name} password")
+            root.geometry("400x180")
+            root.resizable(False, False)
+            root.attributes("-topmost", True)
+            root.focus_force()
+
+            root.update_idletasks()
+            width = root.winfo_width()
+            height = root.winfo_height()
+            x = (root.winfo_screenwidth() // 2) - (width // 2)
+            y = (root.winfo_screenheight() // 2) - (height // 2)
+            root.geometry(f"{width}x{height}+{x}+{y}")
+
+            frame = ttk.Frame(root, padding="20")
+            frame.pack(fill="both", expand=True)
+
+            label = ttk.Label(
+                frame,
+                text=f"Enter password for {app_name}:\n(Username: {username})",
+                font=("Segoe UI", 10),
+            )
+            label.pack(pady=(0, 10))
+
+            password_var = tk.StringVar()
+            entry = ttk.Entry(frame, show="•", textvariable=password_var, width=40)
+            entry.pack(pady=(0, 15))
+            entry.focus_set()
+
+            def _submit():
+                result["password"] = password_var.get()
+                root.destroy()
+
+            def _cancel():
+                result["password"] = ""
+                root.destroy()
+
+            button_frame = ttk.Frame(frame)
+            button_frame.pack()
+
+            save_btn = ttk.Button(button_frame, text="Save", command=_submit, width=12)
+            save_btn.pack(side="left", padx=5)
+
+            cancel_btn = ttk.Button(button_frame, text="Cancel", command=_cancel, width=12)
+            cancel_btn.pack(side="left", padx=5)
+
+            root.bind("<Return>", lambda e: _submit())
+            root.bind("<Escape>", lambda e: _cancel())
+
+            root.mainloop()
+
+        except Exception as exc:
+            print(f"[DEBUG][dialog] password dialog failed: {exc}")
+            result["password"] = ""
+
+    thread = threading.Thread(target=_dialog_thread)
+    thread.start()
+    thread.join(timeout=120)
+
+    return result["password"]
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SAVE LOGIN FLOW HANDLER
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _handle_save_login_flow(action: dict) -> bool:
+    global _pending_save_login
+
+    app = (action.get("app", "") or "").strip()
+
+    if not app:
+        speak("Which app? Say the name.")
+        response = listen(timeout=10)
+        if not response:
+            speak("Cancelled.")
+            _pending_save_login = None
+            return True
+        app = response.strip().rstrip(".,!?")
+        if not app:
+            speak("Didn't catch that. Try again.")
+            _pending_save_login = None
+            return True
+
+    speak(f"What's your {app} username or email? Say it clearly.")
+    username_response = listen(timeout=15)
+
+    if not username_response:
+        speak("Cancelled — didn't hear a username.")
+        _pending_save_login = None
+        return True
+
+    username = username_response.strip().rstrip(".,!?")
+    username = re.sub(r"\s+at\s+", "@", username, flags=re.IGNORECASE)
+    username = re.sub(r"\s+dot\s+", ".", username, flags=re.IGNORECASE)
+    username = username.replace(" ", "")
+
+    if not username:
+        speak("Didn't catch a valid username. Try again.")
+        _pending_save_login = None
+        return True
+
+    speak(f"Got it. I've opened a password box on your screen — type your {app} password there and hit save.")
+
+    password = _show_password_dialog(app, username)
+
+    if not password:
+        speak("Cancelled — no password entered.")
+        _pending_save_login = None
+        return True
+
+    save_action = {
+        "action":   "save_login",
+        "app":      app,
+        "username": username,
+        "password": password,
+    }
+
+    success, message = execute_with_feedback(save_action, original_input=f"save login for {app}")
+    if success:
+        speak(f"Saved. I'll use it next time you open {app}.")
+    else:
+        speak(f"Couldn't save that. {message or 'Try again.'}")
+
+    _pending_save_login = None
+    return True
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# FAST PATHS
+# ══════════════════════════════════════════════════════════════════════════════
+
 _DIAGNOSTIC_TRIGGERS = {
-    "run a checkup",
-    "run checkup",
-    "system checkup",
-    "system diagnostic",
-    "run diagnostic",
-    "health check",
-    "run health check",
-    "are you okay",
-    "are you ok",
-    "self diagnostic",
-    "self check",
-    "check yourself",
-    "diagnose yourself",
+    "run a checkup", "run checkup", "system checkup", "system diagnostic",
+    "run diagnostic", "health check", "run health check",
+    "are you okay", "are you ok", "self diagnostic", "self check",
+    "check yourself", "diagnose yourself",
 }
+
+_FAST_PATH_BLOCKLIST_STARTS = (
+    "remember that", "remember i", "note that", "forget that",
+    "add obligation", "log obligation",
+    "what do you know", "tell me what you know", "show my profile", "my profile",
+    "remind me", "set a reminder", "set reminder",
+    "i have an", "i have a",
+    "assignment due", "exam on", "due tomorrow", "due tonight",
+    "install", "download", "set up", "log me into", "sign into",
+    "save my login", "save my password", "forget my login", "list logins",
+    "scan yourself", "check yourself", "rescan yourself",
+    "what changed", "what's new", "what abilities",
+)
+
+
+def _should_skip_fast_path(cmd_lower: str) -> bool:
+    for phrase in _FAST_PATH_BLOCKLIST_STARTS:
+        if phrase in cmd_lower:
+            return True
+    return False
 
 
 def handle_fast_command(command):
     import psutil
 
-    cmd = (command or "").lower()
+    cmd = (command or "").lower().strip()
 
-    # ── Diagnostic fast-path ──────────────────────────────────────────────────
+    if _should_skip_fast_path(cmd):
+        print(f"[DEBUG][fast] blocklisted phrase detected, deferring to planner")
+        return False
+
     if any(trigger in cmd for trigger in _DIAGNOSTIC_TRIGGERS):
         try:
             import self_diagnostic
@@ -260,7 +569,6 @@ def handle_fast_command(command):
             print(f"[DEBUG][diagnostic] fast-path error: {exc}")
             speak("Couldn't complete the diagnostic. Check the console.")
         return True
-    # ─────────────────────────────────────────────────────────────────────────
 
     if any(item in cmd for item in ("what time", "what's the time", "time now", "current time")):
         speak(f"It's {datetime.datetime.now().strftime('%I:%M %p')}.")
@@ -295,7 +603,13 @@ def handle_fast_command(command):
     if "scroll up" in cmd:
         pyautogui.scroll(500)
         return True
-    if any(item in cmd for item in ("battery", "cpu", "ram", "system info")):
+
+    if (
+        re.search(r"\bbattery\b", cmd)
+        or re.search(r"\bcpu\b", cmd)
+        or re.search(r"\bram\b", cmd)
+        or "system info" in cmd
+    ):
         cpu = psutil.cpu_percent(interval=0.5)
         ram = psutil.virtual_memory()
         battery = psutil.sensors_battery()
@@ -306,6 +620,7 @@ def handle_fast_command(command):
         )
         speak(f"CPU at {cpu}%. RAM {ram.percent}% used. Battery {battery_info}.")
         return True
+
     return False
 
 
@@ -327,16 +642,18 @@ def _init_face_recognition():
     global _face_rec_available, _face_module
     try:
         import face_recognition_module as face_module
-
         _face_module = face_module
         if face_module.is_face_registered():
             face_module.start_face_watcher()
             _face_rec_available = True
             print("[DEBUG][face] face recognition active")
+            get_registry().set_status("FACE_RECOGNITION", SubsystemState.READY, "Face watcher online")
         else:
             print("[DEBUG][face] no face registered")
+            get_registry().set_status("FACE_RECOGNITION", SubsystemState.DISABLED, "No face registered")
     except Exception as exc:
         print(f"[DEBUG][face] unavailable: {exc}")
+        error_handler.log_and_demote("FACE_RECOGNITION", exc, "Face recognition init", SubsystemState.DEGRADED)
 
 
 def check_face_is_user():
@@ -348,11 +665,19 @@ def check_face_is_user():
         return False
 
 
-def execute_with_feedback(action):
+def execute_with_feedback(action, original_input: str = "", _replan_depth: int = 0):
     if not action:
         return False, None
     action_name = action.get("action", "unknown")
     print(f"[DEBUG][executor] executing: {action}")
+
+    pre_state = {}
+    try:
+        if hasattr(observer, "capture_pre_action_state"):
+            pre_state = observer.capture_pre_action_state(action)
+    except Exception as exc:
+        print(f"[DEBUG][verify] pre-state capture failed: {exc}")
+
     try:
         result = executor.execute_with_retry(action)
         if isinstance(result, tuple) and len(result) == 2:
@@ -360,44 +685,133 @@ def execute_with_feedback(action):
         else:
             success, message = bool(result), None
 
+        if success:
+            try:
+                if hasattr(observer, "verify_action_outcome"):
+                    verified, verify_msg = observer.verify_action_outcome(action, pre_state)
+                    if not verified:
+                        print(f"[DEBUG][verify] failed: {verify_msg}")
+
+                        if _replan_depth < 2 and hasattr(planner, "replan_action"):
+                            new_action, repl_msg = planner.replan_action(action, verify_msg, original_input)
+                            if new_action:
+                                return execute_with_feedback(new_action, original_input, _replan_depth=_replan_depth + 1)
+                            success = False
+                            message = repl_msg or verify_msg
+                        else:
+                            success = False
+                            message = verify_msg
+            except Exception as exc:
+                print(f"[DEBUG][verify] verification threw: {exc}")
+
+        # Pipe results into self_model experiential layer
+        try:
+            model = self_model.get_model()
+            model.record_outcome(action_name, success, message)
+        except Exception as exc:
+            print(f"[DEBUG][self_model] record outcome failed: {exc}")
+
         memory.log_action_result(action_name, success=success, detail=(message or "")[:60])
         if success:
             log_usage(action_name, observer.get_context_hint())
         else:
             log_failure(action_name, (message or "failed")[:60])
+            if message:
+                smart_msg = _get_smart_error_message(action_name, message)
+                message = smart_msg
         log_event("execution_result", {"action": action_name, "success": success, "message": message})
         print(f"[DEBUG][executor] result: success={success}, message={message}")
         return success, message
     except Exception as exc:
         print(f"[DEBUG][executor] error: {exc}")
+        
+        try:
+            model = self_model.get_model()
+            model.record_outcome(action_name, False, str(exc))
+        except Exception:
+            pass
+
         memory.log_action_result(action_name, success=False, detail=str(exc)[:60])
         log_failure(action_name, str(exc)[:60])
-        return False, "Something went wrong."
+        smart_msg = _get_smart_error_message(action_name, str(exc))
+        return False, smart_msg
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# STARTUP SCANS
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _run_self_awareness_scan():
+    if not _SELF_AWARENESS_READY:
+        return
+
+    def _scan():
+        time.sleep(2)
+        try:
+            scan = self_awareness.scan_self(verbose=True)
+            changes = scan.get("changes", {})
+            added    = changes.get("added", [])
+            removed  = changes.get("removed", [])
+            modified = changes.get("modified", [])
+
+            if not any([added, removed, modified]):
+                return
+
+            parts = []
+            if added:
+                if len(added) == 1:
+                    parts.append(f"gained a new module: {added[0].replace('.py', '')}")
+                elif len(added) <= 3:
+                    names = ", ".join(a.replace(".py", "") for a in added)
+                    parts.append(f"gained {len(added)} new modules: {names}")
+                else:
+                    parts.append(f"gained {len(added)} new modules")
+
+            if removed:
+                if len(removed) == 1:
+                    parts.append(f"lost {removed[0].replace('.py', '')}")
+                else:
+                    parts.append(f"lost {len(removed)} modules")
+
+            if modified:
+                if len(modified) == 1:
+                    parts.append(f"{modified[0].replace('.py', '')} was updated")
+                elif len(modified) <= 3:
+                    names = ", ".join(m.replace(".py", "") for m in modified)
+                    parts.append(f"{len(modified)} modules updated: {names}")
+                else:
+                    parts.append(f"{len(modified)} modules were updated")
+
+            if parts:
+                message = "I evolved since last boot — " + "; ".join(parts) + "."
+                print(f"[startup] {message}")
+                speak(message)
+
+                log_event(
+                    "self_awareness_boot_scan",
+                    {"added": added, "removed": removed, "modified": len(modified)},
+                    severity="info",
+                    module="self_awareness",
+                    tags=["boot", "evolution"],
+                )
+
+        except Exception as exc:
+            print(f"[startup] self_awareness scan error: {exc}")
+
+    threading.Thread(target=_scan, daemon=True).start()
 
 
 def _run_boot_syntax_scan():
-    """
-    Silent background syntax scan run at the end of startup().
-    - Checks all .py files for syntax errors using self_diagnostic.check_syntax()
-    - If any failures found: speaks a warning and logs at severity=critical
-    - If only warnings: logs silently, does NOT speak (don't alarm on minor issues)
-    - Never blocks startup — runs in a daemon thread, completes after
-      "Systems up." so the user hears the boot message first
-    """
     def _scan():
-        # Small delay so "Systems up." finishes speaking before any warning
         time.sleep(3)
         try:
             import self_diagnostic
             passed, failed, warnings = self_diagnostic.check_syntax()
 
             if failed:
-                # Build a concise spoken warning — max 2 filenames aloud
                 bad_files = []
                 for entry in failed[:2]:
                     detail = entry.get("detail", "")
-                    # Extract just the filename from the detail string
-                    # detail format: "some_file.py — error message"
                     fname = detail.split(" — ")[0].strip() if " — " in detail else detail[:40]
                     bad_files.append(fname)
 
@@ -413,7 +827,6 @@ def _run_boot_syntax_scan():
                 for entry in failed:
                     print(f"  ✗ {entry.get('detail', '')}")
 
-                # Log as critical
                 log_event(
                     "boot_syntax_warning",
                     {
@@ -426,11 +839,9 @@ def _run_boot_syntax_scan():
                     tags=["boot", "syntax", "critical"],
                 )
 
-                # Speak the warning
                 speak(warning_msg)
 
             else:
-                # Clean boot — log silently at debug level, do not speak
                 print(f"[BOOT][syntax] All clear — {len(passed)} file(s) OK")
                 log_event(
                     "boot_syntax_ok",
@@ -441,7 +852,6 @@ def _run_boot_syntax_scan():
                 )
 
         except Exception as exc:
-            # The scan itself crashed — log it but never crash startup
             print(f"[BOOT][syntax] scan error: {exc}")
             log_event(
                 "boot_syntax_scan_error",
@@ -459,23 +869,20 @@ def startup():
     if _startup_done:
         return
     _startup_done = True
-    
-    # Calibrate listener once at startup
+
     print("[Startup] Calibrating audio listener...")
     listener.calibrate_ambient_noise()
-    
+
     observer.start_observers()
     executor.init(speak_fn=speak, ask_fn=planner.ask)
     tasks.init(speak_fn=speak, action_fn=lambda action: executor.execute(action))
     threading.Thread(target=proactive_loop, daemon=True).start()
     threading.Thread(target=_init_face_recognition, daemon=True).start()
 
-    # ── Layer 2: start obligation reasoning scheduler ─────────────────────────
     proactive_scheduler.start(
         speak_fn      = speak,
         active_getter = lambda: ACTIVE,
     )
-    # ─────────────────────────────────────────────────────────────────────────
 
     speak("Systems up.")
     memory.log_activity("startup", "Jarvis online")
@@ -487,9 +894,8 @@ def startup():
     except Exception as exc:
         print(f"[DEBUG][startup] evolver not started: {exc}")
 
-    # ── Boot-time syntax scan (runs in background, speaks only if broken) ─────
     _run_boot_syntax_scan()
-    # ─────────────────────────────────────────────────────────────────────────
+    _run_self_awareness_scan()
 
 
 def _handle_follow_up(command):
@@ -524,9 +930,6 @@ if __name__ == "__main__":
                     observer.mark_user_input()
                     listener.play_jarvis_ui_sound()
 
-                    # ══════════════════════════════════════════════════════════
-                    # ── Layer 3: "Daddy's Home" greeting ──────────────────────
-                    # ══════════════════════════════════════════════════════════
                     minutes_away = _face_module.minutes_since_last_seen()
                     minutes_since_checkin = proactive_scheduler.minutes_since_last_checkin()
 
@@ -543,7 +946,6 @@ if __name__ == "__main__":
                         if pending_msg:
                             time.sleep(1.5)
                             speak(jarvisify_response(pending_msg))
-                    # ══════════════════════════════════════════════════════════
 
                     continue
 
@@ -554,12 +956,10 @@ if __name__ == "__main__":
                     observer.mark_user_input()
                     speak(random.choice(GREETINGS))
 
-                    # ── Layer 2: deliver any pending obligation message ────────
                     pending_msg = proactive_scheduler.deliver_pending_message()
                     if pending_msg:
                         time.sleep(1.5)
                         speak(jarvisify_response(pending_msg))
-                    # ─────────────────────────────────────────────────────────
                     continue
 
             print("[DEBUG][loop] active and waiting for command")
@@ -581,6 +981,10 @@ if __name__ == "__main__":
             last_active = time.time()
 
             command = _preprocess_command(command)
+
+            if _is_interrupt_only_command(command):
+                print(f"[DEBUG][loop] interrupt-only command received: '{command}'")
+                continue
 
             if "register my face" in command or "register face" in command:
                 speak("Alright. Look at the camera.")
@@ -608,7 +1012,7 @@ if __name__ == "__main__":
             if follow_up_result is not None:
                 action, response = follow_up_result
                 if action:
-                    success, exec_message = execute_with_feedback(action)
+                    success, exec_message = execute_with_feedback(action, original_input=command)
                     if exec_message:
                         speak(jarvisify_response(exec_message))
                     elif response and success:
@@ -625,6 +1029,10 @@ if __name__ == "__main__":
                 log_event("planner_output", {"action": action, "response": spoken_response})
                 print(f"[DEBUG][planner] output: action={action}, response={spoken_response}")
 
+                if action and action.get("action") == "save_login" and action.get("needs_dialog"):
+                    _handle_save_login_flow(action)
+                    continue
+
                 final_response = spoken_response
                 if action:
                     if action.get("action") == "exit":
@@ -633,7 +1041,7 @@ if __name__ == "__main__":
                         memory.log_activity("exit", "action triggered exit")
                         save_session()
                         break
-                    success, exec_message = execute_with_feedback(action)
+                    success, exec_message = execute_with_feedback(action, original_input=command)
                     if exec_message:
                         final_response = exec_message
                     elif not success and not final_response:

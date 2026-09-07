@@ -1,0 +1,87 @@
+{
+  "VOICE_STT": {
+    "state": "READY",
+    "detail": "Mic index 1 online",
+    "last_updated": "2026-08-27T14:41:15+00:00"
+  },
+  "VOICE_TTS": {
+    "state": "READY",
+    "detail": "Edge-TTS OK",
+    "last_updated": "2026-08-27T14:42:04+00:00"
+  },
+  "CAMERA": {
+    "state": "UNKNOWN",
+    "detail": "Not yet probed",
+    "last_updated": "2026-08-27T14:41:15+00:00"
+  },
+  "FACE_RECOGNITION": {
+    "state": "UNKNOWN",
+    "detail": "Not yet probed",
+    "last_updated": "2026-08-27T14:41:15+00:00"
+  },
+  "OLLAMA": {
+    "state": "UNKNOWN",
+    "detail": "Not yet probed",
+    "last_updated": "2026-08-27T14:41:15+00:00"
+  },
+  "GROQ": {
+    "state": "UNKNOWN",
+    "detail": "Not yet probed",
+    "last_updated": "2026-08-27T14:41:15+00:00"
+  },
+  "OPENROUTER": {
+    "state": "UNKNOWN",
+    "detail": "Not yet probed",
+    "last_updated": "2026-08-27T14:41:15+00:00"
+  },
+  "GEMINI": {
+    "state": "UNKNOWN",
+    "detail": "Not yet probed",
+    "last_updated": "2026-08-27T14:41:15+00:00"
+  },
+  "TESSERACT_OCR": {
+    "state": "READY",
+    "detail": "Screen grab active, pixels feeding OCR",
+    "last_updated": "2026-08-27T14:42:10+00:00"
+  },
+  "MEMORY": {
+    "state": "UNKNOWN",
+    "detail": "Not yet probed",
+    "last_updated": "2026-08-27T14:41:15+00:00"
+  },
+  "TASKS": {
+    "state": "READY",
+    "detail": "System telemetry engine healthy",
+    "last_updated": "2026-08-27T14:42:12+00:00"
+  },
+  "PLUGINS": {
+    "state": "READY",
+    "detail": "Observer contexts parsing fine",
+    "last_updated": "2026-08-27T14:42:11+00:00"
+  },
+  "WHATSAPP_SEND": {
+    "state": "UNKNOWN",
+    "detail": "Not yet probed",
+    "last_updated": "2026-08-27T14:41:15+00:00"
+  },
+  "SPOTIFY": {
+    "state": "UNKNOWN",
+    "detail": "Not yet probed",
+    "last_updated": "2026-08-27T14:41:15+00:00"
+  },
+  "EMAIL": {
+    "state": "UNKNOWN",
+    "detail": "Not yet probed",
+    "last_updated": "2026-08-27T14:41:15+00:00"
+  },
+  "CALENDAR": {
+    "state": "UNKNOWN",
+    "detail": "Not yet probed",
+    "last_updated": "2026-08-27T14:41:15+00:00"
+  },
+  "FLASK_UI": {
+    "state": "UNKNOWN",
+    "detail": "Not yet probed",
+    "last_updated": "2026-08-27T14:41:15+00:00"
+  }
+}

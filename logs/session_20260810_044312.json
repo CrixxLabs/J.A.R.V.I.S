@@ -1,0 +1,497 @@
+[
+  {
+    "time": "2026-08-10T04:43:12.478355",
+    "type": "skill_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "name": "example_skill",
+      "priority": 60
+    }
+  },
+  {
+    "time": "2026-08-10T04:43:12.478355",
+    "type": "skills_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "count": 1
+    }
+  },
+  {
+    "time": "2026-08-10T04:43:14.696054",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Systems up."
+  },
+  {
+    "time": "2026-08-10T04:43:19.040371",
+    "type": "boot_syntax_ok",
+    "severity": "debug",
+    "module": "self_diagnostic",
+    "tags": [
+      "boot",
+      "syntax"
+    ],
+    "data": {
+      "passed_count": 29,
+      "warning_count": 0
+    }
+  },
+  {
+    "time": "2026-08-10T04:43:50.425082",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "What's the move?"
+  },
+  {
+    "time": "2026-08-10T04:44:04.486988",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "how are you doing jarvis?"
+  },
+  {
+    "time": "2026-08-10T04:44:07.637612",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm functioning within normal parameters."
+    }
+  },
+  {
+    "time": "2026-08-10T04:44:07.637612",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I'm functioning within normal parameters."
+    }
+  },
+  {
+    "time": "2026-08-10T04:44:07.638647",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I'm functioning within normal parameters."
+  },
+  {
+    "time": "2026-08-10T04:44:19.787375",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what do you do?"
+  },
+  {
+    "time": "2026-08-10T04:44:21.406990",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I assist and provide information to users like Arju."
+    }
+  },
+  {
+    "time": "2026-08-10T04:44:21.406990",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I assist and provide information to users like Arju."
+    }
+  },
+  {
+    "time": "2026-08-10T04:44:21.406990",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I assist and provide information to users like Arju."
+  },
+  {
+    "time": "2026-08-10T04:44:32.427311",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "so what's the best scenario in which i can use you?"
+  },
+  {
+    "time": "2026-08-10T04:44:42.249460",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "You can use me to help with tasks like coding in VS Code."
+    }
+  },
+  {
+    "time": "2026-08-10T04:44:42.249460",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "You can use me to help with tasks like coding in VS Code."
+    }
+  },
+  {
+    "time": "2026-08-10T04:44:42.250461",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "You can use me to help with tasks like coding in VS Code."
+  },
+  {
+    "time": "2026-08-10T04:44:52.314117",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "is it only just coding in vs code or something else?"
+  },
+  {
+    "time": "2026-08-10T04:44:54.703338",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "You can use me to help with various tasks, including coding in VS Code, answering questions, providing information, and more."
+    }
+  },
+  {
+    "time": "2026-08-10T04:44:54.703338",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "You can use me to help with various tasks, including coding in VS Code, answering questions, providing information, and more."
+    }
+  },
+  {
+    "time": "2026-08-10T04:44:54.709033",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "You can use me to help with various tasks, including coding in VS Code, answering questions, providing information, and more."
+  },
+  {
+    "time": "2026-08-10T04:45:07.311436",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "could you explain me what is the more?"
+  },
+  {
+    "time": "2026-08-10T04:45:10.482572",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I can provide information on a wide range of topics, answer questions, and assist with tasks such as setting reminders, searching the web, and more."
+    }
+  },
+  {
+    "time": "2026-08-10T04:45:10.482572",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I can provide information on a wide range of topics, answer questions, and assist with tasks such as setting reminders, searching the web, and more."
+    }
+  },
+  {
+    "time": "2026-08-10T04:45:10.482572",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I can provide information on a wide range of topics, answer questions, and assist with tasks such as setting reminders, searching the web, and more."
+  },
+  {
+    "time": "2026-08-10T04:45:23.075453",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "hurry and get out of your cold."
+  },
+  {
+    "time": "2026-08-10T04:45:25.759529",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I don't have a cold, I'm a digital assistant."
+    }
+  },
+  {
+    "time": "2026-08-10T04:45:25.759529",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "I don't have a cold, I'm a digital assistant."
+    }
+  },
+  {
+    "time": "2026-08-10T04:45:25.760529",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "I don't have a cold, I'm a digital assistant."
+  },
+  {
+    "time": "2026-08-10T04:45:33.375611",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "i'll be right back."
+  },
+  {
+    "time": "2026-08-10T04:45:35.372719",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "See you when you return."
+    }
+  },
+  {
+    "time": "2026-08-10T04:45:35.372719",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "See you when you return."
+    }
+  },
+  {
+    "time": "2026-08-10T04:45:35.372719",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "See you when you return."
+  },
+  {
+    "time": "2026-08-10T04:45:43.234237",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "are you about your code at return?"
+  },
+  {
+    "time": "2026-08-10T04:45:46.219052",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "action_use_close_app"
+    }
+  },
+  {
+    "time": "2026-08-10T04:45:46.219052",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "action_use_close_app"
+    }
+  },
+  {
+    "time": "2026-08-10T04:45:46.219052",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Action_use_close_app"
+  },
+  {
+    "time": "2026-08-10T04:45:56.872375",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "do you know how the python code is running inside you?"
+  },
+  {
+    "time": "2026-08-10T04:45:58.100518",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "action_use_close_app"
+    }
+  },
+  {
+    "time": "2026-08-10T04:45:58.100518",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "action_use_close_app"
+    }
+  },
+  {
+    "time": "2026-08-10T04:45:58.110334",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Action_use_close_app"
+  },
+  {
+    "time": "2026-08-10T04:46:06.534026",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "what i will be covering about."
+  },
+  {
+    "time": "2026-08-10T04:46:09.281281",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "You are currently coding in VS Code."
+    }
+  },
+  {
+    "time": "2026-08-10T04:46:09.281281",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "You are currently coding in VS Code."
+    }
+  },
+  {
+    "time": "2026-08-10T04:46:09.282201",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "You are currently coding in VS Code."
+  },
+  {
+    "time": "2026-08-10T04:46:17.122205",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "do you find any error in the code?"
+  },
+  {
+    "time": "2026-08-10T04:46:17.127722",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "web_search",
+        "query": "do you  any error in the code?"
+      },
+      "response": ""
+    }
+  },
+  {
+    "time": "2026-08-10T04:46:17.127722",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": {
+        "action": "web_search",
+        "query": "do you  any error in the code?"
+      },
+      "response": ""
+    }
+  },
+  {
+    "time": "2026-08-10T04:46:18.276827",
+    "type": "execution_result",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": "web_search",
+      "success": true,
+      "message": "Inthis post, we have curated the most common types of programmingerrorsand how you can avoid them. 1. Syntaxerrors: These are the type oferrorsthat occur whencodeviolates the rules of the programming language such as missing semicolons, brackets, or wrong indentation of thecode, Example: Write a function int fib (int n) that returns Fn. For example, if n = 0, then fib () should return ... | From null pointer exceptions to logicerrors, here are the programming mistakes developers hit most, and the fastest ways to fix them. | Struggling with codingerrors? Learn to identify, prevent, and fix commonerrorsinyourcode, ensuring clean, efficient, and reliable software. | This AIcodechecker also understands yourcode'slogic, helping it find semantic bugs, performance problems, security concerns, and best-practice violations. If you do not need the full review and want brokencodefixed quickly, use the free AICodeFixer. It leads with correctedcodeshown as a diff, rather than a list of issues to work ..."
+    }
+  },
+  {
+    "time": "2026-08-10T04:46:18.277990",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Inthis post, we have curated the most common types of programmingerrorsand how you can avoid them. 1. Syntaxerrors: These are the type oferrorsthat occur whencodeviolates the rules of the programming language such as missing semicolons, brackets, or wrong indentation of thecode, Example: Write a function int fib (int n) that returns Fn. For example, if n = 0, then fib () should return... | From null pointer exceptions to logicerrors, here are the programming mistakes developers hit most, and the fastest ways to fix them. | Struggling with codingerrors? Learn to identify, prevent, and fix commonerrorsinyourcode, ensuring clean, efficient, and reliable software. | This AIcodechecker also understands yourcode'slogic, helping it find semantic bugs, performance problems, security concerns, and best-practice violations. If you do not need the full review and want brokencodefixed quickly, use the free AICodeFixer. It leads with correctedcodeshown as a diff, rather than a list of issues to work..."
+  },
+  {
+    "time": "2026-08-10T04:46:50.887837",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Standing by."
+  }
+]

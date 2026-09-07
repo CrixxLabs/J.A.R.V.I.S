@@ -1,0 +1,99 @@
+[
+  {
+    "time": "2026-08-10T11:52:21.098695",
+    "type": "skill_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "name": "example_skill",
+      "priority": 60
+    }
+  },
+  {
+    "time": "2026-08-10T11:52:21.098695",
+    "type": "skills_loaded",
+    "severity": "info",
+    "module": "plugin_loader",
+    "tags": [],
+    "data": {
+      "count": 1
+    }
+  },
+  {
+    "time": "2026-08-10T11:52:23.501819",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Systems up."
+  },
+  {
+    "time": "2026-08-10T11:52:30.043948",
+    "type": "boot_syntax_ok",
+    "severity": "debug",
+    "module": "self_diagnostic",
+    "tags": [
+      "boot",
+      "syntax"
+    ],
+    "data": {
+      "passed_count": 35,
+      "warning_count": 0
+    }
+  },
+  {
+    "time": "2026-08-10T11:52:43.113378",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Listening."
+  },
+  {
+    "time": "2026-08-10T11:53:02.117630",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "hello jarvis."
+  },
+  {
+    "time": "2026-08-10T11:53:07.660483",
+    "type": "planner_decision",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Hello! How can I assist you today?"
+    }
+  },
+  {
+    "time": "2026-08-10T11:53:07.660483",
+    "type": "planner_output",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": {
+      "action": null,
+      "response": "Hello! How can I assist you today?"
+    }
+  },
+  {
+    "time": "2026-08-10T11:53:07.661489",
+    "type": "jarvis_response",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "Hello! How can I assist you today?"
+  },
+  {
+    "time": "2026-08-10T11:53:16.778468",
+    "type": "planner_input",
+    "severity": "info",
+    "module": "core",
+    "tags": [],
+    "data": "go snow for a reason."
+  }
+]

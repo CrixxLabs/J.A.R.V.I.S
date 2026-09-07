@@ -1,0 +1,593 @@
+{
+  "timestamp": "2026-08-27T20:11:21.222671",
+  "core_files": {
+    "app_installer.py": {
+      "hash": "9f6d2b62165a6871",
+      "size_bytes": 23641,
+      "functions": [
+        "check_winget_available",
+        "resolve_app_id",
+        "search_app",
+        "is_app_installed",
+        "install_app",
+        "uninstall_app"
+      ],
+      "description": "Winget-based app installer with real-time progress tracking"
+    },
+    "auto_login_profiles.py": {
+      "hash": "e099a9f166b9c1b4",
+      "size_bytes": 17241,
+      "functions": [
+        "is_supported",
+        "list_supported_apps",
+        "get_profile",
+        "get_launch_command",
+        "get_window_pattern",
+        "get_login_steps",
+        "get_success_indicator",
+        "requires_login",
+        "get_winget_id",
+        "get_notes"
+      ],
+      "description": "Per-app login flow recipes (Spotify, Discord, etc.)"
+    },
+    "boot_check.py": {
+      "hash": "dc326523b919063b",
+      "size_bytes": 17447,
+      "functions": [
+        "probe_voice_stt",
+        "probe_voice_tts",
+        "probe_camera_and_face_recognition",
+        "probe_ollama",
+        "probe_groq",
+        "probe_openrouter",
+        "probe_gemini",
+        "probe_tesseract",
+        "probe_memory",
+        "probe_tasks",
+        "probe_plugins",
+        "probe_whatsapp_send",
+        "probe_spotify",
+        "probe_email",
+        "probe_calendar",
+        "probe_flask_ui",
+        "run_smoke_test"
+      ],
+      "description": ""
+    },
+    "brain.py": {
+      "hash": "ae75fa17721ad573",
+      "size_bytes": 26425,
+      "functions": [
+        "analyze",
+        "ask_llm"
+      ],
+      "description": "LLM router — Ollama (local) → Groq → OpenRouter fallback chain"
+    },
+    "conversation_manager.py": {
+      "hash": "88784a3384dd768a",
+      "size_bytes": 3738,
+      "functions": [
+        "add_turn",
+        "get_context_block",
+        "summarize_conversation",
+        "reset_conversation",
+        "get_last_summary",
+        "update_sentiment",
+        "get_sentiment"
+      ],
+      "description": "Rolling chat history + auto-summarization"
+    },
+    "core.py": {
+      "hash": "01b1d0868fc670bb",
+      "size_bytes": 52247,
+      "functions": [
+        "update_context",
+        "get_context",
+        "resolve_reference",
+        "detect_language",
+        "translate_to_english",
+        "preprocess_malayalam",
+        "analyze_sentiment",
+        "get_tone_prefix",
+        "classify_intent",
+        "parse_whatsapp_text",
+        "format_whatsapp_response"
+      ],
+      "description": "Intent classification, spaCy NLP, Malayalam translation"
+    },
+    "credential_vault.py": {
+      "hash": "784d866736a5727c",
+      "size_bytes": 16672,
+      "functions": [
+        "is_available",
+        "save_credential",
+        "get_credential",
+        "get_username",
+        "get_password",
+        "has_credential",
+        "list_saved_apps",
+        "delete_credential",
+        "delete_all_credentials"
+      ],
+      "description": "Secure password storage via Windows DPAPI (keyring)"
+    },
+    "error_handler.py": {
+      "hash": "db569acb0de2e665",
+      "size_bytes": 3340,
+      "functions": [
+        "log_and_demote",
+        "safe_execute"
+      ],
+      "description": ""
+    },
+    "evolver.py": {
+      "hash": "08daf93b5b953fbd",
+      "size_bytes": 14820,
+      "functions": [
+        "analyze",
+        "generate_proposal",
+        "sandbox_test",
+        "list_backups",
+        "rollback_last_patch",
+        "apply_patch",
+        "run_evolution_cycle",
+        "start_evolver"
+      ],
+      "description": "Self-patching, proposes code improvements"
+    },
+    "executor.py": {
+      "hash": "e8ce493f034983b0",
+      "size_bytes": 71561,
+      "functions": [
+        "init",
+        "get_capabilities_text",
+        "get_spotify",
+        "spotify_play",
+        "spotify_control",
+        "get_cal_service",
+        "calendar_today",
+        "calendar_add",
+        "web_search",
+        "get_weather",
+        "get_news",
+        "morning_briefing",
+        "read_screen_text",
+        "find_file",
+        "open_file",
+        "list_folder",
+        "send_email",
+        "send_whatsapp",
+        "lock_pc",
+        "shutdown_pc",
+        "restart_pc",
+        "clipboard_read",
+        "clipboard_write",
+        "get_youtube_id",
+        "summarize_youtube",
+        "summarize_article",
+        "generate_image",
+        "generate_video",
+        "get_pending_portal_proposals",
+        "confirm_portal_proposals",
+        "execute",
+        "execute_with_retry"
+      ],
+      "description": "Executes actions (open apps, web search, reminders, etc.)"
+    },
+    "face_recognition_module.py": {
+      "hash": "e2f7e106f155766a",
+      "size_bytes": 6257,
+      "functions": [
+        "minutes_since_last_seen",
+        "register_face",
+        "recognize_face",
+        "is_face_registered",
+        "start_face_watcher",
+        "stop_face_watcher"
+      ],
+      "description": "Facial recognition authentication"
+    },
+    "file_ops.py": {
+      "hash": "ceb9fb217fad67c9",
+      "size_bytes": 4236,
+      "functions": [
+        "open_file",
+        "list_folder",
+        "search_files",
+        "rename_file",
+        "summarize_file",
+        "get_file_info"
+      ],
+      "description": "Filesystem operations"
+    },
+    "jarvis.py": {
+      "hash": "10f78711ec92d9d5",
+      "size_bytes": 39973,
+      "functions": [
+        "jarvisify_response",
+        "speak",
+        "was_interrupted",
+        "listen",
+        "wake_word_detect",
+        "handle_fast_command",
+        "proactive_loop",
+        "check_face_is_user",
+        "execute_with_feedback",
+        "startup"
+      ],
+      "description": "Main entry point, event loop, user interaction"
+    },
+    "jarvis_runtime.py": {
+      "hash": "c80935e3596eeb58",
+      "size_bytes": 2724,
+      "functions": [
+        "speak",
+        "run_server",
+        "get_dynamic_greeting",
+        "get_briefing",
+        "is_wake_word"
+      ],
+      "description": "Runtime lifecycle, background states"
+    },
+    "jarvis_tts.py": {
+      "hash": "343d6c30208927df",
+      "size_bytes": 4031,
+      "functions": [
+        "is_f5_ready",
+        "generate_speech_wav",
+        "speak_jarvis"
+      ],
+      "description": ""
+    },
+    "listener.py": {
+      "hash": "b8e94fba36b1b810",
+      "size_bytes": 25793,
+      "functions": [
+        "init_mic",
+        "calibrate_ambient_noise",
+        "detect_double_clap",
+        "start_interrupt_watcher",
+        "stop_interrupt_watcher",
+        "check_interrupt",
+        "reset_interrupt",
+        "play_jarvis_ui_sound",
+        "listen_for_command"
+      ],
+      "description": "Voice capture, wake-word, double-clap, interrupt detection"
+    },
+    "login_orchestrator.py": {
+      "hash": "5d15ada6a7612a2a",
+      "size_bytes": 31855,
+      "functions": [
+        "install_only",
+        "launch_and_login",
+        "install_and_setup",
+        "perform_login_only"
+      ],
+      "description": "Coordinates install → open → login → verify sequence"
+    },
+    "memory.py": {
+      "hash": "ba762197fcd7320d",
+      "size_bytes": 19425,
+      "functions": [
+        "remember",
+        "recall_all",
+        "recall_by_tag",
+        "recall_by_priority",
+        "forget",
+        "cleanup_old_facts",
+        "format_facts_for_prompt",
+        "log_activity",
+        "get_recent_activity",
+        "format_activity_for_prompt",
+        "log_context_change",
+        "get_context_history",
+        "get_app_time_today",
+        "add_session_note",
+        "get_session_notes",
+        "update_daily_stats",
+        "get_todays_stats",
+        "log_action_result",
+        "get_memory_summary",
+        "log_usage",
+        "get_usage_count",
+        "log_failure",
+        "should_avoid",
+        "log_preference",
+        "get_preference",
+        "get_top_preferences",
+        "get_last_action",
+        "get_recent_context",
+        "set_last_intent",
+        "set_last_app",
+        "get_prediction_hint",
+        "semantic_recall",
+        "semantic_recall_text"
+      ],
+      "description": "Facts, activity log, daily stats in memory.json"
+    },
+    "obligations.py": {
+      "hash": "dd4ee094b54515b0",
+      "size_bytes": 10412,
+      "functions": [
+        "add_obligation",
+        "update_status",
+        "mark_done",
+        "get_all",
+        "get_pending",
+        "get_overdue",
+        "get_due_soon",
+        "get_by_id",
+        "delete_obligation",
+        "format_obligation",
+        "format_list",
+        "build_context_block"
+      ],
+      "description": "Assignments, exams, deadlines tracker"
+    },
+    "observer.py": {
+      "hash": "bf18caf7cb973d58",
+      "size_bytes": 15424,
+      "functions": [
+        "get_context_hint",
+        "get_state_snapshot",
+        "mark_user_input",
+        "start_observers",
+        "capture_pre_action_state",
+        "verify_action_outcome"
+      ],
+      "description": "Active app monitoring, screen state, system observers"
+    },
+    "planner.py": {
+      "hash": "76fdfe32596081da",
+      "size_bytes": 28643,
+      "functions": [
+        "replan_action",
+        "add_to_history",
+        "clear_history",
+        "clear_pending_followup",
+        "get_pending_followup",
+        "set_pending_followup",
+        "is_capability_question",
+        "get_capability_response",
+        "should_speak_proactively",
+        "ask"
+      ],
+      "description": "Decision router — decides local action vs LLM call"
+    },
+    "plugin_loader.py": {
+      "hash": "fe1fbf21fdc96220",
+      "size_bytes": 4955,
+      "functions": [
+        "load_skills",
+        "reload_skills",
+        "get_loaded_skills",
+        "route_to_skill",
+        "list_skills"
+      ],
+      "description": "Loads custom skill plugins from /skills/"
+    },
+    "portal_scan.py": {
+      "hash": "100780431d7f14e0",
+      "size_bytes": 6799,
+      "functions": [
+        "scan_portal_screen",
+        "format_scan_proposal"
+      ],
+      "description": "Screen deadline scanning"
+    },
+    "proactive_scheduler.py": {
+      "hash": "28606a4a397bf0ed",
+      "size_bytes": 14278,
+      "functions": [
+        "init",
+        "run_obligation_checkin",
+        "minutes_since_last_checkin",
+        "deliver_pending_message",
+        "start"
+      ],
+      "description": "Scheduled reminders, obligation check-ins"
+    },
+    "seed_me.py": {
+      "hash": "c1ea0b22529cc9e1",
+      "size_bytes": 6737,
+      "functions": [],
+      "description": ""
+    },
+    "self_awareness.py": {
+      "hash": "c6b8dc93f36b0245",
+      "size_bytes": 17486,
+      "functions": [
+        "scan_self",
+        "force_rescan",
+        "get_live_status_summary",
+        "get_file_list",
+        "get_ability_summary",
+        "get_change_summary",
+        "get_self_context_for_prompt",
+        "get_scan_metadata"
+      ],
+      "description": "Runtime self-introspection — scans own codebase"
+    },
+    "self_diagnostic.py": {
+      "hash": "1af3b97a0b3e6465",
+      "size_bytes": 20201,
+      "functions": [
+        "check_syntax",
+        "check_tests",
+        "check_data_integrity",
+        "check_dependencies",
+        "check_backup_status",
+        "run_full_checkup"
+      ],
+      "description": "Internal health checks, boot-time syntax scan"
+    },
+    "self_model.py": {
+      "hash": "19a87c795bd22ff1",
+      "size_bytes": 21195,
+      "functions": [
+        "get_model"
+      ],
+      "description": "Structured self-model tracking operational capabilities"
+    },
+    "server.py": {
+      "hash": "69c975b83d207609",
+      "size_bytes": 5932,
+      "functions": [
+        "speak",
+        "index",
+        "api_status",
+        "api_chat",
+        "api_history",
+        "api_clear",
+        "api_listen",
+        "live"
+      ],
+      "description": "Local web backend for dashboard"
+    },
+    "session_logger.py": {
+      "hash": "fe2cdec14c1257f1",
+      "size_bytes": 4117,
+      "functions": [
+        "log_event",
+        "log_user_input",
+        "log_action",
+        "log_error",
+        "log_speak",
+        "log_startup",
+        "log_shutdown",
+        "get_session_summary",
+        "filter_logs",
+        "save_session"
+      ],
+      "description": "Structured session event logs"
+    },
+    "status_registry.py": {
+      "hash": "de03f05ac00cc4fe",
+      "size_bytes": 8941,
+      "functions": [
+        "get_registry"
+      ],
+      "description": ""
+    },
+    "system_monitor.py": {
+      "hash": "917b5e88b7b9cf89",
+      "size_bytes": 7190,
+      "functions": [
+        "get_system_status",
+        "shutdown"
+      ],
+      "description": "CPU, GPU, RAM tracking"
+    },
+    "tasks.py": {
+      "hash": "5ca906eee57d8def",
+      "size_bytes": 11023,
+      "functions": [
+        "init",
+        "add_reminder",
+        "list_reminders",
+        "cancel_reminder",
+        "set_morning_briefing_time",
+        "disable_task"
+      ],
+      "description": "Active task engine with reminders"
+    },
+    "user_profile.py": {
+      "hash": "88b2fc416b4a59ab",
+      "size_bytes": 35437,
+      "functions": [
+        "seed_profile_from_text",
+        "confirm_and_save_profile",
+        "add_single_fact",
+        "run_behavioral_analysis",
+        "get_profile_summary",
+        "forget_entry",
+        "get_profile_context_for_prompt",
+        "get_profile_for_scheduler"
+      ],
+      "description": "Personal preferences in user_profile.json"
+    },
+    "vision.py": {
+      "hash": "647ec7cab85839c2",
+      "size_bytes": 6860,
+      "functions": [
+        "capture_screen",
+        "screenshot_to_base64",
+        "describe_screen",
+        "read_screen",
+        "analyze_screen_context"
+      ],
+      "description": "Screen capture, OCR via Tesseract"
+    },
+    "voice_setup.py": {
+      "hash": "6edfc628ee6fc130",
+      "size_bytes": 2734,
+      "functions": [
+        "record_voice"
+      ],
+      "description": ""
+    },
+    "whatsapp_fetcher.py": {
+      "hash": "f9813507766afbcd",
+      "size_bytes": 10688,
+      "functions": [
+        "extract_whatsapp_text",
+        "open_whatsapp",
+        "open_group",
+        "scan_and_download",
+        "minimize_whatsapp",
+        "update_timetable",
+        "extract_timetable_for_batch"
+      ],
+      "description": "WhatsApp message scraping"
+    },
+    "window_watcher.py": {
+      "hash": "c336da4bbbd2959c",
+      "size_bytes": 19977,
+      "functions": [
+        "list_windows",
+        "find_window",
+        "find_all_windows",
+        "is_window_open",
+        "wait_for_window",
+        "wait_for_window_close",
+        "wait_for_window_stable",
+        "get_active_window",
+        "focus_window",
+        "detect_state_change",
+        "get_window_snapshot"
+      ],
+      "description": "Real-time window state detection (no fake sleep timing)"
+    }
+  },
+  "skills": [
+    "example_skill"
+  ],
+  "total_files": 38,
+  "total_functions": 294,
+  "total_size_bytes": 640455,
+  "changes": {
+    "added": [
+      "boot_check.py",
+      "error_handler.py",
+      "self_model.py",
+      "status_registry.py"
+    ],
+    "removed": [],
+    "modified": [
+      "brain.py",
+      "executor.py",
+      "jarvis.py",
+      "jarvis_tts.py",
+      "listener.py",
+      "memory.py",
+      "observer.py",
+      "planner.py",
+      "self_awareness.py",
+      "tasks.py",
+      "vision.py",
+      "whatsapp_fetcher.py"
+    ]
+  }
+}

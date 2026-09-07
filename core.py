@@ -87,12 +87,32 @@ def resolve_reference(text: str) -> str:
 
 # ── Private extraction helpers ─────────────────────────────────────────────────
 def _extract_app_name(text: str, keyword: str) -> str:
+    """
+    Extract app name after a keyword like 'open' or 'close'.
+    Stops at conjunctions like 'and', 'then', 'also' to avoid grabbing
+    multi-part commands as one app name.
+    """
     pattern = rf"\b(?:{keyword})\b\s+(.+)$"
     match = re.search(pattern, text, re.IGNORECASE)
     if not match:
         return ""
     app = match.group(1).strip()
-    return re.sub(r"\b(app|application|please|jarvis)\b", "", app, flags=re.IGNORECASE).strip()
+
+    # Cut off at conjunctions / follow-up verbs
+    cutoff_pattern = re.compile(
+        r"\s+(?:and|then|also|after that|,)\s+.*$",
+        re.IGNORECASE,
+    )
+    app = cutoff_pattern.sub("", app).strip()
+    verb_cutoff = re.compile(
+        r"\s+(?:type|write|search|play|open|close|make|create|do)\s+.*$",
+        re.IGNORECASE,
+    )
+    app = verb_cutoff.sub("", app).strip()
+
+    app = re.sub(r"\b(app|application|please|jarvis)\b", "", app, flags=re.IGNORECASE).strip()
+    app = app.rstrip(".,!?;:").strip()
+    return app
 
 
 def _extract_time(text: str) -> str:
@@ -660,11 +680,9 @@ def _infer_obligation_type_from_text(text: str) -> str:
 
 # ── User profile intent helpers ───────────────────────────────────────────────
 
-# "what do you know about me" triggers
 _PROFILE_QUERY_PHRASES = (
     "what do you know about me",
     "what do u know about me",
-    "what do you know about me",
     "tell me what you know about me",
     "show me my profile",
     "what's my profile",
@@ -675,7 +693,6 @@ _PROFILE_QUERY_PHRASES = (
     "what do you remember about me",
 )
 
-# "forget that I [x]" triggers
 _PROFILE_FORGET_PHRASES = (
     "forget that i",
     "forget that I",
@@ -685,9 +702,6 @@ _PROFILE_FORGET_PHRASES = (
     "stop remembering that i",
 )
 
-# "remember that I [x]" triggers — single-fact intake
-# NOTE: Checked AFTER obligation phrases to avoid collision
-# ("remind me about the X" is an obligation, "remember that I X" is a profile fact)
 _PROFILE_REMEMBER_PHRASES = (
     "remember that i",
     "remember that I",
@@ -699,7 +713,6 @@ _PROFILE_REMEMBER_PHRASES = (
 
 
 def _strip_profile_prefix(text: str, prefixes: tuple) -> str:
-    """Strip a known prefix from text, returning the remainder."""
     lowered = text.lower().strip()
     for prefix in sorted(prefixes, key=len, reverse=True):
         if lowered.startswith(prefix.lower()):
@@ -707,7 +720,328 @@ def _strip_profile_prefix(text: str, prefixes: tuple) -> str:
     return text.strip()
 
 
-# ── Intent classification ──────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+# NEW: IRON MAN AUTOMATION INTENT HELPERS
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── Install intent phrases ────────────────────────────────────────────────────
+_INSTALL_PHRASES = (
+    "install ",
+    "instal ",         # Whisper drops the double-l sometimes
+    "instals ",        # "install spotify" → "instals fortify"
+    "installs ",
+    "get me ",
+    "download ",
+    "set up ",
+    "setup ",
+    "grab me ",
+    "get ",
+)
+
+_INSTALL_AND_LOGIN_PHRASES = (
+    "install and log me in",
+    "install and login",
+    "install and sign in",
+    "install and set up",
+    "install and open",
+    "get and log me in",
+    "download and log me in",
+    "set up and log me in",
+)
+
+# ── Auto-login intent phrases ─────────────────────────────────────────────────
+_OPEN_AND_LOGIN_PHRASES = (
+    "log me into",
+    "log me in to",
+    "log into",
+    "sign me into",
+    "sign me in to",
+    "sign into",
+    "open and log me in",
+    "open and login",
+)
+
+# ── Save credentials phrases ──────────────────────────────────────────────────
+_SAVE_LOGIN_PHRASES = (
+    "save my login",
+    "save my password",
+    "save my credentials",
+    "remember my login",
+    "remember my password",
+    "store my login",
+    "store my password",
+    "add my login",
+    "save login for",
+    "remember login for",
+)
+
+# ── List saved logins ─────────────────────────────────────────────────────────
+_LIST_LOGINS_PHRASES = (
+    "list my logins",
+    "list saved logins",
+    "list saved passwords",
+    "show my logins",
+    "show saved logins",
+    "what logins do you have",
+    "what passwords do you have",
+    "what apps do you have saved",
+    "show saved credentials",
+    "list credentials",
+)
+
+# ── Delete saved login ────────────────────────────────────────────────────────
+_DELETE_LOGIN_PHRASES = (
+    "delete my login",
+    "delete saved login",
+    "remove my login",
+    "remove saved login",
+    "forget my login for",
+    "forget my password for",
+    "delete password for",
+    "remove password for",
+)
+
+# ── Self-awareness phrases ────────────────────────────────────────────────────
+_SELF_SCAN_PHRASES = (
+    "scan yourself",
+    "rescan yourself",
+    "check yourself",
+    "scan your code",
+    "scan your files",
+    "reinventory yourself",
+    "check your abilities",
+    "rescan your files",
+    "update your self awareness",
+    "update your self-awareness",
+)
+
+_SELF_CAPABILITIES_PHRASES = (
+    "what are your abilities",
+    "what abilities do you have",
+    "list your abilities",
+    "list your capabilities",
+    "what can you actually do",
+    "show your capabilities",
+    "show me your abilities",
+    "what modules do you have",
+    "what files do you have",
+    "list your modules",
+    "list your files",
+)
+
+_SELF_CHANGES_PHRASES = (
+    "what changed",
+    "what has changed",
+    "what's new",
+    "what is new",
+    "what did you gain",
+    "what abilities did you gain",
+    "what's different",
+    "what evolved",
+    "how have you evolved",
+    "any updates to yourself",
+    "any new files",
+    # ── Handle Whisper transcription variants ─────────────────────────
+    "change since",
+    "changed since",
+    "changed after",
+    "change after",
+    "since last boot",
+    "since previous boot",
+    "since the last boot",
+    "since the previous boot",
+    "after the last boot",
+    "after the previous boot",
+    "did something change",
+    "anything change",
+    "anything changed",
+    "anything new",
+    "what did you learn",
+)
+
+
+# ── App name extraction from install/login commands ────────────────────────────
+
+_KNOWN_INSTALLABLE_APPS = frozenset((
+    "spotify", "discord", "chrome", "firefox", "brave", "vscode", "vs code",
+    "visual studio code", "notion", "slack", "zoom", "obs", "obs studio",
+    "vlc", "7zip", "notepad++", "git", "python", "node", "nodejs", "postman",
+    "figma", "gimp", "blender", "audacity", "steam", "epic games", "telegram",
+    "microsoft edge", "edge", "powertoys", "whatsapp",
+))
+
+
+# Whisper commonly mishears these — map to correct app names
+_WHISPER_APP_CORRECTIONS = {
+    "fortify":       "spotify",
+    "spot if I":     "spotify",
+    "spot if i":     "spotify",
+    "spot if":       "spotify",
+    "spotifi":       "spotify",
+    "vs go":         "vs code",
+    "vs cord":       "vs code",
+    "these code":    "vs code",
+    "disco":         "discord",
+    "diss cord":     "discord",
+    "notion app":    "notion",
+    "slack app":     "slack",
+    "zoom app":      "zoom",
+    "chrome browser":"chrome",
+    "google chrome": "chrome",
+    "fire fox":      "firefox",
+    "brave browser": "brave",
+    "seven zip":     "7zip",
+    "seven-zip":     "7zip",
+    "note pad":      "notepad",
+    "note pad plus plus": "notepad++",
+    "v.s. code":     "vs code",
+    "vscode":        "vs code",
+}
+
+
+def _correct_whisper_app_name(app: str) -> str:
+    """Fix common Whisper mishears for app names."""
+    if not app:
+        return app
+    normalized = app.lower().strip()
+    return _WHISPER_APP_CORRECTIONS.get(normalized, app)
+
+
+def _extract_app_from_install(text: str) -> str:
+    """
+    Pull the app name out of an install-style command.
+    Handles: "install spotify", "get me chrome", "download vs code", etc.
+    Also corrects common Whisper mishears (e.g. "fortify" → "spotify").
+    """
+    lowered = text.lower().strip()
+
+    # Try each install phrase — pick the one that matches at start
+    for phrase in sorted(_INSTALL_PHRASES, key=len, reverse=True):
+        if lowered.startswith(phrase):
+            remainder = text[len(phrase):].strip()
+            # Strip common suffixes
+            remainder = re.sub(
+                r"\s+(?:for me|please|jarvis|now|app|application)\.?$",
+                "",
+                remainder,
+                flags=re.IGNORECASE,
+            ).strip()
+            # Cut at conjunctions
+            remainder = re.sub(
+                r"\s+(?:and|then|also|,)\s+.*$",
+                "",
+                remainder,
+                flags=re.IGNORECASE,
+            ).strip()
+            cleaned = remainder.rstrip(".,!?").strip()
+            # Apply Whisper corrections
+            return _correct_whisper_app_name(cleaned)
+
+    return ""
+
+
+def _extract_app_from_login(text: str) -> str:
+    """
+    Pull the app name out of a login-style command.
+    Handles: "log me into spotify", "sign into discord", etc.
+    """
+    lowered = text.lower().strip()
+
+    for phrase in sorted(_OPEN_AND_LOGIN_PHRASES, key=len, reverse=True):
+        if phrase in lowered:
+            idx = lowered.index(phrase)
+            remainder = text[idx + len(phrase):].strip()
+            remainder = re.sub(
+                r"\s+(?:for me|please|jarvis|now)\.?$",
+                "",
+                remainder,
+                flags=re.IGNORECASE,
+            ).strip()
+            return remainder.rstrip(".,!?").strip()
+
+    return ""
+
+
+def _extract_app_from_save_login(text: str) -> str:
+    """
+    Pull the app name from 'save my [app] login' or 'save login for [app]'.
+    """
+    lowered = text.lower().strip()
+
+    # Pattern: "save my <app> login/password"
+    match = re.search(
+        r"(?:save|remember|store|add)\s+my\s+(.+?)\s+(?:login|password|credentials?)",
+        lowered,
+    )
+    if match:
+        return match.group(1).strip().rstrip(".,!?")
+
+    # Pattern: "save login for <app>"
+    match = re.search(
+        r"(?:save|remember|store)\s+(?:login|password|credentials?)\s+for\s+(.+?)(?:\.|$)",
+        lowered,
+    )
+    if match:
+        return match.group(1).strip().rstrip(".,!?")
+
+    return ""
+
+
+def _extract_app_from_delete_login(text: str) -> str:
+    """
+    Pull the app name from 'delete my [app] login' or 'forget my login for [app]'.
+    """
+    lowered = text.lower().strip()
+
+    # Pattern: "forget my login for <app>" / "delete password for <app>"
+    match = re.search(
+        r"(?:delete|remove|forget)\s+(?:my\s+)?(?:login|password|credentials?)\s+for\s+(.+?)(?:\.|$)",
+        lowered,
+    )
+    if match:
+        return match.group(1).strip().rstrip(".,!?")
+
+    # Pattern: "delete my <app> login"
+    match = re.search(
+        r"(?:delete|remove|forget)\s+my\s+(.+?)\s+(?:login|password|credentials?)",
+        lowered,
+    )
+    if match:
+        return match.group(1).strip().rstrip(".,!?")
+
+    return ""
+
+
+def _looks_like_installable_app_command(text: str) -> bool:
+    """
+    Distinguish 'install spotify' (install intent) from
+    'get me the time' (not install intent).
+
+    Returns True only if we're confident this is an install request.
+    """
+    lowered = text.lower().strip()
+
+    # Explicit strong signals
+    strong_signals = ("install ", "download ", "set up ", "setup ")
+    if any(lowered.startswith(s) for s in strong_signals):
+        return True
+
+    # Weaker signals ("get me", "grab me") — require known app in text
+    weak_signals = ("get me ", "grab me ", "get ")
+    for signal in weak_signals:
+        if lowered.startswith(signal):
+            for app in _KNOWN_INSTALLABLE_APPS:
+                if app in lowered:
+                    return True
+            return False
+
+    return False
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# INTENT CLASSIFICATION (MAIN)
+# ══════════════════════════════════════════════════════════════════════════════
+
 def classify_intent(text: str) -> dict:
     resolved = resolve_reference(text)
     lowered  = resolved.lower().strip()
@@ -719,6 +1053,108 @@ def classify_intent(text: str) -> dict:
         if short_result is not None:
             print(f"[core][SHORT] classified '{resolved}' → {short_result['intent']}")
             return short_result
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # NEW: Iron Man automation intents (checked BEFORE open/close)
+    # ══════════════════════════════════════════════════════════════════════════
+
+    # ── install_and_login (multi-step combined) ──────────────────────────────
+    if any(phrase in lowered for phrase in _INSTALL_AND_LOGIN_PHRASES):
+        app = _extract_app_from_install(resolved)
+        # If that didn't work, try harder — look for known apps in text
+        if not app:
+            for known in _KNOWN_INSTALLABLE_APPS:
+                if known in lowered:
+                    app = known
+                    break
+        return {
+            "intent":   "install_and_login",
+            "params":   {"app": app},
+            "entities": {"app": app},
+            "raw_text": resolved,
+        }
+
+    # ── install_app ──────────────────────────────────────────────────────────
+    if _looks_like_installable_app_command(resolved):
+        app = _extract_app_from_install(resolved)
+        if app:
+            return {
+                "intent":   "install_app",
+                "params":   {"app": app},
+                "entities": {"app": app},
+                "raw_text": resolved,
+            }
+
+    # ── open_and_login ───────────────────────────────────────────────────────
+    if any(phrase in lowered for phrase in _OPEN_AND_LOGIN_PHRASES):
+        app = _extract_app_from_login(resolved)
+        if app:
+            return {
+                "intent":   "open_and_login",
+                "params":   {"app": app},
+                "entities": {"app": app},
+                "raw_text": resolved,
+            }
+
+    # ── save_login ───────────────────────────────────────────────────────────
+    if any(phrase in lowered for phrase in _SAVE_LOGIN_PHRASES):
+        app = _extract_app_from_save_login(resolved)
+        return {
+            "intent":   "save_login",
+            "params":   {"app": app},
+            "entities": {"app": app},
+            "raw_text": resolved,
+        }
+
+    # ── list_logins ──────────────────────────────────────────────────────────
+    if any(phrase in lowered for phrase in _LIST_LOGINS_PHRASES):
+        return {
+            "intent":   "list_logins",
+            "params":   {},
+            "entities": {},
+            "raw_text": resolved,
+        }
+
+    # ── delete_login ─────────────────────────────────────────────────────────
+    if any(phrase in lowered for phrase in _DELETE_LOGIN_PHRASES):
+        app = _extract_app_from_delete_login(resolved)
+        return {
+            "intent":   "delete_login",
+            "params":   {"app": app},
+            "entities": {"app": app},
+            "raw_text": resolved,
+        }
+
+    # ── self_scan ────────────────────────────────────────────────────────────
+    if any(phrase in lowered for phrase in _SELF_SCAN_PHRASES):
+        return {
+            "intent":   "self_scan",
+            "params":   {},
+            "entities": {},
+            "raw_text": resolved,
+        }
+
+    # ── self_capabilities ────────────────────────────────────────────────────
+    if any(phrase in lowered for phrase in _SELF_CAPABILITIES_PHRASES):
+        return {
+            "intent":   "self_capabilities",
+            "params":   {},
+            "entities": {},
+            "raw_text": resolved,
+        }
+
+    # ── self_changes ─────────────────────────────────────────────────────────
+    if any(phrase in lowered for phrase in _SELF_CHANGES_PHRASES):
+        return {
+            "intent":   "self_changes",
+            "params":   {},
+            "entities": {},
+            "raw_text": resolved,
+        }
+
+    # ══════════════════════════════════════════════════════════════════════════
+    # END new Iron Man intents
+    # ══════════════════════════════════════════════════════════════════════════
 
     if any(lowered.startswith(p) for p in ("open ", "launch ", "start ")):
         app = _extract_app_name(resolved, "open|launch|start")
@@ -863,11 +1299,8 @@ def classify_intent(text: str) -> dict:
             "raw_text": resolved,
         }
 
-    # ─────────────────────────────────────────────────────────────────────────
-
     # ── User profile intents ──────────────────────────────────────────────────
 
-    # profile_query — "what do you know about me"
     if any(phrase in lowered for phrase in _PROFILE_QUERY_PHRASES):
         return {
             "intent":   "profile_query",
@@ -876,7 +1309,6 @@ def classify_intent(text: str) -> dict:
             "raw_text": resolved,
         }
 
-    # profile_forget — "forget that I [x]"
     if any(phrase in lowered for phrase in _PROFILE_FORGET_PHRASES):
         hint = _strip_profile_prefix(resolved, _PROFILE_FORGET_PHRASES)
         return {
@@ -886,8 +1318,6 @@ def classify_intent(text: str) -> dict:
             "raw_text": resolved,
         }
 
-    # profile_remember — "remember that I [x]"
-    # Checked AFTER obligation phrases — "remind me about the X" stays as obligation
     if any(phrase in lowered for phrase in _PROFILE_REMEMBER_PHRASES):
         statement = _strip_profile_prefix(resolved, _PROFILE_REMEMBER_PHRASES)
         return {
