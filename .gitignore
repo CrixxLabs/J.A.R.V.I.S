@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment files - KEEP .env LOCAL ONLY
+.env
+*.env
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# JARVIS specific
+*.wav
+*.mp3
+*.onnx
+*.onnx.json
+temp_output.wav
+user_voice.npy
+user_voice_sample.wav
+user_face.pkl
+self_awareness_state.json
+status_registry.json
+memory.json
+tasks.json
+obligations.json
+user_profile.json
+logs/
+generated_media/
+patches/
+*.tmp
+
+# Credentials and secrets
+*.pem
+*.key
+*.crt
+credentials.json
+gcal_token.json
+
+# Runtime
+*.pid
+*.lock
