@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-08-27T20:11:21.222671",
+  "timestamp": "2026-09-08T04:31:15.972447",
   "core_files": {
     "app_installer.py": {
       "hash": "9f6d2b62165a6871",
@@ -32,8 +32,8 @@
       "description": "Per-app login flow recipes (Spotify, Discord, etc.)"
     },
     "boot_check.py": {
-      "hash": "dc326523b919063b",
-      "size_bytes": 17447,
+      "hash": "adc2feb372c95893",
+      "size_bytes": 17439,
       "functions": [
         "probe_voice_stt",
         "probe_voice_tts",
@@ -122,8 +122,8 @@
       "description": ""
     },
     "evolver.py": {
-      "hash": "08daf93b5b953fbd",
-      "size_bytes": 14820,
+      "hash": "e47046518b362bde",
+      "size_bytes": 14810,
       "functions": [
         "analyze",
         "generate_proposal",
@@ -137,8 +137,8 @@
       "description": "Self-patching, proposes code improvements"
     },
     "executor.py": {
-      "hash": "e8ce493f034983b0",
-      "size_bytes": 71561,
+      "hash": "4fcf7f6490ca090c",
+      "size_bytes": 71729,
       "functions": [
         "init",
         "get_capabilities_text",
@@ -176,8 +176,8 @@
       "description": "Executes actions (open apps, web search, reminders, etc.)"
     },
     "face_recognition_module.py": {
-      "hash": "e2f7e106f155766a",
-      "size_bytes": 6257,
+      "hash": "5dc7f893c576965c",
+      "size_bytes": 7443,
       "functions": [
         "minutes_since_last_seen",
         "register_face",
@@ -201,33 +201,28 @@
       ],
       "description": "Filesystem operations"
     },
-    "jarvis.py": {
-      "hash": "10f78711ec92d9d5",
-      "size_bytes": 39973,
+    "file_processor.py": {
+      "hash": "16d24db4faf0ea17",
+      "size_bytes": 38661,
       "functions": [
-        "jarvisify_response",
-        "speak",
-        "was_interrupted",
-        "listen",
-        "wake_word_detect",
-        "handle_fast_command",
-        "proactive_loop",
-        "check_face_is_user",
-        "execute_with_feedback",
-        "startup"
+        "get_processor",
+        "process_file",
+        "process_file_async"
+      ],
+      "description": ""
+    },
+    "jarvis.py": {
+      "hash": "8030161c2de0aca4",
+      "size_bytes": 9284,
+      "functions": [
+        "jarvisify_response"
       ],
       "description": "Main entry point, event loop, user interaction"
     },
     "jarvis_runtime.py": {
-      "hash": "c80935e3596eeb58",
-      "size_bytes": 2724,
-      "functions": [
-        "speak",
-        "run_server",
-        "get_dynamic_greeting",
-        "get_briefing",
-        "is_wake_word"
-      ],
+      "hash": "f60ec06e8c998331",
+      "size_bytes": 1032,
+      "functions": [],
       "description": "Runtime lifecycle, background states"
     },
     "jarvis_tts.py": {
@@ -240,9 +235,23 @@
       ],
       "description": ""
     },
+    "lifecycle.py": {
+      "hash": "06e2536ee0089b9b",
+      "size_bytes": 6492,
+      "functions": [
+        "get_lifecycle",
+        "register_component",
+        "start_all",
+        "shutdown",
+        "wait_for_shutdown",
+        "setup_lifecycle_signals",
+        "managed_lifecycle"
+      ],
+      "description": ""
+    },
     "listener.py": {
-      "hash": "b8e94fba36b1b810",
-      "size_bytes": 25793,
+      "hash": "030774234d473fbf",
+      "size_bytes": 25780,
       "functions": [
         "init_mic",
         "calibrate_ambient_noise",
@@ -327,13 +336,14 @@
       "description": "Assignments, exams, deadlines tracker"
     },
     "observer.py": {
-      "hash": "bf18caf7cb973d58",
-      "size_bytes": 15424,
+      "hash": "51475b7cb1c59d20",
+      "size_bytes": 15937,
       "functions": [
         "get_context_hint",
         "get_state_snapshot",
         "mark_user_input",
         "start_observers",
+        "stop_observers",
         "capture_pre_action_state",
         "verify_action_outcome"
       ],
@@ -378,13 +388,14 @@
       "description": "Screen deadline scanning"
     },
     "proactive_scheduler.py": {
-      "hash": "28606a4a397bf0ed",
-      "size_bytes": 14278,
+      "hash": "2deb36d760254006",
+      "size_bytes": 14827,
       "functions": [
         "init",
         "run_obligation_checkin",
         "minutes_since_last_checkin",
         "deliver_pending_message",
+        "stop_scheduler",
         "start"
       ],
       "description": "Scheduled reminders, obligation check-ins"
@@ -396,8 +407,8 @@
       "description": ""
     },
     "self_awareness.py": {
-      "hash": "c6b8dc93f36b0245",
-      "size_bytes": 17486,
+      "hash": "342578bbdcfd22e5",
+      "size_bytes": 17485,
       "functions": [
         "scan_self",
         "force_rescan",
@@ -424,16 +435,16 @@
       "description": "Internal health checks, boot-time syntax scan"
     },
     "self_model.py": {
-      "hash": "19a87c795bd22ff1",
-      "size_bytes": 21195,
+      "hash": "e849c3f33a2000f7",
+      "size_bytes": 21447,
       "functions": [
         "get_model"
       ],
       "description": "Structured self-model tracking operational capabilities"
     },
     "server.py": {
-      "hash": "69c975b83d207609",
-      "size_bytes": 5932,
+      "hash": "62dfab0c778b4711",
+      "size_bytes": 15744,
       "functions": [
         "speak",
         "index",
@@ -442,7 +453,14 @@
         "api_history",
         "api_clear",
         "api_listen",
-        "live"
+        "live",
+        "api_upload",
+        "api_files",
+        "api_delete_file",
+        "api_process_file",
+        "api_task_status",
+        "api_list_tasks",
+        "api_process_file_sync"
       ],
       "description": "Local web backend for dashboard"
     },
@@ -481,21 +499,52 @@
       "description": "CPU, GPU, RAM tracking"
     },
     "tasks.py": {
-      "hash": "5ca906eee57d8def",
-      "size_bytes": 11023,
+      "hash": "1ac6dedac1efe766",
+      "size_bytes": 11800,
       "functions": [
         "init",
         "add_reminder",
         "list_reminders",
+        "get_active_reminder_count",
+        "get_active_reminders",
         "cancel_reminder",
         "set_morning_briefing_time",
-        "disable_task"
+        "disable_task",
+        "stop_tasks"
       ],
       "description": "Active task engine with reminders"
     },
+    "task_integration.py": {
+      "hash": "7047048148dcea72",
+      "size_bytes": 15180,
+      "functions": [
+        "get_task_integration",
+        "init_task_integration",
+        "classify_action_for_execution",
+        "should_queue_action",
+        "classify_action"
+      ],
+      "description": ""
+    },
+    "task_queue.py": {
+      "hash": "6e3ea4c8a9c1637b",
+      "size_bytes": 17636,
+      "functions": [
+        "get_task_queue"
+      ],
+      "description": ""
+    },
+    "test_startup_shutdown.py": {
+      "hash": "f3a19fee683c22b0",
+      "size_bytes": 2079,
+      "functions": [
+        "debug_startup"
+      ],
+      "description": ""
+    },
     "user_profile.py": {
-      "hash": "88b2fc416b4a59ab",
-      "size_bytes": 35437,
+      "hash": "a436db1681905c15",
+      "size_bytes": 34770,
       "functions": [
         "seed_profile_from_text",
         "confirm_and_save_profile",
@@ -564,30 +613,14 @@
   "skills": [
     "example_skill"
   ],
-  "total_files": 38,
-  "total_functions": 294,
-  "total_size_bytes": 640455,
+  "total_files": 43,
+  "total_functions": 309,
+  "total_size_bytes": 700680,
   "changes": {
-    "added": [
-      "boot_check.py",
-      "error_handler.py",
-      "self_model.py",
-      "status_registry.py"
-    ],
+    "added": [],
     "removed": [],
     "modified": [
-      "brain.py",
-      "executor.py",
-      "jarvis.py",
-      "jarvis_tts.py",
-      "listener.py",
-      "memory.py",
-      "observer.py",
-      "planner.py",
-      "self_awareness.py",
-      "tasks.py",
-      "vision.py",
-      "whatsapp_fetcher.py"
+      "task_integration.py"
     ]
   }
 }

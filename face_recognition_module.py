@@ -5,6 +5,7 @@
 # Non-blocking, lightweight, no UI
 
 import os
+import sys
 import threading
 import time
 import pickle
@@ -12,16 +13,40 @@ import pickle
 import cv2
 import numpy as np
 
-try:
-    import face_recognition
-    _FR_AVAILABLE = True
-except ImportError:
-    _FR_AVAILABLE = False
-    print("[FaceRec] face_recognition not installed. pip install face_recognition")
-
 BASE_DIR      = os.path.dirname(os.path.abspath(__file__))
 ENCODING_FILE = os.path.join(BASE_DIR, "user_face.pkl")
 
+# ── Shared state ──
+_last_result     = False   # True = known user detected
+_last_check_time = 0
+_lock            = threading.Lock()
+COOLDOWN_SECS    = 4       # check at most every 3s
+_cap = None  # persistent camera (performance fix)
+_last_printed_state = None
+
+# ── Layer 3: Session tracking ──────────────────────────────────────────────────
+_last_seen_time = 0.0   # timestamp of last successful recognition
+
+# Lazy-loaded face_recognition
+_face_recognition = None
+_FR_AVAILABLE = None
+
+def _ensure_face_recognition():
+    """Lazily import face_recognition and check for models."""
+    global _face_recognition, _FR_AVAILABLE
+    if _face_recognition is not None:
+        return _FR_AVAILABLE
+    try:
+        import face_recognition
+        # Test if models are available
+        face_recognition.face_encodings(np.zeros((100, 100, 3), dtype=np.uint8))
+        _face_recognition = face_recognition
+        _FR_AVAILABLE = True
+    except Exception:
+        _FR_AVAILABLE = False
+    return _FR_AVAILABLE
+
+# ───────────────────────────────────────────────────────────────────────────────
 # ── Shared state ──
 _last_result     = False   # True = known user detected
 _last_check_time = 0

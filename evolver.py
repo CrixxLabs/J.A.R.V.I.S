@@ -145,7 +145,7 @@ def generate_proposal(finding):
     try:
         with open(path, "w") as f:
             json.dump(proposal, f, indent=2)
-        print(f"[Evolver] Proposal saved → {path}")
+        print(f"[Evolver] Proposal saved -> {path}")
     except Exception as e:
         print(f"[Evolver] Save error: {e}")
 
@@ -291,7 +291,7 @@ def apply_patch(filepath, new_content, proposal=None):
       1. Backup the original
       2. Write the new content
       3. Run sandbox_test() if a proposal is given
-      4. If sandbox_test fails → auto-rollback and log
+      4. If sandbox_test fails -> auto-rollback and log
     Returns (True, message) on success, (False, message) on failure.
     """
     if not os.path.exists(filepath):
@@ -356,7 +356,7 @@ def apply_patch(filepath, new_content, proposal=None):
 # ── Main evolution cycle ──
 def run_evolution_cycle():
     """
-    Full cycle: analyze → propose → sandbox test.
+    Full cycle: analyze -> propose -> sandbox test.
     Runs periodically. NEVER writes to core files.
     """
     print("[Evolver] Running evolution cycle...")
@@ -371,7 +371,7 @@ def run_evolution_cycle():
         proposal = generate_proposal(finding)
         safe     = sandbox_test(proposal)
         if safe:
-            print(f"[Evolver] Proposal ready for review: {finding['type']} → {finding.get('suggestion','')[:60]}")
+            print(f"[Evolver] Proposal ready for review: {finding['type']} -> {finding.get('suggestion','')[:60]}")
         else:
             print(f"[Evolver] Proposal rejected in sandbox: {finding['type']}")
 
@@ -391,7 +391,7 @@ def start_evolver(interval_hours=6):
 
     t = threading.Thread(target=_loop, daemon=True)
     t.start()
-    print(f"[Evolver] Started — cycle every {interval_hours}h. Proposals → /patches/")
+    print(f"[Evolver] Started - cycle every {interval_hours}h. Proposals -> /patches/")
 
 
 # ── Manual trigger ──
@@ -401,8 +401,8 @@ if __name__ == "__main__":
     patches = os.listdir(PATCHES_DIR) if os.path.exists(PATCHES_DIR) else []
     print(f"\n{len(patches)} proposal(s) in /patches/:")
     for p in patches:
-        print(f"  → {p}")
+        print(f"  -> {p}")
     backups = list_backups()
     print(f"\n{len(backups)} backup(s) in /evolver_backups/:")
     for b in backups[:10]:
-        print(f"  → {os.path.basename(b)}")
+        print(f"  -> {os.path.basename(b)}")

@@ -176,7 +176,7 @@ def _load_whisper():
             device = "cuda" if torch.cuda.is_available() else "cpu"
             print(f"[Listener] Loading Whisper ({WHISPER_MODEL_SIZE}) on {device}...")
             _whisper_model = whisper.load_model(WHISPER_MODEL_SIZE, device=device)
-            print(f"[Listener] ✓ Whisper loaded on {device}")
+            print(f"[Listener] OK Whisper loaded on {device}")
         except Exception as e:
             error_handler.log_and_demote(
                 subsystem="VOICE_STT",
@@ -194,11 +194,11 @@ def _load_voice_encoder():
         try:
             from resemblyzer import VoiceEncoder
             _voice_encoder = VoiceEncoder(verbose=False)
-            print("[Listener] ✓ Voice encoder loaded")
+            print("[Listener] OK Voice encoder loaded")
 
             if os.path.exists(VOICE_EMBEDDING_FILE):
                 _user_voice_embedding = np.load(VOICE_EMBEDDING_FILE)
-                print(f"[Listener] ✓ User voice embedding loaded")
+                print("[Listener] OK User voice embedding loaded")
             else:
                 print("[Listener] ⚠ No user voice registered — run voice_setup.py first")
         except Exception as e:
@@ -362,7 +362,7 @@ def calibrate_ambient_noise():
         _calibrated = True
 
         voice_threshold = int(_ambient_energy * VOICE_ENERGY_MULTIPLIER)
-        print(f"[Listener] ✓ Calibrated — ambient: {_ambient_energy:.0f} | voice threshold: {voice_threshold}")
+        print(f"[Listener] OK Calibrated - ambient: {_ambient_energy:.0f} | voice threshold: {voice_threshold}")
 
     except Exception as e:
         error_handler.log_and_demote(
@@ -418,7 +418,7 @@ def detect_double_clap():
                     if len(clap_times) == 2:
                         interval = clap_times[1] - clap_times[0]
                         if CLAP_MIN_INTERVAL < interval < CLAP_MAX_INTERVAL:
-                            print(f"[Listener] ✓ Double clap! (interval: {interval:.2f}s)")
+                            print(f"[Listener] OK Double clap! (interval: {interval:.2f}s)")
                             stream.stop_stream()
                             stream.close()
                             return True
@@ -499,7 +499,7 @@ def _interrupt_watcher():
                         if len(clap_times) == 2:
                             interval = clap_times[1] - clap_times[0]
                             if CLAP_MIN_INTERVAL < interval < CLAP_MAX_INTERVAL:
-                                print(f"[Interrupt] ✓ Double clap interrupt!")
+                                print("[Interrupt] OK Double clap interrupt!")
                                 _interrupt_flag.set()
                                 break
                             else:
@@ -511,7 +511,7 @@ def _interrupt_watcher():
                     if voice_start_time == 0:
                         voice_start_time = current_time
                     elif (current_time - voice_start_time) >= INTERRUPT_MIN_DURATION:
-                        print(f"[Interrupt] ✓ Voice interrupt (energy: {energy:.0f})")
+                        print(f"[Interrupt] OK Voice interrupt (energy: {energy:.0f})")
                         _interrupt_flag.set()
                         break
                 else:
@@ -665,9 +665,9 @@ def listen_for_command(timeout=12, phrase_time_limit=20):
                     timeout=timeout,
                     phrase_time_limit=phrase_time_limit,
                 )
-                print("[Listener] ✓ Audio captured, processing...")
+                print("[Listener] OK Audio captured, processing...")
             except sr.WaitTimeoutError:
-                print("[Listener] ✗ Timeout — no voice detected in time")
+                print("[Listener] FAIL Timeout — no voice detected in time")
                 return None
 
     except Exception as e:
@@ -682,14 +682,14 @@ def listen_for_command(timeout=12, phrase_time_limit=20):
     audio_np = _audio_data_to_numpy(audio)
     if audio_np is not None:
         if not _verify_speaker(audio_np):
-            print("[Listener] ✗ Voice doesn't match registered user — ignored")
+            print("[Listener] FAIL Voice doesn't match registered user — ignored")
             return None
         else:
-            print("[Listener] ✓ Voice verified as user")
+            print("[Listener] OK Voice verified as user")
 
     whisper_text = _transcribe_with_whisper(audio)
     if whisper_text:
-        print(f"[Listener] ✓ Whisper heard: '{whisper_text}'")
+        print(f"[Listener] OK Whisper heard: '{whisper_text}'")
         return whisper_text.lower().strip()
 
     print("[Listener] Whisper empty, trying Google...")
@@ -698,7 +698,7 @@ def listen_for_command(timeout=12, phrase_time_limit=20):
             text = recognizer.recognize_google(audio, language=language)
             normalized = text.strip()
             if normalized:
-                print(f"[Listener] ✓ Google ({language}): {normalized}")
+                print(f"[Listener] OK Google ({language}): {normalized}")
                 return normalized.lower()
         except sr.UnknownValueError:
             continue
@@ -709,7 +709,7 @@ def listen_for_command(timeout=12, phrase_time_limit=20):
             print(f"[Listener] Google error: {e}")
             break
 
-    print("[Listener] ✗ Couldn't understand.")
+    print("[Listener] FAIL Couldn't understand.")
     return None
 
 
@@ -727,10 +727,10 @@ if __name__ == "__main__":
     while True:
         if detect_double_clap():
             play_jarvis_ui_sound()
-            print("\n✓ Activated! Listening for command...")
+            print("\nOK Activated! Listening for command...")
             command = listen_for_command()
             if command:
-                print(f"✓ Command: '{command}'")
+                print(f"OK Command: '{command}'")
             else:
-                print("✗ No command heard.")
+                print("FAIL No command heard.")
             print("\nWaiting for double clap again...")

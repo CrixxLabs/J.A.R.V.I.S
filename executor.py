@@ -25,8 +25,10 @@ from youtube_transcript_api import YouTubeTranscriptApi
 from dotenv import load_dotenv
 from memory import remember, recall_all, log_activity, update_daily_stats, log_failure
 
-# File ops module — provides search_files and rename_file
-from file_ops import search_files, rename_file as _rename_file
+# File ops module — provides search_files and rename_file (lazy import to avoid cycles)
+def _get_file_ops():
+    from file_ops import search_files, rename_file
+    return search_files, rename_file
 
 # Email
 from email.mime.text import MIMEText
@@ -1605,12 +1607,14 @@ def execute(action, speak_fn=None):
             query = action.get("query", "") or action.get("name", "")
             if not query:
                 return _stable_failure("What file should I search for?")
+            search_files, _ = _get_file_ops()
             return _stable_success(search_files(query))
         if act == "rename_file":
             old = action.get("old_name", "") or action.get("name", "")
             new = action.get("new_name", "")
             if not old or not new:
                 return _stable_failure("I need both the old and new name to rename a file.")
+            _, _rename_file = _get_file_ops()
             return _stable_success(_rename_file(old, new))
         if act == "whatsapp_read":
             return _stable_whatsapp_read()

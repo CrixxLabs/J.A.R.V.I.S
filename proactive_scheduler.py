@@ -280,10 +280,11 @@ def _run_weekly_analysis():
 # ── Scheduler thread ──────────────────────────────────────────────────────────
 
 def _scheduler_loop():
+    global _scheduler_shutdown
     print(f"[proactive_scheduler] Scheduler running. Check-in times: {CHECKIN_TIMES}")
     _fired_this_minute: set = set()
 
-    while True:
+    while not _scheduler_shutdown:
         try:
             now_str = datetime.datetime.now().strftime("%H:%M")
 
@@ -332,6 +333,8 @@ def _scheduler_loop():
 
 _pending_message: str = ""
 _pending_message_lock = threading.Lock()
+_scheduler_thread: threading.Thread | None = None
+_scheduler_shutdown = False
 
 
 def _store_pending_message(message: str):
@@ -348,10 +351,21 @@ def deliver_pending_message() -> str:
     return msg
 
 
+def stop_scheduler():
+    """Signal the scheduler loop to stop."""
+    global _scheduler_shutdown, _scheduler_thread
+    _scheduler_shutdown = True
+    if _scheduler_thread and _scheduler_thread.is_alive():
+        _scheduler_thread.join(timeout=3.0)
+    print("[proactive_scheduler] Scheduler stopped.")
+
+
 # ── Start ─────────────────────────────────────────────────────────────────────
 
 def start(speak_fn, active_getter):
+    global _scheduler_thread, _scheduler_shutdown
     init(speak_fn, active_getter)
-    t = threading.Thread(target=_scheduler_loop, daemon=True, name="ProactiveScheduler")
-    t.start()
+    _scheduler_shutdown = False
+    _scheduler_thread = threading.Thread(target=_scheduler_loop, daemon=True, name="ProactiveScheduler")
+    _scheduler_thread.start()
     print("[proactive_scheduler] Background scheduler started.")

@@ -28,5 +28,20 @@
     "repeat": false,
     "label": "reminder: drink water in 10 seconds",
     "entities": {}
+  },
+  {
+    "id": "reminder_d8670ec6",
+    "type": "scheduled",
+    "scheduled_time": null,
+    "delay_seconds": 2,
+    "fire_at": "2026-09-07T17:44:56.457678",
+    "action": "speak",
+    "message": "test reminder",
+    "active": false,
+    "last_triggered": null,
+    "cooldown_minutes": 9999,
+    "repeat": false,
+    "label": "reminder: test reminder",
+    "entities": {}
   }
 ]

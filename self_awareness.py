@@ -279,7 +279,7 @@ def scan_self(verbose: bool = True) -> dict:
     _scan_timestamp = datetime.datetime.now()
 
     if verbose:
-        print(f"[self_awareness] ✓ scanned {len(core_files)} files, {total_functions} functions, {len(skills)} skills")
+        print(f"[self_awareness] OK scanned {len(core_files)} files, {total_functions} functions, {len(skills)} skills")
         if changes["added"]:
             print(f"[self_awareness] + added since last boot: {', '.join(changes['added'])}")
         if changes["removed"]:

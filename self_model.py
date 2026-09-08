@@ -295,24 +295,27 @@ class SelfCapabilityModel:
         worst_state = SubsystemState.READY.value
         worst_detail = "All systems operational"
 
-        # State ranking order (worst to best)
+        # State ranking order (worst to best) — UNKNOWN is worse than READY
         state_ranks = {
-            SubsystemState.DISABLED.value: 4,
-            SubsystemState.OFFLINE.value:  3,
-            SubsystemState.DEGRADED.value: 2,
+            SubsystemState.DISABLED.value: 5,
+            SubsystemState.OFFLINE.value:  4,
+            SubsystemState.DEGRADED.value: 3,
+            SubsystemState.UNKNOWN.value:  2,
             SubsystemState.READY.value:    1,
-            SubsystemState.UNKNOWN.value:  0
         }
 
         for dep in deps:
             info = reg.get_status(dep)
             if not info:
-                continue
-            state = info.get("state", SubsystemState.UNKNOWN.value)
-            detail = info.get("detail", "")
+                # Dependency not in registry = UNKNOWN (treated as potentially problematic)
+                state = SubsystemState.UNKNOWN.value
+                detail = "not in registry"
+            else:
+                state = info.get("state", SubsystemState.UNKNOWN.value)
+                detail = info.get("detail", "")
 
-            rank_current = state_ranks.get(state, 0)
-            rank_worst = state_ranks.get(worst_state, 0)
+            rank_current = state_ranks.get(state, 2)  # default to UNKNOWN rank
+            rank_worst = state_ranks.get(worst_state, 1)
 
             if rank_current > rank_worst:
                 worst_state = state

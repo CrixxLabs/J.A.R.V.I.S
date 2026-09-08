@@ -34,6 +34,7 @@ state = {
     "youtube_time":       0,   # seconds spent on youtube today
     "last_app_change":    time.time(),
 }
+_shutdown = False
 _lock = threading.Lock()
 
 # ── App name mapping ──
@@ -63,6 +64,7 @@ APP_MAP = {
     "twitch":             "Twitch",
     "figma":              "Figma",
     "photoshop":          "Photoshop",
+    "notepad":            "Notepad",
 }
 
 def _detect_app(title):
@@ -116,7 +118,7 @@ def mark_user_input():
 # ── Context Observer Thread ──
 def _context_observer():
     registry = get_registry()
-    while True:
+    while not _shutdown:
         try:
             hwnd  = win32gui.GetForegroundWindow()
             title = win32gui.GetWindowText(hwnd)
@@ -148,7 +150,7 @@ def _context_observer():
 # ── System Observer Thread ──
 def _system_observer():
     registry = get_registry()
-    while True:
+    while not _shutdown:
         try:
             cpu = psutil.cpu_percent(interval=None)
             ram = psutil.virtual_memory()
@@ -178,7 +180,7 @@ def _system_observer():
 def _screen_observer():
     registry = get_registry()
     last_hash = None
-    while True:
+    while not _shutdown:
         try:
             with mss() as sct:
                 img = np.array(sct.grab(sct.monitors[1]))
@@ -209,7 +211,7 @@ def _screen_observer():
 
 # ── YouTube Time Tracker ──
 def _youtube_tracker():
-    while True:
+    while not _shutdown:
         try:
             with _lock:
                 app = state["active_app"]
@@ -228,17 +230,33 @@ def _youtube_tracker():
         time.sleep(30)
 
 
+# Thread references for graceful shutdown
+_observer_threads: list[threading.Thread] = []
+
+
 # ── Start all observers ──
 def start_observers():
-    threads = [
+    global _observer_threads
+    _observer_threads = [
         threading.Thread(target=_context_observer, daemon=True),
         threading.Thread(target=_system_observer,  daemon=True),
         threading.Thread(target=_screen_observer,  daemon=True),
         threading.Thread(target=_youtube_tracker,  daemon=True),
     ]
-    for t in threads:
+    for t in _observer_threads:
         t.start()
     print("[Observer] All observers started.")
+
+
+def stop_observers():
+    """Signal all observer threads to stop and wait for them."""
+    global _shutdown
+    _shutdown = True
+    # Give threads time to exit cleanly
+    for t in _observer_threads:
+        if t.is_alive():
+            t.join(timeout=2.0)
+    print("[Observer] All observers stopped.")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -352,7 +370,7 @@ def verify_action_outcome(action: dict, pre_state: dict = None, timeout: float =
         if act == "set_reminder":
             import tasks
             time.sleep(0.3)
-            current_count = len(tasks.reminders) if hasattr(tasks, "reminders") else 0
+            current_count = tasks.get_active_reminder_count()
             pre_count = pre_state.get("reminder_count", 0)
             if current_count > pre_count or current_count > 0:
                 return True, "Reminder verified in task registry."

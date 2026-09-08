@@ -120,9 +120,13 @@ def _evaluate_condition(condition, snap):
         return snap.get("cpu_percent", 0) > 90
     return False
 
+_task_thread: threading.Thread | None = None
+_tasks_shutdown = False
+
+
 def _task_loop():
     from observer import get_state_snapshot
-    while True:
+    while not _tasks_shutdown:
         try:
             now  = datetime.datetime.now()
             snap = get_state_snapshot()
@@ -299,6 +303,18 @@ def list_reminders():
     return "Active reminders: " + ", ".join(active)
 
 
+def get_active_reminder_count() -> int:
+    """Return count of active reminders for verification."""
+    with _lock:
+        return sum(1 for t in _tasks if t.get("active", True) and "reminder" in t.get("id", ""))
+
+
+def get_active_reminders() -> list:
+    """Return list of active reminder tasks for inspection."""
+    with _lock:
+        return [dict(t) for t in _tasks if t.get("active", True) and "reminder" in t.get("id", "")]
+
+
 def cancel_reminder(keyword):
     with _lock:
         for t in _tasks:
@@ -325,3 +341,12 @@ def disable_task(task_id):
             if t["id"] == task_id:
                 t["active"] = False
     _save_tasks()
+
+
+def stop_tasks():
+    """Signal the task loop to stop."""
+    global _tasks_shutdown, _task_thread
+    _tasks_shutdown = True
+    if _task_thread and _task_thread.is_alive():
+        _task_thread.join(timeout=3.0)
+    print("[Tasks] Task engine stopped.")

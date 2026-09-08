@@ -11,14 +11,29 @@
 import os
 import threading
 import time
+import uuid
+import asyncio
+import mimetypes
 from datetime import datetime
+from functools import wraps
+from pathlib import Path
+from werkzeug.utils import secure_filename
+
 import pyttsx3
 import speech_recognition as sr
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from dotenv import load_dotenv
 
+from task_queue import TaskPriority
+
 load_dotenv()
+
+# Security configuration
+ALLOWED_ORIGINS = os.getenv("JARVIS_CORS_ORIGINS", "http://localhost:5000,http://127.0.0.1:5000").split(",")
+BIND_HOST = os.getenv("JARVIS_BIND_HOST", "127.0.0.1")
+REQUIRE_AUTH = os.getenv("JARVIS_REQUIRE_AUTH", "false").lower() == "true"
+API_KEY = os.getenv("JARVIS_API_KEY", "")  # Optional API key for privileged actions
 
 engine = pyttsx3.init()
 recognizer = sr.Recognizer()
@@ -29,6 +44,27 @@ def speak(text: str):
         engine.runAndWait()
     except Exception:
         pass
+
+def _require_auth(f):
+    """Decorator to require API key for privileged endpoints."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not REQUIRE_AUTH or not API_KEY:
+            return f(*args, **kwargs)
+        provided = request.headers.get("X-API-Key") or request.args.get("api_key")
+        if provided != API_KEY:
+            return jsonify({"error": "Unauthorized"}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+# File upload configuration
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads")
+MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
+ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.doc', '.txt', '.md', '.py', '.js', '.ts', '.jsx', '.tsx',
+                      '.html', '.css', '.json', '.xml', '.yaml', '.yml', '.csv', '.tsv',
+                      '.xlsx', '.xls', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp',
+                      '.mp3', '.wav', '.ogg', '.flac', '.m4a', '.mp4', '.mov', '.avi',
+                      '.mkv', '.webm', '.zip', '.tar', '.gz', '.bz2', '.xz', '.7z', '.rar'}
 
 # ── Lazy Jarvis imports (graceful if running headless / without PC deps) ───────
 _planner    = None
@@ -69,7 +105,7 @@ app = Flask(
     static_folder=os.path.join(BASE_DIR, "ui"),
     static_url_path=""
 )
-CORS(app)
+CORS(app, origins=ALLOWED_ORIGINS, supports_credentials=False)
 
 # In-memory chat log (resets on server restart)
 _chat_log: list[dict] = []
@@ -166,6 +202,7 @@ def api_history():
 
 
 @app.route("/api/clear", methods=["POST"])
+@_require_auth
 def api_clear():
     """Clears in-memory chat log and planner history."""
     _chat_log.clear()
@@ -175,6 +212,7 @@ def api_clear():
 
 
 @app.route("/api/listen", methods=["GET"])
+@_require_auth
 def api_listen():
     try:
         with sr.Microphone() as source:
@@ -193,8 +231,242 @@ def live():
     return jsonify(last_message)
 
 
+# ── File Processing Endpoints ────────────────────────────────────────────────
+
+def _allowed_file(filename: str) -> bool:
+    """Check if file extension is allowed."""
+    return Path(filename).suffix.lower() in ALLOWED_EXTENSIONS
+
+
+@app.route("/api/upload", methods=["POST"])
+@_require_auth
+def api_upload():
+    """Upload file(s) for processing."""
+    if 'files' not in request.files and 'file' not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+    
+    files = request.files.getlist('files') if 'files' in request.files else [request.files['file']]
+    if not files or all(f.filename == '' for f in files):
+        return jsonify({"error": "No file selected"}), 400
+    
+    # Ensure upload directory exists
+    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+    
+    uploaded = []
+    for file in files:
+        if file.filename == '':
+            continue
+        
+        if not _allowed_file(file.filename):
+            return jsonify({"error": f"File type not allowed: {file.filename}"}), 400
+        
+        # Generate safe filename
+        filename = secure_filename(file.filename)
+        file_id = str(uuid.uuid4())[:8]
+        ext = Path(file.filename).suffix.lower()
+        safe_filename = f"{file_id}_{filename}"
+        filepath = os.path.join(UPLOAD_FOLDER, safe_filename)
+        
+        # Save file
+        file.save(filepath)
+        
+        # Check file size
+        file_size = os.path.getsize(filepath)
+        if file_size > MAX_FILE_SIZE:
+            os.remove(filepath)
+            return jsonify({"error": f"File too large: {file_size} bytes (max {MAX_FILE_SIZE})"}), 413
+        
+        # Get file info
+        mime_type, _ = mimetypes.guess_type(filepath)
+        
+        uploaded.append({
+            "id": file_id,
+            "original_name": file.filename,
+            "saved_name": safe_filename,
+            "size": file_size,
+            "mime_type": mime_type or "application/octet-stream",
+            "path": filepath
+        })
+    
+    return jsonify({"files": uploaded, "count": len(uploaded)})
+
+
+@app.route("/api/files", methods=["GET"])
+@_require_auth
+def api_files():
+    """List uploaded files."""
+    if not os.path.exists(UPLOAD_FOLDER):
+        return jsonify({"files": []})
+    
+    files = []
+    for fname in os.listdir(UPLOAD_FOLDER):
+        filepath = os.path.join(UPLOAD_FOLDER, fname)
+        if os.path.isfile(filepath):
+            stat = os.stat(filepath)
+            mime_type, _ = mimetypes.guess_type(filepath)
+            files.append({
+                "name": fname,
+                "size": stat.st_size,
+                "mime_type": mime_type or "application/octet-stream",
+                "modified": datetime.fromtimestamp(stat.st_mtime).isoformat()
+            })
+    
+    return jsonify({"files": files})
+
+
+@app.route("/api/files/<file_id>", methods=["DELETE"])
+@_require_auth
+def api_delete_file(file_id: str):
+    """Delete an uploaded file."""
+    if not os.path.exists(UPLOAD_FOLDER):
+        return jsonify({"error": "File not found"}), 404
+    
+    for fname in os.listdir(UPLOAD_FOLDER):
+        if fname.startswith(file_id + "_"):
+            filepath = os.path.join(UPLOAD_FOLDER, fname)
+            os.remove(filepath)
+            return jsonify({"ok": True, "deleted": fname})
+    
+    return jsonify({"error": "File not found"}), 404
+
+
+@app.route("/api/process-file", methods=["POST"])
+@_require_auth
+def api_process_file():
+    """
+    Process an uploaded file with a specific action.
+    POST {"file_id": "...", "action": "summarize|extract|ocr|transcribe|analyze|code_review|debug|inspect|summarize|explain|convert", "params": {...}}
+    """
+    data = request.get_json(silent=True) or {}
+    file_id = data.get("file_id")
+    action = data.get("action", "inspect")
+    params = data.get("params", {})
+    
+    if not file_id:
+        return jsonify({"error": "file_id required"}), 400
+    
+    # Find file
+    filepath = None
+    for fname in os.listdir(UPLOAD_FOLDER) if os.path.exists(UPLOAD_FOLDER) else []:
+        if fname.startswith(file_id + "_"):
+            filepath = os.path.join(UPLOAD_FOLDER, fname)
+            break
+    
+    if not filepath or not os.path.exists(filepath):
+        return jsonify({"error": "File not found"}), 404
+    
+    # Submit to task queue for async processing
+    try:
+        from task_queue import submit_task
+        
+        def _coro_factory():
+            return _process_file_task(filepath, action, params)
+        
+        task_id = asyncio.run(submit_task(
+            _coro_factory,
+            name=f"file_{action}_{file_id}",
+            priority=TaskPriority.NORMAL
+        ))
+        return jsonify({"task_id": task_id, "status": "queued"})
+    except Exception as e:
+        return jsonify({"error": f"Failed to queue task: {e}"}), 500
+
+
+async def _process_file_task(filepath: str, action: str, params: dict):
+    """Process file asynchronously using file_processor."""
+    try:
+        from file_processor import process_file
+        result = process_file(filepath, action, **params)
+        return {
+            "success": result.success,
+            "action": action,
+            "result": result.result,
+            "error": result.error,
+            "metadata": {
+                "file": result.metadata.name if result.metadata else None,
+                "size": result.metadata.size if result.metadata else None,
+                "mime": result.metadata.mime_type if result.metadata else None
+            } if result.metadata else None
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+
+@app.route("/api/tasks/<task_id>", methods=["GET"])
+@_require_auth
+def api_task_status(task_id: str):
+    """Get status of a background task."""
+    try:
+        from task_queue import get_task_status
+        status = asyncio.run(get_task_status(task_id))
+        if status is None:
+            return jsonify({"error": "Task not found"}), 404
+        return jsonify(status)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/tasks", methods=["GET"])
+@_require_auth
+def api_list_tasks():
+    """List recent tasks."""
+    try:
+        from task_queue import get_task_queue
+        queue = get_task_queue()
+        stats = queue.get_stats()
+        return jsonify(stats)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/process-file-sync", methods=["POST"])
+@_require_auth
+def api_process_file_sync():
+    """
+    Process file synchronously (for quick operations).
+    POST {"file_id": "...", "action": "inspect|extract|summarize|..."}
+    """
+    data = request.get_json(silent=True) or {}
+    file_id = data.get("file_id")
+    action = data.get("action", "inspect")
+    params = data.get("params", {})
+    
+    if not file_id:
+        return jsonify({"error": "file_id required"}), 400
+    
+    # Find file
+    filepath = None
+    for fname in os.listdir(UPLOAD_FOLDER) if os.path.exists(UPLOAD_FOLDER) else []:
+        if fname.startswith(file_id + "_"):
+            filepath = os.path.join(UPLOAD_FOLDER, fname)
+            break
+    
+    if not filepath or not os.path.exists(filepath):
+        return jsonify({"error": "File not found"}), 404
+    
+    try:
+        from file_processor import process_file
+        result = process_file(filepath, action, **params)
+        return jsonify({
+            "success": result.success,
+            "action": action,
+            "result": result.result,
+            "error": result.error,
+            "metadata": {
+                "file": result.metadata.name if result.metadata else None,
+                "size": result.metadata.size if result.metadata else None,
+                "mime": result.metadata.mime_type if result.metadata else None
+            } if result.metadata else None
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 # ── Run ───────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     port = int(os.getenv("JARVIS_PORT", 5000))
-    print(f"[server] Starting Jarvis UI at http://localhost:{port}")
-    app.run(host="0.0.0.0", port=port, debug=False, threaded=True)
+    print(f"[server] Starting Jarvis UI at http://{BIND_HOST}:{port}")
+    print(f"[server] CORS origins: {ALLOWED_ORIGINS}")
+    if REQUIRE_AUTH:
+        print("[server] API authentication ENABLED")
+    app.run(host=BIND_HOST, port=port, debug=False, threaded=True)

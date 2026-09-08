@@ -2,16 +2,16 @@
   "facts": {
     "app_use_chrome": "1776178925.0065627",
     "action_use_open_app": {
-      "value": "1786337388.0845096",
+      "value": "1788822058.486072",
       "tags": [],
       "priority": "normal",
-      "timestamp": "2026-08-10T10:19:48.085513"
+      "timestamp": "2026-09-08T04:30:58.486072"
     },
     "action_use_close_app": {
-      "value": "1781547020.2712526",
+      "value": "1788822056.9282067",
       "tags": [],
       "priority": "normal",
-      "timestamp": "2026-06-15T23:40:20.282775"
+      "timestamp": "2026-09-08T04:30:56.929205"
     },
     "conversation_summary_2026-06-02T17:08:57.527639": {
       "value": "```\n{\n  \"type: text\",\n  \"text\": \"Virtual assistants like me, Siri, Alexa, and Google Assistant, use AI to understand and respond to voice commands.\"\n}\n```\n\nThis conversation started with a discussion about artificial intelligence, and the user asked for an example in daily life.",
@@ -202,386 +202,367 @@
       "tags": [],
       "priority": "normal",
       "timestamp": "2026-08-10T12:31:40.401436"
+    },
+    "action_use_join_meeting": {
+      "value": "1788822056.9482062",
+      "tags": [],
+      "priority": "normal",
+      "timestamp": "2026-09-08T04:30:56.948206"
     }
   },
   "activity_log": [
     {
-      "time": "2026-08-10T10:43:02.718268",
-      "type": "exit",
-      "detail": "user said goodbye",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T11:38:47.945142",
-      "type": "speak",
-      "detail": "Systems up.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T11:38:50.927922",
+      "time": "2026-09-08T01:04:38.445238",
       "type": "startup",
       "detail": "Jarvis online",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-10T11:44:36.947947",
+      "time": "2026-09-08T01:04:38.903022",
+      "type": "speak",
+      "detail": "I evolved since last boot — jarvis was updated.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T01:05:37.921957",
       "type": "speak",
       "detail": "Systems up.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-10T11:44:37.933499",
+      "time": "2026-09-08T01:05:40.019703",
+      "type": "speak",
+      "detail": "I evolved since last boot — jarvis was updated.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T01:05:41.021373",
       "type": "startup",
       "detail": "Jarvis online",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-10T11:44:43.190151",
-      "type": "speak",
-      "detail": "Listening.",
+      "time": "2026-09-08T01:06:03.962067",
+      "type": "open_app",
+      "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-10T11:48:42.103015",
+      "time": "2026-09-08T01:06:03.981197",
+      "type": "close_app",
+      "detail": "notepad",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T01:06:04.004701",
+      "type": "join_meeting",
+      "detail": "Test Class: https://meet.google.com/abc-def-ghi",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T01:06:05.541646",
+      "type": "open_app",
+      "detail": "notepad",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T01:08:37.033291",
       "type": "speak",
       "detail": "Systems up.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-10T11:48:43.012715",
+      "time": "2026-09-08T01:08:39.936119",
       "type": "startup",
       "detail": "Jarvis online",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-10T11:48:48.730858",
-      "type": "speak",
-      "detail": "What's the move?",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T11:52:23.503818",
+      "time": "2026-09-08T01:09:01.121364",
       "type": "speak",
       "detail": "Systems up.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-10T11:52:26.689888",
+      "time": "2026-09-08T01:09:02.902858",
       "type": "startup",
       "detail": "Jarvis online",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-10T11:52:43.114439",
-      "type": "speak",
-      "detail": "Listening.",
+      "time": "2026-09-08T01:09:28.797779",
+      "type": "open_app",
+      "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-10T11:53:07.662490",
-      "type": "speak",
-      "detail": "Hello! How can I assist you today?",
+      "time": "2026-09-08T01:09:28.817310",
+      "type": "close_app",
+      "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-10T11:53:18.234065",
-      "type": "speak",
-      "detail": "I understand you're curious about why one might go snowboard",
+      "time": "2026-09-08T01:09:28.834524",
+      "type": "join_meeting",
+      "detail": "Test Class: https://meet.google.com/abc-def-ghi",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-10T11:58:58.365010",
+      "time": "2026-09-08T01:09:30.368579",
+      "type": "open_app",
+      "detail": "notepad",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T03:18:02.562673",
+      "type": "open_app",
+      "detail": "notepad",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T03:18:02.582471",
+      "type": "close_app",
+      "detail": "notepad",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T03:18:02.600478",
+      "type": "join_meeting",
+      "detail": "Test Class: https://meet.google.com/abc-def-ghi",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T03:18:04.135130",
+      "type": "open_app",
+      "detail": "notepad",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T03:28:38.880798",
+      "type": "open_app",
+      "detail": "notepad",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T03:28:38.902847",
+      "type": "close_app",
+      "detail": "notepad",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T03:28:38.924848",
+      "type": "join_meeting",
+      "detail": "Test Class: https://meet.google.com/abc-def-ghi",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T03:28:40.453979",
+      "type": "open_app",
+      "detail": "notepad",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T03:31:03.453069",
       "type": "speak",
       "detail": "Systems up.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-10T11:59:01.159965",
+      "time": "2026-09-08T03:31:05.527794",
       "type": "startup",
       "detail": "Jarvis online",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-10T11:59:13.181717",
-      "type": "speak",
-      "detail": "Ready. What do you need?",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T11:59:35.391982",
-      "type": "speak",
-      "detail": "I'm not sure how to answer that.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T11:59:49.284230",
-      "type": "speak",
-      "detail": "I'm not sure how to answer that.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:00:00.528540",
-      "type": "speak",
-      "detail": "I'm not sure how to answer that.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:00:09.998406",
-      "type": "speak",
-      "detail": "I'm not sure how to answer that.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:00:19.129765",
-      "type": "speak",
-      "detail": "I'm not sure how to answer that.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:00:27.867580",
-      "type": "speak",
-      "detail": "It seems like there might be a misunderstanding. Could you p",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:00:41.022529",
-      "type": "speak",
-      "detail": "Standing by.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:00:43.994677",
-      "type": "exit",
-      "detail": "user said goodbye",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:14:56.633622",
+      "time": "2026-09-08T03:32:34.262854",
       "type": "speak",
       "detail": "Systems up.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-10T12:14:59.540621",
+      "time": "2026-09-08T03:32:45.828796",
       "type": "startup",
       "detail": "Jarvis online",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-10T12:15:01.774140",
-      "type": "speak",
-      "detail": "I evolved since last boot — gained a new module: jarvis_tts;",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:15:05.088523",
-      "type": "speak",
-      "detail": "Listening.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:15:25.869093",
-      "type": "speak",
-      "detail": "Hello! How can I assist you today?",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:15:39.524919",
-      "type": "speak",
-      "detail": "Hello! How can I assist you today?",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:28:40.384593",
+      "time": "2026-09-08T03:33:34.639009",
       "type": "speak",
       "detail": "Systems up.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-10T12:28:43.268770",
+      "time": "2026-09-08T03:33:36.716208",
       "type": "startup",
       "detail": "Jarvis online",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-10T12:28:45.511141",
-      "type": "speak",
-      "detail": "I evolved since last boot — jarvis_tts was updated.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:28:57.894462",
-      "type": "speak",
-      "detail": "Listening.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:29:17.263111",
-      "type": "speak",
-      "detail": "Since last boot, I 1 file(s) were modified.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:29:26.651757",
-      "type": "speak",
-      "detail": "Couldn't open that. Check if it's installed correctly.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:29:38.337870",
-      "type": "speak",
-      "detail": "Downloading Spotify now — takes a minute.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:31:25.688777",
-      "type": "speak",
-      "detail": "Downloaded, installing now.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:31:39.067824",
-      "type": "speak",
-      "detail": "Spotify installed.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:31:40.393350",
-      "type": "install_app",
-      "detail": "Spotify",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:31:53.831895",
-      "type": "speak",
-      "detail": "Use the auto_login_profiles.py module to save your Spotify l",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:32:03.689257",
-      "type": "speak",
-      "detail": "Use the auto_login_profiles.py module to save your Spotify l",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:32:19.914732",
-      "type": "speak",
-      "detail": "The auto_login_profiles.py module can help you manage and se",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:32:43.267844",
-      "type": "speak",
-      "detail": "Standing by.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-10T12:32:47.087211",
-      "type": "exit",
-      "detail": "user said goodbye",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-08-27T20:11:17.621498",
+      "time": "2026-09-08T03:34:43.121556",
       "type": "speak",
       "detail": "Systems up.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-27T20:11:19.103675",
+      "time": "2026-09-08T03:34:46.156410",
       "type": "startup",
       "detail": "Jarvis online",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-27T20:11:21.230002",
+      "time": "2026-09-08T03:37:52.030450",
       "type": "speak",
-      "detail": "I evolved since last boot — gained 4 new modules; 12 modules",
+      "detail": "Systems up.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-08-27T20:12:03.850360",
+      "time": "2026-09-08T03:37:53.998823",
+      "type": "startup",
+      "detail": "Jarvis online",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T03:37:54.133778",
       "type": "speak",
-      "detail": "What's the move?",
+      "detail": "I evolved since last boot — server was updated.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T03:38:29.268335",
+      "type": "speak",
+      "detail": "Systems up.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T03:38:31.242586",
+      "type": "startup",
+      "detail": "Jarvis online",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T03:39:21.690296",
+      "type": "open_app",
+      "detail": "notepad",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T03:39:21.709349",
+      "type": "close_app",
+      "detail": "notepad",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T03:39:21.733864",
+      "type": "join_meeting",
+      "detail": "Test Class: https://meet.google.com/abc-def-ghi",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T03:39:23.280819",
+      "type": "open_app",
+      "detail": "notepad",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T04:23:58.312137",
+      "type": "open_app",
+      "detail": "notepad",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T04:23:58.334974",
+      "type": "close_app",
+      "detail": "notepad",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T04:23:58.351880",
+      "type": "join_meeting",
+      "detail": "Test Class: https://meet.google.com/abc-def-ghi",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T04:23:59.891736",
+      "type": "open_app",
+      "detail": "notepad",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T04:30:56.896199",
+      "type": "open_app",
+      "detail": "notepad",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T04:30:56.920206",
+      "type": "close_app",
+      "detail": "notepad",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T04:30:56.941206",
+      "type": "join_meeting",
+      "detail": "Test Class: https://meet.google.com/abc-def-ghi",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T04:30:58.478059",
+      "type": "open_app",
+      "detail": "notepad",
       "app": "",
       "tags": []
     }
   ],
   "context_history": [
-    {
-      "time": "2026-08-10T11:58:58.351482",
-      "app": "Brave",
-      "title": "Arena | Benchmark & Compare the Best AI Models - Brave"
-    },
-    {
-      "time": "2026-08-10T11:59:16.366556",
-      "app": "Voice call",
-      "title": "Voice call"
-    },
-    {
-      "time": "2026-08-10T11:59:25.377841",
-      "app": "Brave",
-      "title": "Arena | Benchmark & Compare the Best AI Models - Brave"
-    },
-    {
-      "time": "2026-08-10T12:14:56.620808",
-      "app": "VS Code",
-      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
-    },
-    {
-      "time": "2026-08-10T12:15:26.636848",
-      "app": "Brave",
-      "title": "Arena | Benchmark & Compare the Best AI Models - Brave"
-    },
     {
       "time": "2026-08-10T12:15:50.654417",
       "app": "VS Code",
@@ -656,18 +637,35 @@
       "time": "2026-08-10T12:32:46.557879",
       "app": "Brave",
       "title": "Arena | Benchmark & Compare the Best AI Models - Brave"
+    },
+    {
+      "time": "2026-09-07T17:42:33.039707",
+      "app": "PowerShell",
+      "title": "Windows PowerShell"
+    },
+    {
+      "time": "2026-09-07T18:22:46.653002",
+      "app": "Speedtest",
+      "title": "Speedtest"
+    },
+    {
+      "time": "2026-09-07T18:44:06.626701",
+      "app": "PowerShell",
+      "title": "Windows PowerShell"
+    },
+    {
+      "time": "2026-09-07T21:02:55.506944",
+      "app": "Unknown",
+      "title": ""
+    },
+    {
+      "time": "2026-09-07T22:27:31.139925",
+      "app": "PowerShell",
+      "title": "Windows PowerShell"
     }
   ],
   "session_notes": [],
   "daily_stats": {
-    "2026-06-15": {
-      "sessions": 3,
-      "brain_calls": 21,
-      "actions_executed": 18
-    },
-    "2026-06-16": {
-      "actions_executed": 1
-    },
     "2026-06-20": {
       "sessions": 1,
       "brain_calls": 7
@@ -688,6 +686,16 @@
     },
     "2026-08-27": {
       "sessions": 1
+    },
+    "2026-09-07": {
+      "brain_calls": 10,
+      "actions_executed": 21,
+      "sessions": 2
+    },
+    "2026-09-08": {
+      "actions_executed": 27,
+      "brain_calls": 9,
+      "sessions": 12
     }
   },
   "action_results": [
@@ -972,6 +980,11 @@
       "count": 7,
       "last": "2026-08-10T12:29:26.644192",
       "detail": "Couldn't open spotify."
+    },
+    "invalid_action": {
+      "count": 16,
+      "last": "2026-09-08T04:30:59.013238",
+      "detail": "Unsupported action."
     }
   },
   "preferences": {}

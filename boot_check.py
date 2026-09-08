@@ -120,7 +120,7 @@ def probe_camera_and_face_recognition() -> Tuple[Tuple[SubsystemState, str], Tup
         cam_msg = f"Camera verification error: {e}"
 
     # 2. Probe Face Recognition
-    ref_face = os.path.join(os.path.dirname(os.path.abspath(__file__)), "user_voice.npy")  # references face/user embeddings
+    ref_face = os.path.join(os.path.dirname(os.path.abspath(__file__)), "user_face.pkl")  # references face encoding
     if not _check_import("face_recognition") and not os.path.exists(ref_face):
         face_state = SubsystemState.DISABLED
         face_msg = "Face credentials or face_recognition module not set up"

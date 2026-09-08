@@ -156,26 +156,17 @@ def seed_profile_from_text(text: str) -> list:
         return []
 
     try:
-        # ── Direct brain._post() call with high token limit ───────────────────
-        # We bypass ask_llm() here because ask_llm() caps at 220 tokens,
-        # which is not enough for a multi-entry JSON array.
-        # seed_profile_from_text() is a one-off bulk operation, not a
-        # conversational call — high token limit is appropriate and safe here.
+        # Use brain.ask_llm with allow_actions=False and model_type="chat" for higher token limit
         import brain
-
-        messages = [
-            {"role": "system", "content": _EXTRACTION_SYSTEM},
-            {"role": "user",   "content": text.strip()[:4000]},
-        ]
 
         print("[user_profile] Sending text to LLM for profile extraction...")
 
-        raw = brain._post(
-            messages  = messages,
-            model     = brain.MODEL_MAP["chat"],
-            max_tokens= 1500,   # enough for 20 entries comfortably
+        raw = brain.ask_llm(
+            query         = text.strip()[:4000],
+            context       = _EXTRACTION_SYSTEM,
+            model_type    = "chat",
+            allow_actions = False,
         )
-        # ─────────────────────────────────────────────────────────────────────
 
         if not raw or not raw.strip():
             print("[user_profile] LLM returned empty response")
