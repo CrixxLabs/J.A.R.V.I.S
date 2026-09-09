@@ -12,10 +12,15 @@ public sealed record JarvisVisualSignals
     public double ThinkingIntensity { get; init; } = 1;
     public double ExecutionIntensity { get; init; } = 1;
     public double AlertSeverity { get; init; } = 1;
-    public double MoodTension { get; init; }
-    public int TaskCount { get; init; }
-    public double MemoryUsage { get; init; } = 68;
-    public string VisionStatus { get; init; } = "PASSIVE";
-    public string CurrentUserTranscript { get; init; } = "Check what’s using my memory.";
-    public string CurrentJarvisResponse { get; init; } = "Chrome is taking most of it. Nothing concerning.";
+    public string Affect { get; init; } = "neutral";
+    public double AffectTension { get; init; }
+    public int? TaskCount { get; init; }
+    public double? MemoryUsage { get; init; }
+    public string? VisionStatus { get; init; }
+    public string? ProviderModel { get; init; }
+    public string? CurrentAction { get; init; }
+    public string? CurrentUserTranscript { get; init; }
+    public string? CurrentJarvisResponse { get; init; }
+    public string? AlertInformation { get; init; }
+    public long Sequence { get; init; }
 }

@@ -29,6 +29,7 @@ from session_logger import log_event
 
 # ── Reliability imports ───────────────────────────────────────────────────────
 import status_registry
+import runtime_visuals
 from status_registry import SubsystemState
 import self_model
 
@@ -596,6 +597,7 @@ def _trim_context_for_tokens(system_context: str, max_chars: int = 3500) -> str:
     return trimmed
 
 
+@runtime_visuals.visual_activity("thinking")
 def ask(user_input: str, image_b64=None, extra_context: str = "") -> tuple:
     """
     Decide what to do with user_input.

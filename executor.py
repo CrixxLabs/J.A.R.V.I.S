@@ -44,6 +44,7 @@ from email.mime.multipart import MIMEMultipart
 
 # Reliability imports
 import status_registry
+import runtime_visuals
 from status_registry import SubsystemState, get_registry
 import error_handler
 
@@ -1727,6 +1728,7 @@ def _handle_vision_status(action: dict) -> tuple:
 # MAIN EXECUTE
 # ══════════════════════════════════════════════════════════════════════════════
 
+@runtime_visuals.visual_activity("executing", "current_action")
 def execute(action, speak_fn=None):
     global _pending_confirm
     if not action:

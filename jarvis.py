@@ -28,6 +28,7 @@ import tasks
 import conversation_manager
 import proactive_scheduler
 import listener
+import runtime_visuals
 from memory import log_failure, log_usage
 from session_logger import log_event, save_session
 
@@ -238,6 +239,7 @@ def _get_smart_error_message(action_name: str, raw_error: str) -> str:
 # SPEAK WITH INTERRUPT SUPPORT
 # ══════════════════════════════════════════════════════════════════════════════
 
+@runtime_visuals.visual_activity("speaking", "current_jarvis_response")
 def speak(text):
     global stop_speaking, is_speaking
 
@@ -259,6 +261,7 @@ def speak(text):
     if not final_text:
         return
 
+    runtime_visuals.update(current_jarvis_response=final_text)
     print(f"Jarvis: {final_text}")
     log_event("jarvis_response", final_text)
     memory.log_activity("speak", final_text[:60])
@@ -349,7 +352,11 @@ def was_interrupted() -> bool:
 
 
 def listen(timeout=12, phrase_time_limit=20):
-    return listener.listen_for_command(timeout, phrase_time_limit)
+    with runtime_visuals.activity("listening"):
+        command = listener.listen_for_command(timeout, phrase_time_limit)
+    if command:
+        runtime_visuals.update(current_user_transcript=command)
+    return command
 
 
 def _preprocess_command(command: str) -> str:
@@ -847,6 +854,10 @@ def _run_boot_syntax_scan():
                     tags=["boot", "syntax", "critical"],
                 )
 
+                runtime_visuals.alert(
+                    f"Boot syntax check found {len(failed)} failing file(s)",
+                    severity=1.0,
+                )
                 speak(warning_msg)
 
             else:
@@ -877,6 +888,9 @@ def startup():
     if _startup_done:
         return
     _startup_done = True
+
+    runtime_visuals.start_bridge()
+    runtime_visuals.set_base_state("dormant")
 
     print("[Startup] Calibrating audio listener...")
     listener.calibrate_ambient_noise()
@@ -938,6 +952,7 @@ if __name__ == "__main__":
         MAX_EMPTY_BEFORE_SLEEP = 5
 
         while True:
+            runtime_visuals.set_base_state("idle" if ACTIVE else "dormant")
             if not ACTIVE:
                 consecutive_empty = 0
 
@@ -1043,6 +1058,7 @@ if __name__ == "__main__":
             try:
                 print(f"[DEBUG][planner] input: {command}")
                 action, spoken_response, _model_type = planner.ask(command)
+                runtime_visuals.update(provider_model=_model_type)
                 log_event("planner_output", {"action": action, "response": spoken_response})
                 print(f"[DEBUG][planner] output: action={action}, response={spoken_response}")
 
@@ -1079,3 +1095,5 @@ if __name__ == "__main__":
             except Exception as exc:
                 print(f"[DEBUG][shutdown] task queue shutdown error: {exc}")
         save_session()
+        runtime_visuals.set_base_state("dormant")
+        runtime_visuals.stop_bridge()

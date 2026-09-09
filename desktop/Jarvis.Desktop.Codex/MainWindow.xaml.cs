@@ -11,13 +11,20 @@ namespace Jarvis.Desktop;
 public partial class MainWindow : Window
 {
     private readonly JarvisStateController _stateController = new();
+    private readonly JarvisRuntimeClient _runtimeClient = new();
+    private JarvisVisualSignals? _latestRuntimeSignals;
+    private bool _runtimeConnected;
+    private bool _devOverride;
 
     public MainWindow()
     {
         InitializeComponent();
         _stateController.Changed += (_, state) => ApplyState(state);
+        _runtimeClient.SnapshotReceived += (_, signals) => Dispatcher.InvokeAsync(() => ReceiveRuntimeSignals(signals));
+        _runtimeClient.ConnectionChanged += (_, connected) => Dispatcher.InvokeAsync(() => SetRuntimeConnection(connected));
         StateChanged += (_, _) => UpdateMaximizeGlyph();
-        Loaded += (_, _) => ApplyState(_stateController.Current);
+        Loaded += (_, _) => { _stateController.Set(JarvisState.Dormant); _runtimeClient.Start(); };
+        Closed += async (_, _) => await _runtimeClient.DisposeAsync();
     }
 
     /// <summary>Single future integration point for backend state, telemetry, voice, and subtle mood modulation.</summary>
@@ -25,20 +32,61 @@ public partial class MainWindow : Window
     {
         Core.SetInputAmplitude(signals.ListeningAmplitude);
         Core.SetSpeechAmplitude(signals.SpeechAmplitude);
-        Core.SetModulation(signals.ThinkingIntensity, signals.ExecutionIntensity, signals.AlertSeverity, signals.MoodTension);
-        Ambient.MoodTension = Math.Clamp(signals.MoodTension, 0, 1);
-        _stateController.Set(signals.OperationalState);
-        TaskQueueValue.Text = Math.Clamp(signals.TaskCount, 0, 99).ToString("00");
-        MemoryValue.Text = $"{Math.Clamp(signals.MemoryUsage, 0, 100):0.0}%";
-        VisionValue.Text = signals.VisionStatus.ToUpperInvariant();
-        UserTranscript.Text = signals.CurrentUserTranscript;
-        JarvisResponse.Text = signals.CurrentJarvisResponse;
+        Core.SetModulation(signals.ThinkingIntensity, signals.ExecutionIntensity, signals.AlertSeverity, signals.AffectTension);
+        Ambient.MoodTension = Math.Clamp(signals.AffectTension, 0, 1);
+        if (!_devOverride) _stateController.Set(signals.OperationalState);
+        TaskQueueValue.Text = Math.Clamp(signals.TaskCount ?? 0, 0, 99).ToString("00");
+        MemoryValue.Text = signals.MemoryUsage.HasValue ? $"{Math.Clamp(signals.MemoryUsage.Value, 0, 100):0.0}%" : "--";
+        VisionValue.Text = string.IsNullOrWhiteSpace(signals.VisionStatus) ? "UNWIRED" : signals.VisionStatus.ToUpperInvariant();
+        UserTranscript.Text = signals.CurrentUserTranscript ?? "";
+        JarvisResponse.Text = signals.CurrentJarvisResponse ?? "";
+        if (!string.IsNullOrWhiteSpace(signals.ProviderModel) && signals.OperationalState == JarvisState.Thinking)
+            CognitiveStatus.Text = signals.ProviderModel.ToUpperInvariant();
+        AnalysisHeader.Text = string.IsNullOrWhiteSpace(signals.CurrentAction)
+            ? "SYSTEM ANALYSIS  /  RUNTIME TASK"
+            : $"SYSTEM ANALYSIS  /  {signals.CurrentAction.ToUpperInvariant()}";
+        AnalysisValues.Visibility = Visibility.Collapsed;
+        AnalysisProcesses.Visibility = Visibility.Collapsed;
+    }
+
+    private void ReceiveRuntimeSignals(JarvisVisualSignals signals)
+    {
+        _latestRuntimeSignals = signals;
+        ApplyVisualSignals(signals);
+    }
+
+    private void SetRuntimeConnection(bool connected)
+    {
+        _runtimeConnected = connected;
+        RuntimeOwnership.Text = connected ? "RUNTIME / LIVE" : "RUNTIME / WAITING";
+        RuntimeOwnership.Foreground = new SolidColorBrush(connected ? Color.FromRgb(88, 174, 193) : Color.FromRgb(82, 105, 114));
+        if (!connected && !_devOverride) _stateController.Set(JarvisState.Dormant);
     }
 
     private void State_OnChecked(object sender, RoutedEventArgs e)
     {
-        if (sender is RadioButton { Tag: string name } && Enum.TryParse<JarvisState>(name, out var state))
+        if (_devOverride && sender is RadioButton { Tag: string name } && Enum.TryParse<JarvisState>(name, out var state))
             _stateController.Set(state);
+    }
+
+    private void DevOverride_OnChanged(object sender, RoutedEventArgs e)
+    {
+        _devOverride = DevOverrideToggle.IsChecked == true;
+        if (_devOverride)
+        {
+            RuntimeOwnership.Text = "VISUAL / OVERRIDE";
+            RuntimeOwnership.Foreground = new SolidColorBrush(Color.FromRgb(214, 169, 84));
+            AnalysisValues.Visibility = Visibility.Visible;
+            AnalysisProcesses.Visibility = Visibility.Visible;
+            IdleStateChoice.IsChecked = true;
+            _stateController.Set(JarvisState.Idle);
+        }
+        else
+        {
+            RuntimeOwnership.Text = _runtimeConnected ? "RUNTIME / LIVE" : "RUNTIME / WAITING";
+            if (_latestRuntimeSignals is not null) ApplyVisualSignals(_latestRuntimeSignals);
+            else _stateController.Set(JarvisState.Dormant);
+        }
     }
 
     private void ApplyState(JarvisState state)

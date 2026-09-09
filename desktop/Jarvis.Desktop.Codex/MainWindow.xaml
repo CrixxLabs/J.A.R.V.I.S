@@ -39,6 +39,17 @@
                 <ControlTemplate.Triggers>
                     <Trigger Property="IsMouseOver" Value="True"><Setter Property="Foreground" Value="#B5DCE7EC"/></Trigger>
                     <Trigger Property="IsChecked" Value="True"><Setter Property="Foreground" Value="#8BE6FA"/><Setter TargetName="Shell" Property="BorderBrush" Value="#8BE6FA"/><Setter TargetName="Shell" Property="Background" Value="#0B6BDCF5"/></Trigger>
+                    <Trigger Property="IsEnabled" Value="False"><Setter Property="Opacity" Value=".28"/></Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate></Setter.Value></Setter>
+        </Style>
+        <Style x:Key="OverrideChoice" TargetType="ToggleButton">
+            <Setter Property="Foreground" Value="#526A737B"/><Setter Property="FontFamily" Value="Segoe UI Semibold"/><Setter Property="FontSize" Value="7"/><Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ToggleButton">
+                <Border x:Name="Shell" Padding="7,4" Margin="0,0,8,0" BorderBrush="#243D4A53" BorderThickness="1" Background="#080B151B"><ContentPresenter/></Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True"><Setter Property="Foreground" Value="#A8CDD7DD"/></Trigger>
+                    <Trigger Property="IsChecked" Value="True"><Setter Property="Foreground" Value="#E2B45E"/><Setter TargetName="Shell" Property="BorderBrush" Value="#765D2E"/></Trigger>
                 </ControlTemplate.Triggers>
             </ControlTemplate></Setter.Value></Setter>
         </Style>
@@ -140,16 +151,17 @@
                 <Grid Grid.Row="2">
                     <Border Height="1" VerticalAlignment="Top" Margin="18,0" Background="#102B3740"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <TextBlock Text="DEV / STATE" Style="{StaticResource Micro}" FontSize="7" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="#445A626A"/>
-                        <RadioButton Style="{StaticResource StateChoice}" Content="DORMANT" Tag="Dormant" Checked="State_OnChecked"/>
-                        <RadioButton Style="{StaticResource StateChoice}" Content="IDLE" Tag="Idle" IsChecked="True" Checked="State_OnChecked"/>
-                        <RadioButton Style="{StaticResource StateChoice}" Content="LISTENING" Tag="Listening" Checked="State_OnChecked"/>
-                        <RadioButton Style="{StaticResource StateChoice}" Content="THINKING" Tag="Thinking" Checked="State_OnChecked"/>
-                        <RadioButton Style="{StaticResource StateChoice}" Content="SPEAKING" Tag="Speaking" Checked="State_OnChecked"/>
-                        <RadioButton Style="{StaticResource StateChoice}" Content="EXECUTING" Tag="Executing" Checked="State_OnChecked"/>
-                        <RadioButton Style="{StaticResource StateChoice}" Content="ALERT" Tag="Alert" Checked="State_OnChecked"/>
+                        <TextBlock x:Name="RuntimeOwnership" Text="RUNTIME / WAITING" Style="{StaticResource Micro}" FontSize="7" VerticalAlignment="Center" Margin="0,0,10,0" Foreground="#52717A82"/>
+                        <ToggleButton x:Name="DevOverrideToggle" Style="{StaticResource OverrideChoice}" Content="DEV OVERRIDE" Checked="DevOverride_OnChanged" Unchecked="DevOverride_OnChanged"/>
+                        <RadioButton IsEnabled="{Binding IsChecked, ElementName=DevOverrideToggle}" Style="{StaticResource StateChoice}" Content="DORMANT" Tag="Dormant" Checked="State_OnChecked"/>
+                        <RadioButton x:Name="IdleStateChoice" IsEnabled="{Binding IsChecked, ElementName=DevOverrideToggle}" Style="{StaticResource StateChoice}" Content="IDLE" Tag="Idle" IsChecked="True" Checked="State_OnChecked"/>
+                        <RadioButton IsEnabled="{Binding IsChecked, ElementName=DevOverrideToggle}" Style="{StaticResource StateChoice}" Content="LISTENING" Tag="Listening" Checked="State_OnChecked"/>
+                        <RadioButton IsEnabled="{Binding IsChecked, ElementName=DevOverrideToggle}" Style="{StaticResource StateChoice}" Content="THINKING" Tag="Thinking" Checked="State_OnChecked"/>
+                        <RadioButton IsEnabled="{Binding IsChecked, ElementName=DevOverrideToggle}" Style="{StaticResource StateChoice}" Content="SPEAKING" Tag="Speaking" Checked="State_OnChecked"/>
+                        <RadioButton IsEnabled="{Binding IsChecked, ElementName=DevOverrideToggle}" Style="{StaticResource StateChoice}" Content="EXECUTING" Tag="Executing" Checked="State_OnChecked"/>
+                        <RadioButton IsEnabled="{Binding IsChecked, ElementName=DevOverrideToggle}" Style="{StaticResource StateChoice}" Content="ALERT" Tag="Alert" Checked="State_OnChecked"/>
                     </StackPanel>
-                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,20,0" Text="VISUAL PROTOTYPE  0.7" Style="{StaticResource Micro}" FontSize="7" Foreground="#344A535A"/>
+                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,20,0" Text="NATIVE LINK  1.0" Style="{StaticResource Micro}" FontSize="7" Foreground="#344A535A"/>
                 </Grid>
             </Grid>
         </Grid>

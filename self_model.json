@@ -1,0 +1,162 @@
+{
+  "SPEECH_INPUT": {
+    "success_count": 0,
+    "failure_count": 0,
+    "last_attempt": null,
+    "last_success": null,
+    "last_failure": null,
+    "last_error": null
+  },
+  "SPEECH_OUTPUT": {
+    "success_count": 0,
+    "failure_count": 0,
+    "last_attempt": null,
+    "last_success": null,
+    "last_failure": null,
+    "last_error": null
+  },
+  "APP_MANAGEMENT": {
+    "success_count": 1,
+    "failure_count": 0,
+    "last_attempt": "2026-09-09T19:12:03+00:00",
+    "last_success": "2026-09-09T19:12:03+00:00",
+    "last_failure": null,
+    "last_error": null
+  },
+  "SYSTEM_CONTROL": {
+    "success_count": 0,
+    "failure_count": 0,
+    "last_attempt": null,
+    "last_success": null,
+    "last_failure": null,
+    "last_error": null
+  },
+  "WEB_SEARCH": {
+    "success_count": 0,
+    "failure_count": 0,
+    "last_attempt": null,
+    "last_success": null,
+    "last_failure": null,
+    "last_error": null
+  },
+  "OCR_READ": {
+    "success_count": 0,
+    "failure_count": 0,
+    "last_attempt": null,
+    "last_success": null,
+    "last_failure": null,
+    "last_error": null
+  },
+  "SCREEN_UNDERSTANDING": {
+    "success_count": 0,
+    "failure_count": 0,
+    "last_attempt": null,
+    "last_success": null,
+    "last_failure": null,
+    "last_error": null
+  },
+  "REMINDERS_SET": {
+    "success_count": 0,
+    "failure_count": 0,
+    "last_attempt": null,
+    "last_success": null,
+    "last_failure": null,
+    "last_error": null
+  },
+  "OBLIGATIONS_TRACK": {
+    "success_count": 0,
+    "failure_count": 0,
+    "last_attempt": null,
+    "last_success": null,
+    "last_failure": null,
+    "last_error": null
+  },
+  "PORTAL_SCAN": {
+    "success_count": 0,
+    "failure_count": 0,
+    "last_attempt": null,
+    "last_success": null,
+    "last_failure": null,
+    "last_error": null
+  },
+  "WHATSAPP_AUTOMATION": {
+    "success_count": 0,
+    "failure_count": 0,
+    "last_attempt": null,
+    "last_success": null,
+    "last_failure": null,
+    "last_error": null
+  },
+  "WHATSAPP_SEND": {
+    "success_count": 0,
+    "failure_count": 0,
+    "last_attempt": null,
+    "last_success": null,
+    "last_failure": null,
+    "last_error": null
+  },
+  "SPOTIFY_CONTROL": {
+    "success_count": 0,
+    "failure_count": 0,
+    "last_attempt": null,
+    "last_success": null,
+    "last_failure": null,
+    "last_error": null
+  },
+  "EMAIL_SEND": {
+    "success_count": 0,
+    "failure_count": 0,
+    "last_attempt": null,
+    "last_success": null,
+    "last_failure": null,
+    "last_error": null
+  },
+  "CALENDAR_SYNC": {
+    "success_count": 0,
+    "failure_count": 0,
+    "last_attempt": null,
+    "last_success": null,
+    "last_failure": null,
+    "last_error": null
+  },
+  "SECURE_VAULT": {
+    "success_count": 0,
+    "failure_count": 0,
+    "last_attempt": null,
+    "last_success": null,
+    "last_failure": null,
+    "last_error": null
+  },
+  "APP_INSTALLATION": {
+    "success_count": 0,
+    "failure_count": 0,
+    "last_attempt": null,
+    "last_success": null,
+    "last_failure": null,
+    "last_error": null
+  },
+  "IMAGE_GENERATION": {
+    "success_count": 0,
+    "failure_count": 0,
+    "last_attempt": null,
+    "last_success": null,
+    "last_failure": null,
+    "last_error": null
+  },
+  "VIDEO_GENERATION": {
+    "success_count": 0,
+    "failure_count": 0,
+    "last_attempt": null,
+    "last_success": null,
+    "last_failure": null,
+    "last_error": null
+  },
+  "CODE_SCANNING": {
+    "success_count": 0,
+    "failure_count": 0,
+    "last_attempt": null,
+    "last_success": null,
+    "last_failure": null,
+    "last_error": null
+  }
+}

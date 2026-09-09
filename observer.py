@@ -15,6 +15,7 @@ from memory import log_context_change, log_activity
 
 # Reliability imports
 import status_registry
+import runtime_visuals
 from status_registry import SubsystemState, get_registry
 import error_handler
 
@@ -163,6 +164,7 @@ def _system_observer():
                 if bat:
                     state["battery_percent"]  = bat.percent
                     state["battery_charging"] = bat.power_plugged
+            runtime_visuals.update(memory_usage=ram.percent)
             
             # We track general tasks/monitor health with this thread
             registry.set_status("TASKS", SubsystemState.READY, "System telemetry engine healthy")
