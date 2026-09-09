@@ -525,6 +525,18 @@ def _handle_local_intent(intent_data: dict) -> tuple | None:
             return None, "What should I remember?"
         return {"action": "profile_remember", "statement": statement}, ""
 
+    if intent == "declarative_fact":
+        statement = params.get("statement", "").strip()
+        if not statement:
+            return None, "What should I remember?"
+        return {"action": "declarative_fact", "statement": statement}, ""
+
+    if intent == "fact_query":
+        fact_name = params.get("fact_name", "").strip()
+        if not fact_name:
+            return None, "What fact would you like to know?"
+        return {"action": "fact_query", "fact_name": fact_name}, ""
+
     if intent == "install_app":
         app = params.get("app", "").strip()
         if not app:

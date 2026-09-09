@@ -196,3 +196,169 @@ def analyze_screen_context():
         # Don't demote here as describe_screen handles its own status; just fallback safely
         print(f"[Vision] analyze_screen_context error: {exc}")
         return describe_screen("Describe what you see on this screen.")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# MARK VII — Extended Vision Capabilities
+# ══════════════════════════════════════════════════════════════════════════════
+
+def capture_screen_region(left: int, top: int, width: int, height: int):
+    """Capture a specific screen region using mss."""
+    try:
+        with mss() as sct:
+            monitor = {"left": left, "top": top, "width": width, "height": height}
+            screenshot = np.array(sct.grab(monitor))
+            img = cv2.cvtColor(screenshot, cv2.COLOR_BGRA2BGR)
+            return img
+    except Exception as exc:
+        error_handler.log_and_demote(
+            subsystem="TESSERACT_OCR",
+            exception=exc,
+            context="Capture screen region mss interface",
+            demote_to=SubsystemState.OFFLINE
+        )
+        raise exc
+
+
+def capture_webcam(camera_index: int = 0):
+    """Capture a frame from the webcam."""
+    registry = get_registry()
+    try:
+        cap = cv2.VideoCapture(camera_index, cv2.CAP_DSHOW)
+        if not cap.isOpened():
+            registry.set_status("WEBCAM", SubsystemState.OFFLINE, "Webcam not accessible")
+            return None
+        
+        ret, frame = cap.read()
+        cap.release()
+        
+        if not ret or frame is None:
+            registry.set_status("WEBCAM", SubsystemState.OFFLINE, "Failed to capture frame")
+            return None
+        
+        registry.set_status("WEBCAM", SubsystemState.READY, "Webcam capture successful")
+        return frame
+    except Exception as exc:
+        error_handler.log_and_demote(
+            subsystem="WEBCAM",
+            exception=exc,
+            context="Webcam capture via cv2",
+            demote_to=SubsystemState.OFFLINE
+        )
+        return None
+
+
+def image_to_base64(img: np.ndarray) -> str:
+    """Encode numpy image array to base64 PNG."""
+    success, buffer = cv2.imencode('.png', img)
+    if not success:
+        raise ValueError("Failed to encode image as PNG")
+    return base64.b64encode(buffer).decode('utf-8')
+
+
+def describe_image(img: np.ndarray, prompt: str = "describe what you see") -> str:
+    """Send an image to Gemini for description."""
+    registry = get_registry()
+
+    if not GEMINI_API_KEY:
+        print("[Vision] No Gemini API key — falling back to OCR")
+        registry.set_status(
+            "GEMINI",
+            SubsystemState.DISABLED,
+            "Gemini API key is empty in environment"
+        )
+        return "Gemini API key not configured. Using OCR fallback."
+
+    try:
+        b64 = image_to_base64(img)
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+
+        payload = {
+            "contents": [{
+                "parts": [
+                    {"text": prompt},
+                    {
+                        "inline_data": {
+                            "mime_type": "image/png",
+                            "data": b64
+                        }
+                    }
+                ]
+            }]
+        }
+
+        res = requests.post(url, json=payload, timeout=15)
+        res.raise_for_status()
+        data = res.json()
+
+        if "candidates" not in data or not data["candidates"]:
+            if "error" in data:
+                error_msg = data["error"].get("message", "Unknown error")
+                if "API_KEY_INVALID" in error_msg or "API key not valid" in error_msg:
+                    registry.set_status("GEMINI", SubsystemState.DEGRADED, "Invalid API Key")
+                    return "Your Gemini API key is invalid."
+                registry.set_status("GEMINI", SubsystemState.DEGRADED, f"Gemini API error: {error_msg}")
+                return f"Gemini API error: {error_msg}"
+            registry.set_status("GEMINI", SubsystemState.DEGRADED, "Gemini API payload lacks candidates")
+            return "Could not describe the image."
+
+        text = data["candidates"][0]["content"]["parts"][0]["text"]
+        registry.set_status("GEMINI", SubsystemState.READY, "Gemini Vision responding normally")
+        return text.strip()
+
+    except requests.exceptions.Timeout as timeout_exc:
+        error_handler.log_and_demote("GEMINI", timeout_exc, "Gemini vision timeout", SubsystemState.DEGRADED)
+        return "Image description timed out."
+    except Exception as exc:
+        error_handler.log_and_demote("GEMINI", exc, "Gemini vision query", SubsystemState.DEGRADED)
+        return "Image description failed."
+
+
+def analyze_image_file(file_path: str, prompt: str = "describe what you see") -> str:
+    """Analyze an image file using Gemini Vision."""
+    registry = get_registry()
+    try:
+        if not os.path.exists(file_path):
+            return f"File not found: {file_path}"
+        
+        img = cv2.imread(file_path)
+        if img is None:
+            return f"Could not read image file: {file_path}"
+        
+        return describe_image(img, prompt)
+    except Exception as exc:
+        error_handler.log_and_demote("VISION", exc, f"Analyze image file {file_path}", SubsystemState.DEGRADED)
+        return f"Image analysis failed: {exc}"
+
+
+def read_image_text(file_path: str) -> str:
+    """OCR text extraction from an image file."""
+    registry = get_registry()
+    try:
+        if not os.path.exists(file_path):
+            return f"File not found: {file_path}"
+        
+        img = cv2.imread(file_path)
+        if img is None:
+            return f"Could not read image file: {file_path}"
+        
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
+        text = pytesseract.image_to_string(thresh).strip()
+        
+        registry.set_status("TESSERACT_OCR", SubsystemState.READY, "Pytesseract file OCR successful")
+        
+        return text[:1000] if text else "No text detected in image."
+    except Exception as exc:
+        error_handler.log_and_demote("TESSERACT_OCR", exc, f"OCR file {file_path}", SubsystemState.OFFLINE)
+        return f"OCR failed: {exc}"
+
+
+def get_vision_status() -> dict:
+    """Get status of all vision subsystems."""
+    registry = get_registry()
+    return {
+        "gemini": registry.get_status("GEMINI"),
+        "tesseract_ocr": registry.get_status("TESSERACT_OCR"),
+        "webcam": registry.get_status("WEBCAM"),
+    }

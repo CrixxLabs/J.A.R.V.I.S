@@ -1,0 +1,11 @@
+("No uploaded files.")
+        
+        return _stable_success("Uploaded files:\n" + "\n".join(files[:20]))
+    except Exception as exc:
+        print(f"[DEBUG][executor] list_uploaded_files error: {exc}")
+        return _stable_failure("Couldn't list files.")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# MAIN EXECUTE
+# ═══════════════════════════�

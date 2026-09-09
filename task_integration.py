@@ -60,6 +60,10 @@ BACKGROUND_ACTIONS = {
     "voice_type", "clipboard_read", "clipboard_write",
     "spotify_play", "spotify_control",
     "calendar_today", "calendar_add",
+    # File Processor actions
+    "process_file", "list_uploaded_files",
+    # Vision/Eyes actions
+    "capture_webcam", "capture_screen_region", "analyze_image_file", "read_image_text", "vision_status",
 }
 
 # Actions that are long-running and should always be queued
@@ -92,6 +96,8 @@ PROGRESS_TRACKED_ACTIONS = {
     "install_app", "install_and_login", "generate_video", "generate_image",
     "portal_scan", "run_diagnostic", "run_sequence",
     "install_app", "install_and_login", "open_and_login",
+    "process_file",
+    "capture_webcam", "analyze_image_file",
 }
 
 # Actions that must run synchronously (never queue)
@@ -105,6 +111,7 @@ NEVER_QUEUE_ACTIONS = {
     "save_login", "list_logins", "delete_login", "open_and_login",
     "lock_pc", "shutdown_pc", "restart_pc", "join_meeting",
     "save_login", "list_logins", "delete_login", "open_and_login",
+    "list_uploaded_files",
 }
 
 

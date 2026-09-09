@@ -711,6 +711,23 @@ _PROFILE_REMEMBER_PHRASES = (
     "save that i",
 )
 
+# Declarative fact phrases - for statements like "My X is Y", "X is Y", "I am Y"
+_DECLARATIVE_FACT_PHRASES = (
+    "my name is ",
+    "i am ",
+    "i'm ",
+    "my ",
+)
+
+# Fact query phrases - for questions like "What is my X?", "What's my X?", "What was my X?"
+_FACT_QUERY_PHRASES = (
+    "what is my ",
+    "what's my ",
+    "what was my ",
+    "what did i say my ",
+    "what did i tell you my ",
+)
+
 
 def _strip_profile_prefix(text: str, prefixes: tuple) -> str:
     lowered = text.lower().strip()
@@ -1299,9 +1316,41 @@ def classify_intent(text: str) -> dict:
             "raw_text": resolved,
         }
 
-    # ── User profile intents ──────────────────────────────────────────────────
+    if any(phrase in lowered for phrase in _PROFILE_REMEMBER_PHRASES):
+        statement = _strip_profile_prefix(resolved, _PROFILE_REMEMBER_PHRASES)
+        return {
+            "intent":   "profile_remember",
+            "params":   {"statement": statement},
+            "entities": {},
+            "raw_text": resolved,
+        }
 
-    if any(phrase in lowered for phrase in _PROFILE_QUERY_PHRASES):
+    # Fact queries: "What is my X?", "What's my X?", "What was my X?"
+    if any(phrase in lowered for phrase in _FACT_QUERY_PHRASES):
+        # Extract the fact name from the query
+        fact_name = resolved
+        for phrase in _FACT_QUERY_PHRASES:
+            if phrase in lowered:
+                idx = lowered.index(phrase)
+                fact_name = resolved[idx + len(phrase):].strip().strip("?").strip()
+                break
+        return {
+            "intent":   "fact_query",
+            "params":   {"fact_name": fact_name},
+            "entities": {},
+            "raw_text": resolved,
+        }
+
+    # Declarative fact statements: "My X is Y", "X is Y", "I am Y"
+    if any(phrase in lowered for phrase in _DECLARATIVE_FACT_PHRASES):
+        return {
+            "intent":   "declarative_fact",
+            "params":   {"statement": resolved},
+            "entities": {},
+            "raw_text": resolved,
+        }
+
+    # ── User profile intents ──────────────────────────────────────────────────
         return {
             "intent":   "profile_query",
             "params":   {},

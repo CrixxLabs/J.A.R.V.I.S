@@ -178,5 +178,41 @@
     "confidence": 1.0,
     "verified": true,
     "last_updated": "2026-06-20T00:37:37.658525"
+  },
+  {
+    "id": "40efb2e7",
+    "category": "other",
+    "value": "Temporary test word is pineapple.",
+    "source": "manual",
+    "confidence": 1.0,
+    "verified": true,
+    "last_updated": "2026-09-08T22:07:56.922582"
+  },
+  {
+    "id": "ac3f6c0d",
+    "category": "preferences",
+    "value": "Test word is apple",
+    "source": "manual",
+    "confidence": 1.0,
+    "verified": true,
+    "last_updated": "2026-09-08T22:39:43.173696"
+  },
+  {
+    "id": "802e9f6e",
+    "category": "preferences",
+    "value": "Temporary test word is banana.",
+    "source": "manual",
+    "confidence": 1.0,
+    "verified": true,
+    "last_updated": "2026-09-08T22:48:59.451608"
+  },
+  {
+    "id": "1af7bb05",
+    "category": "preferences",
+    "value": "Temporary test word is cherry.",
+    "source": "manual",
+    "confidence": 1.0,
+    "verified": true,
+    "last_updated": "2026-09-08T22:57:49.661356"
   }
 ]

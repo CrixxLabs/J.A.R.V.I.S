@@ -2,16 +2,16 @@
   "facts": {
     "app_use_chrome": "1776178925.0065627",
     "action_use_open_app": {
-      "value": "1788822058.486072",
+      "value": "1788897467.5675702",
       "tags": [],
       "priority": "normal",
-      "timestamp": "2026-09-08T04:30:58.486072"
+      "timestamp": "2026-09-09T01:27:47.568193"
     },
     "action_use_close_app": {
-      "value": "1788822056.9282067",
+      "value": "1788897466.0065963",
       "tags": [],
       "priority": "normal",
-      "timestamp": "2026-09-08T04:30:56.929205"
+      "timestamp": "2026-09-09T01:27:46.007174"
     },
     "conversation_summary_2026-06-02T17:08:57.527639": {
       "value": "```\n{\n  \"type: text\",\n  \"text\": \"Virtual assistants like me, Siri, Alexa, and Google Assistant, use AI to understand and respond to voice commands.\"\n}\n```\n\nThis conversation started with a discussion about artificial intelligence, and the user asked for an example in daily life.",
@@ -54,12 +54,12 @@
       "timestamp": "2026-06-02T17:21:49.302276"
     },
     "test_fact": {
-      "value": "Jarvis is becoming Iron Man",
+      "value": "pineapple",
       "tags": [
-        "project"
+        "test"
       ],
-      "priority": "high",
-      "timestamp": "2026-06-02T17:31:39.298761"
+      "priority": "normal",
+      "timestamp": "2026-09-08T20:55:38.055010"
     },
     "conversation_summary_2026-06-02T17:31:41.223069": {
       "value": "[\n  {\n    \"name\": \"Conversation Summary\",\n    \"entities\": [\n      {\n        \"type\": \"User\",\n        \"text\": \"Explain AI\"\n      },\n      {\n        \"type\": \"Assistant\",\n        \"text\": \"AI is simulation of intelligence\"\n      },\n      {\n        \"type\": \"User\",\n        \"text\": \"Give real life example\"\n      }\n    ]\n  }\n]",
@@ -204,358 +204,382 @@
       "timestamp": "2026-08-10T12:31:40.401436"
     },
     "action_use_join_meeting": {
-      "value": "1788822056.9482062",
+      "value": "1788897466.030949",
       "tags": [],
       "priority": "normal",
-      "timestamp": "2026-09-08T04:30:56.948206"
+      "timestamp": "2026-09-09T01:27:46.032049"
+    },
+    "conversation_summary_2026-09-08T19:27:43.069410": {
+      "value": "{\n  \"action\": \"query_user_request\"\n}",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-09-08T19:27:43.069921"
+    },
+    "conversation_summary_2026-09-08T19:29:02.320263": {
+      "value": "```json\n{\n  \"action\": \"calculate_and_reply\"\n}\n```\n10:30  \n280",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-09-08T19:29:02.320779"
+    },
+    "conversation_summary_2026-09-08T19:29:42.366273": {
+      "value": "```json\n{\n  \"action\": \"generate_capabilities_summary\"\n}\n```",
+      "tags": [
+        "conversation"
+      ],
+      "priority": "normal",
+      "timestamp": "2026-09-08T19:29:42.367273"
     }
   },
   "activity_log": [
     {
-      "time": "2026-09-08T01:04:38.445238",
-      "type": "startup",
-      "detail": "Jarvis online",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-09-08T01:04:38.903022",
-      "type": "speak",
-      "detail": "I evolved since last boot — jarvis was updated.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-09-08T01:05:37.921957",
-      "type": "speak",
-      "detail": "Systems up.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-09-08T01:05:40.019703",
-      "type": "speak",
-      "detail": "I evolved since last boot — jarvis was updated.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-09-08T01:05:41.021373",
-      "type": "startup",
-      "detail": "Jarvis online",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-09-08T01:06:03.962067",
+      "time": "2026-09-08T19:12:15.429819",
       "type": "open_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T01:06:03.981197",
+      "time": "2026-09-08T19:15:44.583457",
+      "type": "open_app",
+      "detail": "notepad",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T19:15:44.601454",
       "type": "close_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T01:06:04.004701",
+      "time": "2026-09-08T19:15:44.618481",
       "type": "join_meeting",
       "detail": "Test Class: https://meet.google.com/abc-def-ghi",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T01:06:05.541646",
+      "time": "2026-09-08T19:15:46.150055",
       "type": "open_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T01:08:37.033291",
+      "time": "2026-09-08T19:26:02.158788",
       "type": "speak",
       "detail": "Systems up.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T01:08:39.936119",
+      "time": "2026-09-08T19:26:05.577558",
       "type": "startup",
       "detail": "Jarvis online",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T01:09:01.121364",
+      "time": "2026-09-08T19:26:10.585224",
       "type": "speak",
-      "detail": "Systems up.",
+      "detail": "What's the move?",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T01:09:02.902858",
-      "type": "startup",
-      "detail": "Jarvis online",
+      "time": "2026-09-08T19:26:29.354416",
+      "type": "speak",
+      "detail": "I couldn't figure that out.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T01:09:28.797779",
+      "time": "2026-09-08T19:26:45.318611",
+      "type": "speak",
+      "detail": "I am functioning well, thank you for asking. How can I assis",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T19:27:01.777526",
+      "type": "speak",
+      "detail": "You consist of 58 core Python modules with 339 functions.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T19:27:22.144117",
+      "type": "speak",
+      "detail": "I am currently operational across various functionalities in",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T19:27:43.087471",
+      "type": "speak",
+      "detail": "I am not actively listening or transcribing speech in real-t",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T19:28:09.573096",
+      "type": "speak",
+      "detail": "Understood. Understood. To clarify my current capabilities a",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T19:28:28.415407",
+      "type": "speak",
+      "detail": "I understand. Based on the context provided, it seems likely",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T19:29:02.335526",
+      "type": "speak",
+      "detail": "10:30 40 * 7 = 280",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T19:29:12.696063",
+      "type": "speak",
+      "detail": "Please clarify what you mean by \"of the question in one sent",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T19:29:26.897392",
+      "type": "speak",
+      "detail": "Perception is in one sentence: Understanding through sensory",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T19:29:42.405050",
+      "type": "speak",
+      "detail": "I'm not sure how to answer that.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T19:29:58.831414",
+      "type": "speak",
+      "detail": "I'm not sure how to answer that.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T19:30:08.089927",
+      "type": "speak",
+      "detail": "I'm not sure how to answer that.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T19:30:22.827255",
+      "type": "speak",
+      "detail": "Standing by.",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T19:30:27.469746",
+      "type": "exit",
+      "detail": "user said goodbye",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T19:38:39.260773",
       "type": "open_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T01:09:28.817310",
+      "time": "2026-09-08T19:38:39.292938",
       "type": "close_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T01:09:28.834524",
+      "time": "2026-09-08T19:38:39.324022",
       "type": "join_meeting",
       "detail": "Test Class: https://meet.google.com/abc-def-ghi",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T01:09:30.368579",
+      "time": "2026-09-08T19:38:40.862648",
       "type": "open_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T03:18:02.562673",
+      "time": "2026-09-08T20:26:38.789953",
       "type": "open_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T03:18:02.582471",
+      "time": "2026-09-08T20:26:38.810741",
       "type": "close_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T03:18:02.600478",
+      "time": "2026-09-08T20:26:38.828902",
       "type": "join_meeting",
       "detail": "Test Class: https://meet.google.com/abc-def-ghi",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T03:18:04.135130",
+      "time": "2026-09-08T20:26:40.359662",
       "type": "open_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T03:28:38.880798",
+      "time": "2026-09-08T20:51:50.096239",
       "type": "open_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T03:28:38.902847",
+      "time": "2026-09-08T20:51:50.119978",
       "type": "close_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T03:28:38.924848",
+      "time": "2026-09-08T20:51:50.143982",
       "type": "join_meeting",
       "detail": "Test Class: https://meet.google.com/abc-def-ghi",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T03:28:40.453979",
+      "time": "2026-09-08T20:51:51.677505",
       "type": "open_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T03:31:03.453069",
+      "time": "2026-09-08T22:55:46.811850",
+      "type": "speak",
+      "detail": "Test message from speak function",
+      "app": "",
+      "tags": []
+    },
+    {
+      "time": "2026-09-08T22:57:44.799448",
       "type": "speak",
       "detail": "Systems up.",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T03:31:05.527794",
+      "time": "2026-09-08T22:57:47.835312",
       "type": "startup",
       "detail": "Jarvis online",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T03:32:34.262854",
-      "type": "speak",
-      "detail": "Systems up.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-09-08T03:32:45.828796",
-      "type": "startup",
-      "detail": "Jarvis online",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-09-08T03:33:34.639009",
-      "type": "speak",
-      "detail": "Systems up.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-09-08T03:33:36.716208",
-      "type": "startup",
-      "detail": "Jarvis online",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-09-08T03:34:43.121556",
-      "type": "speak",
-      "detail": "Systems up.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-09-08T03:34:46.156410",
-      "type": "startup",
-      "detail": "Jarvis online",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-09-08T03:37:52.030450",
-      "type": "speak",
-      "detail": "Systems up.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-09-08T03:37:53.998823",
-      "type": "startup",
-      "detail": "Jarvis online",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-09-08T03:37:54.133778",
-      "type": "speak",
-      "detail": "I evolved since last boot — server was updated.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-09-08T03:38:29.268335",
-      "type": "speak",
-      "detail": "Systems up.",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-09-08T03:38:31.242586",
-      "type": "startup",
-      "detail": "Jarvis online",
-      "app": "",
-      "tags": []
-    },
-    {
-      "time": "2026-09-08T03:39:21.690296",
+      "time": "2026-09-08T22:58:41.902785",
       "type": "open_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T03:39:21.709349",
+      "time": "2026-09-08T22:58:41.923248",
       "type": "close_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T03:39:21.733864",
+      "time": "2026-09-08T22:58:41.952482",
       "type": "join_meeting",
       "detail": "Test Class: https://meet.google.com/abc-def-ghi",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T03:39:23.280819",
+      "time": "2026-09-08T22:58:43.504813",
       "type": "open_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T04:23:58.312137",
+      "time": "2026-09-09T01:23:31.339828",
       "type": "open_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T04:23:58.334974",
+      "time": "2026-09-09T01:23:31.360548",
       "type": "close_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T04:23:58.351880",
+      "time": "2026-09-09T01:23:31.378184",
       "type": "join_meeting",
       "detail": "Test Class: https://meet.google.com/abc-def-ghi",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T04:23:59.891736",
+      "time": "2026-09-09T01:23:32.910079",
       "type": "open_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T04:30:56.896199",
+      "time": "2026-09-09T01:27:45.974566",
       "type": "open_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T04:30:56.920206",
+      "time": "2026-09-09T01:27:45.996960",
       "type": "close_app",
       "detail": "notepad",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T04:30:56.941206",
+      "time": "2026-09-09T01:27:46.021918",
       "type": "join_meeting",
       "detail": "Test Class: https://meet.google.com/abc-def-ghi",
       "app": "",
       "tags": []
     },
     {
-      "time": "2026-09-08T04:30:58.478059",
+      "time": "2026-09-09T01:27:47.560740",
       "type": "open_app",
       "detail": "notepad",
       "app": "",
@@ -563,76 +587,6 @@
     }
   ],
   "context_history": [
-    {
-      "time": "2026-08-10T12:15:50.654417",
-      "app": "VS Code",
-      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
-    },
-    {
-      "time": "2026-08-10T12:29:58.406350",
-      "app": "Brave",
-      "title": "Arena | Benchmark & Compare the Best AI Models - Brave"
-    },
-    {
-      "time": "2026-08-10T12:30:16.423777",
-      "app": "PowerShell",
-      "title": "Administrator: Windows PowerShell"
-    },
-    {
-      "time": "2026-08-10T12:30:31.437546",
-      "app": "Brave",
-      "title": "Prime Agent: Autonomous Agent Framework - Google Gemini - Brave"
-    },
-    {
-      "time": "2026-08-10T12:30:49.446748",
-      "app": "PowerShell",
-      "title": "Administrator: Windows PowerShell"
-    },
-    {
-      "time": "2026-08-10T12:30:52.456157",
-      "app": "VS Code",
-      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
-    },
-    {
-      "time": "2026-08-10T12:30:55.468415",
-      "app": "Search",
-      "title": "Search"
-    },
-    {
-      "time": "2026-08-10T12:31:01.483197",
-      "app": "VS Code",
-      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
-    },
-    {
-      "time": "2026-08-10T12:31:04.490800",
-      "app": "Brave",
-      "title": "Attention Required! | Cloudflare - Brave"
-    },
-    {
-      "time": "2026-08-10T12:31:13.499770",
-      "app": "YouTube",
-      "title": "youtube.com/watch?v=NLdXH4wmqvY - Brave"
-    },
-    {
-      "time": "2026-08-10T12:31:31.508497",
-      "app": "Brave",
-      "title": "Prime Agent: Autonomous Agent Framework - Google Gemini - Brave"
-    },
-    {
-      "time": "2026-08-10T12:31:37.519975",
-      "app": "VS Code",
-      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
-    },
-    {
-      "time": "2026-08-10T12:31:40.531231",
-      "app": "IObit Uninstaller",
-      "title": "IObit Uninstaller"
-    },
-    {
-      "time": "2026-08-10T12:31:43.538594",
-      "app": "VS Code",
-      "title": "jarvis.py - J.A.R.V.I.S - Visual Studio Code"
-    },
     {
       "time": "2026-08-10T12:32:46.557879",
       "app": "Brave",
@@ -662,14 +616,80 @@
       "time": "2026-09-07T22:27:31.139925",
       "app": "PowerShell",
       "title": "Windows PowerShell"
+    },
+    {
+      "time": "2026-09-08T17:05:46.998746",
+      "app": "OC | Continue JARVIS MARK VII ",
+      "title": "OC | Continue JARVIS MARK VII development …"
+    },
+    {
+      "time": "2026-09-08T17:09:12.254114",
+      "app": "SENTINEL  ·  CrixxLabs",
+      "title": "SENTINEL  ·  CrixxLabs"
+    },
+    {
+      "time": "2026-09-08T17:12:01.730911",
+      "app": "Brave",
+      "title": "AirLLM performance thoughts - Brave"
+    },
+    {
+      "time": "2026-09-08T18:27:22.680987",
+      "app": "YouTube",
+      "title": "(170) I Tested the THINNEST Tech in 2026 - YouTube - Brave"
+    },
+    {
+      "time": "2026-09-08T18:53:56.550431",
+      "app": "OC | Continue JARVIS MARK VII ",
+      "title": "OC | Continue JARVIS MARK VII development …"
+    },
+    {
+      "time": "2026-09-08T19:26:02.124953",
+      "app": "PowerShell",
+      "title": "Windows PowerShell"
+    },
+    {
+      "time": "2026-09-08T19:26:32.203099",
+      "app": "Search",
+      "title": "Search"
+    },
+    {
+      "time": "2026-09-08T19:26:35.218326",
+      "app": "PowerShell",
+      "title": "Windows PowerShell"
+    },
+    {
+      "time": "2026-09-08T19:27:23.322164",
+      "app": "Brave",
+      "title": "AirLLM performance thoughts - Brave"
+    },
+    {
+      "time": "2026-09-08T19:27:35.357302",
+      "app": "PowerShell",
+      "title": "Windows PowerShell"
+    },
+    {
+      "time": "2026-09-08T19:28:38.497195",
+      "app": "Brave",
+      "title": "AirLLM performance thoughts - Brave"
+    },
+    {
+      "time": "2026-09-08T19:28:50.533913",
+      "app": "PowerShell",
+      "title": "Windows PowerShell"
+    },
+    {
+      "time": "2026-09-08T19:38:46.580026",
+      "app": "Brave",
+      "title": "AirLLM performance thoughts - Brave"
+    },
+    {
+      "time": "2026-09-08T20:26:46.079615",
+      "app": "PowerShell",
+      "title": "Windows PowerShell"
     }
   ],
   "session_notes": [],
   "daily_stats": {
-    "2026-06-20": {
-      "sessions": 1,
-      "brain_calls": 7
-    },
     "2026-07-18": {
       "sessions": 4,
       "brain_calls": 2
@@ -693,48 +713,16 @@
       "sessions": 2
     },
     "2026-09-08": {
-      "actions_executed": 27,
-      "brain_calls": 9,
-      "sessions": 12
+      "actions_executed": 89,
+      "brain_calls": 37,
+      "sessions": 14
+    },
+    "2026-09-09": {
+      "actions_executed": 6,
+      "brain_calls": 2
     }
   },
   "action_results": [
-    {
-      "time": "2026-04-14T20:52:08.634830",
-      "action": "whatsapp_read",
-      "success": true,
-      "detail": ""
-    },
-    {
-      "time": "2026-04-14T22:11:58.709673",
-      "action": "whatsapp_read",
-      "success": true,
-      "detail": ""
-    },
-    {
-      "time": "2026-04-15T00:44:34.870810",
-      "action": "whatsapp_read",
-      "success": true,
-      "detail": "There's a Excel class update at 3:30pm."
-    },
-    {
-      "time": "2026-04-15T00:44:45.416269",
-      "action": "close_app",
-      "success": false,
-      "detail": "whatsapp for me is not running."
-    },
-    {
-      "time": "2026-04-15T00:44:53.550270",
-      "action": "close_app",
-      "success": true,
-      "detail": "Closed whatsapp."
-    },
-    {
-      "time": "2026-06-15T22:15:05.382309",
-      "action": "weather",
-      "success": true,
-      "detail": "it's 31 degrees in Mumbai. feels like 36. broken clouds. hum"
-    },
     {
       "time": "2026-06-15T22:25:25.381897",
       "action": "screenshot_describe",
@@ -878,6 +866,42 @@
       "action": "install_app",
       "success": true,
       "detail": ""
+    },
+    {
+      "time": "2026-09-08T22:39:43.180131",
+      "action": "declarative_fact",
+      "success": true,
+      "detail": "Got it — saved: 'Test word is apple'."
+    },
+    {
+      "time": "2026-09-08T22:39:43.206079",
+      "action": "fact_query",
+      "success": true,
+      "detail": "Here's what I know about you — 22 entrys, 22 manual, 0 obser"
+    },
+    {
+      "time": "2026-09-08T22:48:59.459369",
+      "action": "declarative_fact",
+      "success": true,
+      "detail": "Got it — saved: 'Temporary test word is banana.'."
+    },
+    {
+      "time": "2026-09-08T22:53:08.244649",
+      "action": "fact_query",
+      "success": true,
+      "detail": "Here's what I know about you — 23 entrys, 23 manual, 0 obser"
+    },
+    {
+      "time": "2026-09-08T22:57:49.673469",
+      "action": "declarative_fact",
+      "success": true,
+      "detail": "Got it — saved: 'Temporary test word is cherry.'."
+    },
+    {
+      "time": "2026-09-08T22:57:49.706157",
+      "action": "fact_query",
+      "success": true,
+      "detail": "Here's what I know about you — 24 entrys, 24 manual, 0 obser"
     }
   ],
   "usage_freq": {
@@ -963,6 +987,18 @@
       "contexts": [
         "Arju is coding in VS Code."
       ]
+    },
+    "declarative_fact": {
+      "count": 3,
+      "contexts": [
+        "Arju has PowerShell open."
+      ]
+    },
+    "fact_query": {
+      "count": 3,
+      "contexts": [
+        "Arju has PowerShell open."
+      ]
     }
   },
   "failure_log": {
@@ -982,8 +1018,8 @@
       "detail": "Couldn't open spotify."
     },
     "invalid_action": {
-      "count": 16,
-      "last": "2026-09-08T04:30:59.013238",
+      "count": 36,
+      "last": "2026-09-09T01:27:48.097530",
       "detail": "Unsupported action."
     }
   },

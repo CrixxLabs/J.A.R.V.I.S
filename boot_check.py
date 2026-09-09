@@ -1,5 +1,5 @@
 # boot_check.py — J.A.R.V.I.S Boot Verification & Smoke Test Harness
-# =================================═════════════════════════════════
+# ==================================================================
 # Actively tests hardware channels, API keys, local ports, and databases,
 # syncs the verified realities with the status registry, and prints a report.
 #
@@ -12,13 +12,18 @@ import socket
 import datetime
 import requests
 import importlib.util
+import json
+import shutil
+from dotenv import load_dotenv
 from typing import Tuple
+
+load_dotenv()
 
 # Reliability Imports
 import status_registry
 from status_registry import SubsystemState, get_registry
 
-# ── Colors for CLI output ─────────────────────────────────────────────────────
+# -- Colors for CLI output -----------------------------------------------------
 COLOR_GREEN = "\033[92m"
 COLOR_YELLOW = "\033[93m"
 COLOR_RED = "\033[91m"
@@ -26,9 +31,9 @@ COLOR_GREY = "\033[90m"
 COLOR_CYAN = "\033[96m"
 COLOR_RESET = "\033[0m"
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # SUB-PROBE UTILITIES
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 
 def _check_port_open(host: str, port: int, timeout: float = 1.0) -> bool:
     """Check if a local/remote TCP port is actively listening."""
@@ -44,9 +49,9 @@ def _check_import(module_name: str) -> bool:
     return importlib.util.find_spec(module_name) is not None
 
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # ACTIVE PROBES
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 
 def probe_voice_stt() -> Tuple[SubsystemState, str]:
     """Test STT engines, PyAudio, and hardware input channels."""
@@ -286,15 +291,161 @@ def probe_flask_ui() -> Tuple[SubsystemState, str]:
     return SubsystemState.READY, "Flask server dependencies verified"
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# MAIN EXECUTOR
-# ══════════════════════════════════════════════════════════════════════════════
+
+
+def probe_file_processor() -> Tuple[SubsystemState, str]:
+    """Verify file processor dependencies and capabilities."""
+    required = ["PyPDF2", "docx", "openpyxl", "PIL"]
+    missing = [m for m in required if not _check_import(m.lower().replace("PIL", "PIL").replace("docx", "docx"))]
+    
+    optional = ["pytesseract", "whisper", "ffmpeg", "magic", "pandas"]
+    optional_missing = [m for m in optional if not _check_import(m)]
+    
+    if missing:
+        return SubsystemState.DEGRADED, "Core deps missing: " + ", ".join(missing) + ". Optional missing: " + ", ".join(optional_missing)
+    
+    msg = "All core file processor dependencies available"
+    if optional_missing:
+        msg += " | Optional: " + ", ".join(optional_missing) + " unavailable"
+    return SubsystemState.READY, msg
+
+
+def probe_vision() -> Tuple[SubsystemState, str]:
+    """Verify vision subsystem (Gemini Vision + OCR)."""
+    # Check actual Tesseract status (binary availability)
+    tes_state, tes_msg = probe_tesseract()
+    has_tesseract = (tes_state == SubsystemState.READY)
+    
+    # Check actual Gemini status (API key)
+    gem_state, gem_msg = probe_gemini()
+    has_gemini = (gem_state == SubsystemState.READY)
+    
+    has_cv2 = _check_import("cv2")
+    has_mss = _check_import("mss")
+    
+    if not has_cv2 or not has_mss:
+        return SubsystemState.DEGRADED, "OpenCV or MSS screen capture not available"
+    
+    # Determine vision readiness based on actual working components
+    if not has_gemini and not has_tesseract:
+        return SubsystemState.DISABLED, "No Gemini API key and no Tesseract OCR fallback"
+    
+    # Both available
+    if has_gemini and has_tesseract:
+        return SubsystemState.READY, "Gemini Vision + Tesseract OCR fallback active"
+    # Only Gemini available
+    elif has_gemini:
+        return SubsystemState.READY, "Gemini Vision active (no local OCR fallback)"
+    # Only Tesseract available
+    else:
+        return SubsystemState.READY, "Tesseract OCR active (no cloud vision)"
+
+
+def probe_task_queue() -> Tuple[SubsystemState, str]:
+    """Verify async task queue availability."""
+    if not _check_import("task_queue"):
+        return SubsystemState.OFFLINE, "task_queue module not found"
+    
+    try:
+        import task_queue
+        return SubsystemState.READY, "Async task queue module loaded (4 workers default)"
+    except Exception as e:
+        return SubsystemState.DEGRADED, "Task queue import error: " + str(e)
+
+
+def probe_dev_agent() -> Tuple[SubsystemState, str]:
+    """Verify dev agent capabilities."""
+    if not _check_import("dev_agent"):
+        return SubsystemState.OFFLINE, "dev_agent module not found"
+    
+    # Check for development tools
+    dev_tools = ["pytest", "black", "ruff", "mypy", "git"]
+    available = [t for t in dev_tools if _check_import(t) or shutil.which(t)]
+    
+    return SubsystemState.READY, "Dev agent ready | Tools: " + ", ".join(available)
+
+
+def probe_configuration() -> Tuple[SubsystemState, str]:
+    """Validate .env configuration and critical paths."""
+    issues = []
+    warnings = []
+    
+    # Check .env exists
+    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    if not os.path.exists(env_path):
+        issues.append(".env file not found")
+    else:
+        # Check critical keys
+        critical_keys = ["OPENROUTER_API_KEY", "GROQ_API_KEY"]
+        for key in critical_keys:
+            if not os.getenv(key):
+                warnings.append(key + " not set (cloud fallback unavailable)")
+    
+    # Check memory.json
+    mem_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "memory.json")
+    if not os.path.exists(mem_path):
+        warnings.append("memory.json not found (will be created on first run)")
+    
+    # Check user voice
+    voice_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "user_voice.npy")
+    if not os.path.exists(voice_path):
+        warnings.append("user_voice.npy not found (voice recognition disabled)")
+    
+    if issues:
+        msg = "Config issues: " + ", ".join(issues)
+        if warnings:
+            msg += " | Warnings: " + ", ".join(warnings)
+        return SubsystemState.DEGRADED, msg
+    elif warnings:
+        return SubsystemState.READY, "Config OK with warnings: " + ", ".join(warnings)
+    else:
+        return SubsystemState.READY, "All configuration validated"
+
+
+def probe_hardware_resources() -> Tuple[SubsystemState, str]:
+    """Check system resources (disk, memory, GPU)."""
+    try:
+        import psutil
+        
+        # Disk space
+        disk = psutil.disk_usage(os.path.dirname(os.path.abspath(__file__)))
+        free_gb = disk.free / (1024**3)
+        
+        # Memory
+        mem = psutil.virtual_memory()
+        mem_free_gb = mem.available / (1024**3)
+        
+        # CPU
+        cpu_count = psutil.cpu_count()
+        
+        # GPU check (basic)
+        gpu_info = "Not detected"
+        try:
+            import torch
+            if torch.cuda.is_available():
+                gpu_info = "CUDA (" + torch.cuda.get_device_name(0) + ")"
+        except:
+            pass
+        
+        status = SubsystemState.READY
+        if free_gb < 5:
+            status = SubsystemState.DEGRADED
+            msg = "Low disk: " + str(round(free_gb, 1)) + "GB free"
+        elif mem_free_gb < 2:
+            status = SubsystemState.DEGRADED
+            msg = "Low memory: " + str(round(mem_free_gb, 1)) + "GB available"
+        else:
+            msg = "Disk: " + str(round(free_gb, 1)) + "GB free | RAM: " + str(round(mem_free_gb, 1)) + "GB avail | CPU: " + str(cpu_count) + " cores | GPU: " + gpu_info
+        
+        return status, msg
+    except Exception as e:
+        return SubsystemState.DEGRADED, "Hardware check error: " + str(e)
 
 def run_smoke_test() -> bool:
     """Run active probes across all baseline subsystems and update status registry."""
-    print("═" * 70)
-    print("  J.A.R.V.I.S  —  Runtime Smoke Test Harness")
-    print("═" * 70)
+    print("=" * 70)
+    print("  J.A.R.V.I.S  -  Runtime Smoke Test Harness")
+    print("=" * 70)
     print("Initializing active verification checks on hardware and network resources...")
     time.sleep(0.5)
 
@@ -365,21 +516,55 @@ def run_smoke_test() -> bool:
     ui_state, ui_msg = probe_flask_ui()
     registry.set_status("FLASK_UI", ui_state, ui_msg)
 
+    # File Processor
+    fp_state, fp_msg = probe_file_processor()
+    registry.set_status("FILE_PROCESSOR", fp_state, fp_msg)
+
+    # Vision
+    vis_state, vis_msg = probe_vision()
+    registry.set_status("VISION", vis_state, vis_msg)
+
+    # Task Queue
+    tq_state, tq_msg = probe_task_queue()
+    registry.set_status("TASK_QUEUE", tq_state, tq_msg)
+
+    # Dev Agent
+    da_state, da_msg = probe_dev_agent()
+    registry.set_status("DEV_AGENT", da_state, da_msg)
+
+    # Configuration
+    cfg_state, cfg_msg = probe_configuration()
+    registry.set_status("CONFIG", cfg_state, cfg_msg)
+
+    # Hardware Resources
+    hw_state, hw_msg = probe_hardware_resources()
+    registry.set_status("HARDWARE", hw_state, hw_msg)
+
     # Print Formatted Report
     status_registry._print_report()
 
     # Determine Overall Result
+    # Check if any LLM provider is available
+    ollama_state = registry.get_all().get("OLLAMA", {}).get("state")
+    groq_state = registry.get_all().get("GROQ", {}).get("state")
+    openrouter_state = registry.get_all().get("OPENROUTER", {}).get("state")
+    has_llm_provider = any(s == SubsystemState.READY.value for s in [ollama_state, groq_state, openrouter_state])
+    
     critical_failures = [
         name for name, info in registry.get_all().items()
-        if info.get("state") == SubsystemState.OFFLINE.value and name in ("VOICE_STT", "VOICE_TTS", "OLLAMA", "MEMORY", "TASKS")
+        if info.get("state") == SubsystemState.OFFLINE.value and name in ("VOICE_STT", "VOICE_TTS", "MEMORY", "TASKS", "FILE_PROCESSOR")
     ]
+    
+    # If no LLM provider is available, that's a critical failure for conversational AI
+    if not has_llm_provider:
+        critical_failures.append("NO_LLM_PROVIDER")
 
     if critical_failures:
-        print(f"{COLOR_RED}[FAIL] Boot validation failed. Critical operational failures discovered: {', '.join(critical_failures)}{COLOR_RESET}")
+        print("[FAIL] Boot validation failed. Critical operational failures discovered: " + ", ".join(critical_failures))
         print("Please check local port listeners, folder paths, and file permissions before booting.")
         return False
     
-    print(f"{COLOR_GREEN}[PASS] Core runtime systems verified successfully. Jarvis is ready for operational tasks!{COLOR_RESET}")
+    print("[PASS] Core runtime systems verified successfully. Jarvis is ready for operational tasks!")
     return True
 
 

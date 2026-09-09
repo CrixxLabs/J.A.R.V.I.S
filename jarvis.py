@@ -31,6 +31,14 @@ import listener
 from memory import log_failure, log_usage
 from session_logger import log_event, save_session
 
+# ── Task Queue (MARK VII Phase 1) ─────────────────────────────────────────────
+try:
+    from task_queue import init_task_queue, shutdown_task_queue, get_task_queue
+    _TASK_QUEUE_AVAILABLE = True
+except Exception as _tq_err:
+    _TASK_QUEUE_AVAILABLE = False
+    print(f"[jarvis] Task queue not available: {_tq_err}")
+
 # ── Reliability imports (Phase 2-5) ───────────────────────────────────────────
 import status_registry
 from status_registry import SubsystemState, get_registry
@@ -876,6 +884,15 @@ def startup():
     observer.start_observers()
     executor.init(speak_fn=speak, ask_fn=planner.ask)
     tasks.init(speak_fn=speak, action_fn=lambda action: executor.execute(action))
+
+    # Start async task queue (MARK VII Phase 1)
+    if _TASK_QUEUE_AVAILABLE:
+        try:
+            asyncio.run(init_task_queue(max_workers=4, use_dedicated_thread=True))
+            print("[Startup] Task queue initialized with 4 workers")
+        except Exception as exc:
+            print(f"[DEBUG][startup] task queue init failed: {exc}")
+
     threading.Thread(target=proactive_loop, daemon=True).start()
     threading.Thread(target=_init_face_recognition, daemon=True).start()
 
@@ -1055,4 +1072,10 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         pass
     finally:
+        if _TASK_QUEUE_AVAILABLE:
+            try:
+                asyncio.run(shutdown_task_queue(timeout=10.0))
+                print("[Shutdown] Task queue stopped")
+            except Exception as exc:
+                print(f"[DEBUG][shutdown] task queue shutdown error: {exc}")
         save_session()

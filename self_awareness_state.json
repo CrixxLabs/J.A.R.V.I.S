@@ -1,6 +1,66 @@
 {
-  "timestamp": "2026-09-08T04:31:15.972447",
+  "timestamp": "2026-09-09T01:28:04.929322",
   "core_files": {
+    "add_boot_check_enhancements.py": {
+      "hash": "57633e75dedda88f",
+      "size_bytes": 8144,
+      "functions": [],
+      "description": ""
+    },
+    "add_dev_agent_to_executor.py": {
+      "hash": "96a50cd467d9b5c4",
+      "size_bytes": 2754,
+      "functions": [],
+      "description": ""
+    },
+    "add_probes_fixed.py": {
+      "hash": "c323b6d6f169cedf",
+      "size_bytes": 5989,
+      "functions": [],
+      "description": ""
+    },
+    "add_vision_actions.py": {
+      "hash": "0810516a50f88e06",
+      "size_bytes": 1109,
+      "functions": [],
+      "description": ""
+    },
+    "add_vision_handlers.py": {
+      "hash": "0348a280aafc2fb5",
+      "size_bytes": 5087,
+      "functions": [],
+      "description": ""
+    },
+    "add_vision_handlers2.py": {
+      "hash": "0264626274c078ae",
+      "size_bytes": 5585,
+      "functions": [],
+      "description": ""
+    },
+    "add_vision_to_list.py": {
+      "hash": "7f1f00aeac332ac7",
+      "size_bytes": 891,
+      "functions": [],
+      "description": ""
+    },
+    "add_vision_to_noretry.py": {
+      "hash": "da4b597081f449c8",
+      "size_bytes": 621,
+      "functions": [],
+      "description": ""
+    },
+    "apply_all_changes.py": {
+      "hash": "b95073e3a3923f78",
+      "size_bytes": 24911,
+      "functions": [],
+      "description": ""
+    },
+    "apply_final_changes.py": {
+      "hash": "23ee42fc14f9544a",
+      "size_bytes": 25162,
+      "functions": [],
+      "description": ""
+    },
     "app_installer.py": {
       "hash": "9f6d2b62165a6871",
       "size_bytes": 23641,
@@ -32,8 +92,8 @@
       "description": "Per-app login flow recipes (Spotify, Discord, etc.)"
     },
     "boot_check.py": {
-      "hash": "adc2feb372c95893",
-      "size_bytes": 17439,
+      "hash": "d11d7cd62f5f9ffd",
+      "size_bytes": 23381,
       "functions": [
         "probe_voice_stt",
         "probe_voice_tts",
@@ -51,6 +111,12 @@
         "probe_email",
         "probe_calendar",
         "probe_flask_ui",
+        "probe_file_processor",
+        "probe_vision",
+        "probe_task_queue",
+        "probe_dev_agent",
+        "probe_configuration",
+        "probe_hardware_resources",
         "run_smoke_test"
       ],
       "description": ""
@@ -79,8 +145,8 @@
       "description": "Rolling chat history + auto-summarization"
     },
     "core.py": {
-      "hash": "01b1d0868fc670bb",
-      "size_bytes": 52247,
+      "hash": "268a7ea51f885f31",
+      "size_bytes": 53851,
       "functions": [
         "update_context",
         "get_context",
@@ -112,6 +178,18 @@
       ],
       "description": "Secure password storage via Windows DPAPI (keyring)"
     },
+    "dev_agent.py": {
+      "hash": "fb2e528a36bbf7a8",
+      "size_bytes": 33752,
+      "functions": [
+        "get_dev_agent",
+        "inspect_file",
+        "run_tests",
+        "propose_change",
+        "explain_test_failure"
+      ],
+      "description": ""
+    },
     "error_handler.py": {
       "hash": "db569acb0de2e665",
       "size_bytes": 3340,
@@ -137,8 +215,8 @@
       "description": "Self-patching, proposes code improvements"
     },
     "executor.py": {
-      "hash": "4fcf7f6490ca090c",
-      "size_bytes": 71729,
+      "hash": "d67ede021048b39d",
+      "size_bytes": 89150,
       "functions": [
         "init",
         "get_capabilities_text",
@@ -211,11 +289,50 @@
       ],
       "description": ""
     },
+    "find_handlers.py": {
+      "hash": "11bfd7580b14ea61",
+      "size_bytes": 704,
+      "functions": [],
+      "description": ""
+    },
+    "fix_dev_indent.py": {
+      "hash": "77cbf0b5f7e6d4cf",
+      "size_bytes": 331,
+      "functions": [],
+      "description": ""
+    },
+    "fix_executor.py": {
+      "hash": "895a6c0eea79b35f",
+      "size_bytes": 794,
+      "functions": [],
+      "description": ""
+    },
+    "fix_indent.py": {
+      "hash": "48ed631e326f2088",
+      "size_bytes": 441,
+      "functions": [],
+      "description": ""
+    },
+    "fix_string.py": {
+      "hash": "ee9cd55f2417d02e",
+      "size_bytes": 535,
+      "functions": [],
+      "description": ""
+    },
     "jarvis.py": {
-      "hash": "8030161c2de0aca4",
-      "size_bytes": 9284,
+      "hash": "4b774122f42386b4",
+      "size_bytes": 42099,
       "functions": [
-        "jarvisify_response"
+        "jarvisify_response",
+        "speak",
+        "was_interrupted",
+        "listen",
+        "wake_word_detect",
+        "handle_fast_command",
+        "proactive_loop",
+        "check_face_is_user",
+        "execute_with_feedback",
+        "startup"
       ],
       "description": "Main entry point, event loop, user interaction"
     },
@@ -350,8 +467,8 @@
       "description": "Active app monitoring, screen state, system observers"
     },
     "planner.py": {
-      "hash": "76fdfe32596081da",
-      "size_bytes": 28643,
+      "hash": "a4ad4584bc93093b",
+      "size_bytes": 29131,
       "functions": [
         "replan_action",
         "add_to_history",
@@ -400,6 +517,12 @@
       ],
       "description": "Scheduled reminders, obligation check-ins"
     },
+    "restore_run_smoke_test.py": {
+      "hash": "3d1556cea1f82439",
+      "size_bytes": 4520,
+      "functions": [],
+      "description": ""
+    },
     "seed_me.py": {
       "hash": "c1ea0b22529cc9e1",
       "size_bytes": 6737,
@@ -443,8 +566,8 @@
       "description": "Structured self-model tracking operational capabilities"
     },
     "server.py": {
-      "hash": "62dfab0c778b4711",
-      "size_bytes": 15744,
+      "hash": "2736cbab57b886b1",
+      "size_bytes": 17231,
       "functions": [
         "speak",
         "index",
@@ -460,6 +583,9 @@
         "api_process_file",
         "api_task_status",
         "api_list_tasks",
+        "api_vision_status",
+        "api_activity",
+        "api_subsystems",
         "api_process_file_sync"
       ],
       "description": "Local web backend for dashboard"
@@ -515,8 +641,8 @@
       "description": "Active task engine with reminders"
     },
     "task_integration.py": {
-      "hash": "7047048148dcea72",
-      "size_bytes": 15180,
+      "hash": "8fd233a73caac2fe",
+      "size_bytes": 15474,
       "functions": [
         "get_task_integration",
         "init_task_integration",
@@ -527,11 +653,91 @@
       "description": ""
     },
     "task_queue.py": {
-      "hash": "6e3ea4c8a9c1637b",
-      "size_bytes": 17636,
+      "hash": "32fb22ef3325b36e",
+      "size_bytes": 18121,
       "functions": [
         "get_task_queue"
       ],
+      "description": ""
+    },
+    "test_concurrent.py": {
+      "hash": "94d7d809a37a4833",
+      "size_bytes": 960,
+      "functions": [],
+      "description": ""
+    },
+    "test_concurrent2.py": {
+      "hash": "2bbf5b181dfcf66c",
+      "size_bytes": 1409,
+      "functions": [],
+      "description": ""
+    },
+    "test_concurrent3.py": {
+      "hash": "7cf0e81e3d76d604",
+      "size_bytes": 1190,
+      "functions": [],
+      "description": ""
+    },
+    "test_concurrent4.py": {
+      "hash": "276b721734720b11",
+      "size_bytes": 1492,
+      "functions": [],
+      "description": ""
+    },
+    "test_debug.py": {
+      "hash": "b0d5e49a51d14943",
+      "size_bytes": 1481,
+      "functions": [],
+      "description": ""
+    },
+    "test_debug2.py": {
+      "hash": "6e062a183cf629f3",
+      "size_bytes": 1138,
+      "functions": [],
+      "description": ""
+    },
+    "test_final.py": {
+      "hash": "a6b3b80760f0346a",
+      "size_bytes": 742,
+      "functions": [],
+      "description": ""
+    },
+    "test_flow.py": {
+      "hash": "143bf8c9b2b85fd2",
+      "size_bytes": 496,
+      "functions": [],
+      "description": ""
+    },
+    "test_flow2.py": {
+      "hash": "f9d4079ee66d1dfe",
+      "size_bytes": 624,
+      "functions": [],
+      "description": ""
+    },
+    "test_full_flow.py": {
+      "hash": "eac089d393e8d514",
+      "size_bytes": 1504,
+      "functions": [
+        "run_jarvis"
+      ],
+      "description": ""
+    },
+    "test_planner.py": {
+      "hash": "1c08d5e5dac83732",
+      "size_bytes": 308,
+      "functions": [],
+      "description": ""
+    },
+    "test_pytest_style.py": {
+      "hash": "78051e20bbd6e37b",
+      "size_bytes": 1453,
+      "functions": [],
+      "description": ""
+    },
+    "test_speak.py": {
+      "hash": "b710a5108393ff22",
+      "size_bytes": 345,
+      "functions": [],
       "description": ""
     },
     "test_startup_shutdown.py": {
@@ -540,6 +746,18 @@
       "functions": [
         "debug_startup"
       ],
+      "description": ""
+    },
+    "update_jarvis.py": {
+      "hash": "50537bd0f7eee3ec",
+      "size_bytes": 470,
+      "functions": [],
+      "description": ""
+    },
+    "update_task_queue.py": {
+      "hash": "dc828476e2cad5dd",
+      "size_bytes": 27680,
+      "functions": [],
       "description": ""
     },
     "user_profile.py": {
@@ -558,14 +776,21 @@
       "description": "Personal preferences in user_profile.json"
     },
     "vision.py": {
-      "hash": "647ec7cab85839c2",
-      "size_bytes": 6860,
+      "hash": "5cd29800b2ab9a22",
+      "size_bytes": 13513,
       "functions": [
         "capture_screen",
         "screenshot_to_base64",
         "describe_screen",
         "read_screen",
-        "analyze_screen_context"
+        "analyze_screen_context",
+        "capture_screen_region",
+        "capture_webcam",
+        "image_to_base64",
+        "describe_image",
+        "analyze_image_file",
+        "read_image_text",
+        "get_vision_status"
       ],
       "description": "Screen capture, OCR via Tesseract"
     },
@@ -613,14 +838,14 @@
   "skills": [
     "example_skill"
   ],
-  "total_files": 43,
-  "total_functions": 309,
-  "total_size_bytes": 700680,
+  "total_files": 75,
+  "total_functions": 340,
+  "total_size_bytes": 930491,
   "changes": {
-    "added": [],
+    "added": [
+      "test_final.py"
+    ],
     "removed": [],
-    "modified": [
-      "task_integration.py"
-    ]
+    "modified": []
   }
 }

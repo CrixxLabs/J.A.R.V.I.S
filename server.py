@@ -26,6 +26,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 
 from task_queue import TaskPriority
+from file_processor import get_processor, process_file
 
 load_dotenv()
 
@@ -415,6 +416,53 @@ def api_list_tasks():
         queue = get_task_queue()
         stats = queue.get_stats()
         return jsonify(stats)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/vision/status", methods=["GET"])
+@_require_auth
+def api_vision_status():
+    """Get vision subsystem status."""
+    try:
+        from vision import get_vision_status
+        status = get_vision_status()
+        return jsonify(status)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/activity", methods=["GET"])
+@_require_auth
+def api_activity():
+    """Get recent activity from memory."""
+    try:
+        from memory import get_recent_activity
+        activities = get_recent_activity(20)
+        items = []
+        for act in activities:
+            act_type = act.get("type", "unknown")
+            detail = act.get("detail", "")
+            time_str = act.get("time", "")[:16].replace("T", " ") if act.get("time") else ""
+            items.append({
+                "time": time_str,
+                "type": act_type,
+                "text": f"{act_type}: {detail[:80]}"
+            })
+        return jsonify({"items": items})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/subsystems", methods=["GET"])
+@_require_auth
+def api_subsystems():
+    """Get all subsystem statuses."""
+    try:
+        from status_registry import get_registry
+        registry = get_registry()
+        all_status = registry.get_all()
+        return jsonify(all_status)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

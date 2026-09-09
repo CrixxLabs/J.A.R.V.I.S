@@ -25,6 +25,14 @@ from youtube_transcript_api import YouTubeTranscriptApi
 from dotenv import load_dotenv
 from memory import remember, recall_all, log_activity, update_daily_stats, log_failure
 
+# Dev Agent (MARK VII)
+try:
+    from dev_agent import DEV_AGENT_ACTIONS
+    _DEV_AGENT_AVAILABLE = True
+except Exception as _dev_err:
+    _DEV_AGENT_AVAILABLE = False
+    print(f"[executor] Dev Agent not available: {_dev_err}")
+
 # File ops module — provides search_files and rename_file (lazy import to avoid cycles)
 def _get_file_ops():
     from file_ops import search_files, rename_file
@@ -177,6 +185,26 @@ AVAILABLE_ACTIONS_LIST = [
     "self_scan",                # rescan own codebase
     "self_capabilities",        # report current abilities
     "self_changes",             # report what changed since last boot
+    # File Processor (MARK VII)
+    "process_file",             # universal file processing (inspect, summarize, extract, ocr, transcribe, analyze, code_review, debug, convert)
+    "list_uploaded_files",      # list files in upload directory
+
+    # Vision/Eyes (MARK VII)
+    "capture_webcam",           # capture and describe webcam frame
+    "capture_screen_region",    # capture and describe screen region
+    "analyze_image_file",       # analyze image file with Gemini Vision
+    "read_image_text",          # OCR text extraction from image file
+    "vision_status",            # get vision subsystem status
+
+    # Dev Agent (MARK VII)
+    "dev_inspect",           # inspect file structure and content
+    "dev_test",              # run tests and analyze failures
+    "dev_search",            # search code for patterns
+    "dev_propose",           # propose code changes (diff)
+    "dev_status",            # get dev agent status
+    # Declarative fact handling (MARK VII)
+    "declarative_fact",      # store declarative fact statements
+    "fact_query",            # query specific facts from profile
 ]
 
 def get_capabilities_text():
@@ -1459,6 +1487,243 @@ def _handle_self_changes(action: dict) -> tuple:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# FILE PROCESSOR ACTIONS (MARK VII - File Intelligence)
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _handle_process_file(action: dict) -> tuple:
+    """Process a file with the universal file processor."""
+    try:
+        from file_processor import process_file, get_processor
+        
+        file_path = action.get("file_path", "") or action.get("path", "")
+        file_action = action.get("file_action", "inspect")
+        
+        if not file_path:
+            return _stable_failure("Which file should I process? Provide a file path.")
+        
+        # Run the file processor
+        result = process_file(file_path, file_action)
+        
+        if result.success:
+            # Format response based on action type
+            if file_action == "inspect":
+                meta = result.metadata
+                response = (
+                    f"File: {meta.name} ({meta.size_human})\n"
+                    f"Type: {meta.mime_type}\n"
+                    f"SHA256: {meta.sha256[:16]}...\n"
+                    f"Modified: {meta.modified.strftime('%Y-%m-%d %H:%M')}"
+                )
+                if meta.extra:
+                    for k, v in meta.extra.items():
+                        response += f"\n  {k}: {v}"
+                return _stable_success(response)
+            
+            elif file_action == "summarize":
+                return _stable_success(result.result)
+            
+            elif file_action == "explain":
+                return _stable_success(result.result)
+            
+            elif file_action == "extract":
+                text_data = result.result
+                preview = text_data.get("text", "")[:500]
+                return _stable_success(
+                    f"Extracted {text_data.get('word_count', 0)} words, "
+                    f"{text_data.get('line_count', 0)} lines:\n{preview}"
+                )
+            
+            elif file_action == "ocr":
+                return _stable_success(f"OCR result:\n{result.result}")
+            
+            elif file_action == "transcribe":
+                return _stable_success(f"Transcription:\n{result.result}")
+            
+            elif file_action == "analyze":
+                if isinstance(result.result, dict) and "error" not in result.result:
+                    data = result.result
+                    if "shape" in data:
+                        return _stable_success(
+                            f"CSV Analysis: {data['shape'][0]} rows × {data['shape'][1]} cols\n"
+                            f"Columns: {', '.join(data['columns'][:5])}{'...' if len(data['columns']) > 5 else ''}\n"
+                            f"Memory: {data.get('memory_mb', 0):.1f} MB"
+                        )
+                    elif "keys" in data:
+                        return _stable_success(
+                            f"JSON Analysis: {data['type']} with {data.get('length', 0)} items\n"
+                            f"Keys: {', '.join(data['keys'][:5]) if data['keys'] else 'N/A'}"
+                        )
+                return _stable_success(str(result.result))
+            
+            elif file_action == "code_review":
+                return _stable_success(result.result)
+            
+            elif file_action == "debug":
+                return _stable_success(result.result)
+            
+            elif file_action == "convert":
+                if isinstance(result.result, dict) and result.result.get("success"):
+                    return _stable_success(f"Converted to {result.result['output']}")
+                return _stable_failure(result.result.get("error", "Conversion failed"))
+            
+            else:
+                return _stable_success(str(result.result))
+        else:
+            return _stable_failure(result.error or "File processing failed")
+            
+    except Exception as exc:
+        print(f"[DEBUG][executor] process_file error: {exc}")
+        return _stable_failure(f"Couldn't process file: {exc}")
+
+
+def _handle_list_uploaded_files(action: dict) -> tuple:
+    """List files in the upload directory (for server mode)."""
+    try:
+        import os
+        from server import UPLOAD_FOLDER
+        
+        if not os.path.exists(UPLOAD_FOLDER):
+            return _stable_success("No uploaded files.")
+        
+        files = []
+        for fname in os.listdir(UPLOAD_FOLDER):
+            fpath = os.path.join(UPLOAD_FOLDER, fname)
+            if os.path.isfile(fpath):
+                size = os.path.getsize(fpath) / 1024
+                files.append(f"{fname} ({size:.1f} KB)")
+        
+        if not files:
+            return _stable_success("No uploaded files.")
+        
+        return _stable_success("Uploaded files:\n" + "\n".join(files[:20]))
+    except Exception as exc:
+        print(f"[DEBUG][executor] list_uploaded_files error: {exc}")
+        return _stable_failure("Couldn't list files.")
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+
+
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# VISION/EYES ACTIONS (MARK VII - Visual Awareness)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def _handle_capture_webcam(action: dict) -> tuple:
+    """Capture a frame from the webcam and optionally describe it."""
+    try:
+        from vision import capture_webcam, describe_image, get_vision_status
+        
+        camera_index = action.get("camera_index", 0)
+        describe = action.get("describe", True)
+        prompt = action.get("prompt", "describe what you see in this webcam capture")
+        
+        frame = capture_webcam(camera_index)
+        if frame is None:
+            return _stable_failure("Could not access webcam. Make sure it's connected and not in use by another app.")
+        
+        if describe:
+            result = describe_image(frame, prompt)
+            return _stable_success(result)
+        else:
+            return _stable_success("Webcam frame captured successfully.")
+            
+    except Exception as exc:
+        print(f"[DEBUG][executor] capture_webcam error: {exc}")
+        return _stable_failure(f"Webcam capture failed: {exc}")
+
+
+def _handle_capture_screen_region(action: dict) -> tuple:
+    """Capture a specific screen region."""
+    try:
+        from vision import capture_screen_region, describe_image
+        import cv2
+        
+        left = action.get("left", 0)
+        top = action.get("top", 0)
+        width = action.get("width", 800)
+        height = action.get("height", 600)
+        describe = action.get("describe", True)
+        prompt = action.get("prompt", "describe what you see in this screen region")
+        save_path = action.get("save_path", "")
+        
+        img = capture_screen_region(left, top, width, height)
+        
+        # Save if requested
+        if save_path:
+            cv2.imwrite(save_path, img)
+            saved_msg = " Saved to " + save_path + "."
+        else:
+            saved_msg = ""
+        
+        if describe:
+            result = describe_image(img, prompt)
+            return _stable_success(result + saved_msg)
+        else:
+            return _stable_success("Screen region captured (" + str(width) + "x" + str(height) + " at " + str(left) + "," + str(top) + ")" + saved_msg)
+            
+    except Exception as exc:
+        print(f"[DEBUG][executor] capture_screen_region error: {exc}")
+        return _stable_failure("Screen region capture failed: " + str(exc))
+
+
+def _handle_analyze_image_file(action: dict) -> tuple:
+    """Analyze an image file using Gemini Vision."""
+    try:
+        from vision import analyze_image_file
+        
+        file_path = action.get("file_path", "") or action.get("path", "")
+        prompt = action.get("prompt", "describe what you see in this image")
+        
+        if not file_path:
+            return _stable_failure("Which image file should I analyze? Provide a file path.")
+        
+        result = analyze_image_file(file_path, prompt)
+        return _stable_success(result)
+        
+    except Exception as exc:
+        print(f"[DEBUG][executor] analyze_image_file error: {exc}")
+        return _stable_failure("Image analysis failed: " + str(exc))
+
+
+def _handle_read_image_text(action: dict) -> tuple:
+    """Extract text from an image file using OCR."""
+    try:
+        from vision import read_image_text
+        
+        file_path = action.get("file_path", "") or action.get("path", "")
+        
+        if not file_path:
+            return _stable_failure("Which image file should I read? Provide a file path.")
+        
+        result = read_image_text(file_path)
+        return _stable_success(result)
+        
+    except Exception as exc:
+        print(f"[DEBUG][executor] read_image_text error: {exc}")
+        return _stable_failure("Image OCR failed: " + str(exc))
+
+
+def _handle_vision_status(action: dict) -> tuple:
+    """Get status of all vision subsystems."""
+    try:
+        from vision import get_vision_status
+        
+        status = get_vision_status()
+        lines = []
+        for subsystem, info in status.items():
+            state = info.get("state", "unknown")
+            detail = info.get("detail", "")
+            lines.append(subsystem + ": " + state + " -- " + detail)
+        
+        return _stable_success("Vision subsystem status:\n" + "\n".join(lines))
+        
+    except Exception as exc:
+        print(f"[DEBUG][executor] vision_status error: {exc}")
+        return _stable_failure("Couldn't get vision status: " + str(exc))
+
+
 # MAIN EXECUTE
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -1747,6 +2012,44 @@ def execute(action, speak_fn=None):
                 print(f"[DEBUG][executor] profile_remember error: {exc}")
                 return _stable_failure("Couldn't save that.")
 
+        if act == "declarative_fact":
+            try:
+                from user_profile import add_single_fact, confirm_and_save_profile
+                statement = action.get("statement", "")
+                if not statement:
+                    return _stable_failure("What should I remember?")
+                proposed = add_single_fact(statement)
+                if not proposed:
+                    return _stable_failure("Couldn't extract that. Try rephrasing.")
+                result = confirm_and_save_profile(proposed)
+                entry_preview = proposed[0].get("value", statement) if proposed else statement
+                return _stable_success(f"Got it — saved: '{entry_preview}'.")
+            except Exception as exc:
+                print(f"[DEBUG][executor] declarative_fact error: {exc}")
+                return _stable_failure("Couldn't save that.")
+
+        if act == "fact_query":
+            try:
+                from user_profile import get_profile_summary
+                fact_name = action.get("fact_name", "")
+                if not fact_name:
+                    return _stable_failure("What fact would you like to know?")
+                summary = get_profile_summary()
+                if not summary or summary.strip() == "No profile entries yet.":
+                    return _stable_failure("I don't have any facts saved about you yet.")
+                # Search for the fact in the summary
+                summary_lower = summary.lower()
+                fact_name_lower = fact_name.lower()
+                if fact_name_lower in summary_lower:
+                    # Find the relevant line
+                    for line in summary.split('\n'):
+                        if fact_name_lower in line.lower():
+                            return _stable_success(line.strip())
+                return _stable_failure(f"I don't have a fact about '{fact_name}' saved.")
+            except Exception as exc:
+                print(f"[DEBUG][executor] fact_query error: {exc}")
+                return _stable_failure("Couldn't retrieve that fact.")
+
         # ── Iron Man automation actions ───────────────────────────────────────
         if act == "install_app":
             return _handle_install_app(action)
@@ -1767,6 +2070,39 @@ def execute(action, speak_fn=None):
         if act == "self_changes":
             return _handle_self_changes(action)
 
+        # ── File Processor actions (MARK VII) ──────────────────────────────────
+        if act == "process_file":
+            return _handle_process_file(action)
+        if act == "list_uploaded_files":
+            return _handle_list_uploaded_files(action)
+
+        
+        # Vision/Eyes actions (MARK VII)
+        if act == "capture_webcam":
+            return _handle_capture_webcam(action)
+        if act == "capture_screen_region":
+            return _handle_capture_screen_region(action)
+        if act == "analyze_image_file":
+            return _handle_analyze_image_file(action)
+        if act == "read_image_text":
+            return _handle_read_image_text(action)
+        if act == "vision_status":
+            return _handle_vision_status(action)
+
+        
+        # Dev Agent actions (MARK VII)
+        if _DEV_AGENT_AVAILABLE:
+            if act == "dev_inspect":
+                return DEV_AGENT_ACTIONS["dev_inspect"](action)
+            if act == "dev_test":
+                return DEV_AGENT_ACTIONS["dev_test"](action)
+            if act == "dev_search":
+                return DEV_AGENT_ACTIONS["dev_search"](action)
+            if act == "dev_propose":
+                return DEV_AGENT_ACTIONS["dev_propose"](action)
+            if act == "dev_status":
+                return DEV_AGENT_ACTIONS["dev_status"](action)
+
         return _stable_failure("Unsupported action.")
     except Exception as exc:
         print(f"[DEBUG][executor] unhandled error for action {act}: {exc}")
@@ -1782,6 +2118,11 @@ def execute_with_retry(action, speak_fn=None, max_retries=1):
         "save_login", "list_logins", "delete_login",
         "self_scan", "self_capabilities", "self_changes",
         "generate_video", "generate_image",
+        "process_file", "list_uploaded_files",
+        "capture_webcam", "capture_screen_region",
+        "analyze_image_file", "read_image_text", "vision_status",
+        "dev_inspect", "dev_test", "dev_search", "dev_propose", "dev_status",
+        "declarative_fact", "fact_query",
     }
     if action_name in _NO_RETRY_ACTIONS:
         return execute(action, speak_fn)
