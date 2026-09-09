@@ -1,0 +1,157 @@
+<Window x:Class="Jarvis.Desktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:chrome="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        xmlns:controls="clr-namespace:Jarvis.Desktop.Controls"
+        Title="JARVIS MARK VII" Width="1200" Height="750" MinWidth="980" MinHeight="620"
+        WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="CanResize"
+        Background="#02070C" Foreground="#DDF8FF" UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <chrome:WindowChrome.WindowChrome>
+        <chrome:WindowChrome CaptionHeight="42" ResizeBorderThickness="6" CornerRadius="10" GlassFrameThickness="0" UseAeroCaptionButtons="False" />
+    </chrome:WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <Style x:Key="Micro" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe UI"/><Setter Property="FontSize" Value="9"/>
+            <Setter Property="Foreground" Value="#7896A0A8"/>
+        </Style>
+        <Style x:Key="HudValue" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe UI Light"/><Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="#D7EAF0F3"/>
+        </Style>
+        <Style x:Key="CaptionButton" TargetType="Button">
+            <Setter Property="Width" Value="42"/><Setter Property="Height" Value="30"/><Setter Property="Foreground" Value="#8FAAB2BA"/>
+            <Setter Property="Background" Value="Transparent"/><Setter Property="BorderThickness" Value="0"/><Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="FontSize" Value="12"/><Setter Property="Cursor" Value="Arrow"/><Setter Property="chrome:WindowChrome.IsHitTestVisibleInChrome" Value="True"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button">
+                <Border x:Name="B" Background="{TemplateBinding Background}"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="B" Property="Background" Value="#152A3540"/><Setter Property="Foreground" Value="#E8FAFF"/></Trigger>
+                    <Trigger Property="IsPressed" Value="True"><Setter TargetName="B" Property="Background" Value="#243C4B58"/></Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate></Setter.Value></Setter>
+        </Style>
+        <Style x:Key="StateChoice" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="#687F8890"/><Setter Property="FontFamily" Value="Segoe UI Semibold"/><Setter Property="FontSize" Value="8"/>
+            <Setter Property="Margin" Value="2,0"/><Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="RadioButton">
+                <Border x:Name="Shell" Padding="8,5" BorderBrush="#1D536776" BorderThickness="0,0,0,1" Background="Transparent"><ContentPresenter HorizontalAlignment="Center"/></Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True"><Setter Property="Foreground" Value="#B5DCE7EC"/></Trigger>
+                    <Trigger Property="IsChecked" Value="True"><Setter Property="Foreground" Value="#8BE6FA"/><Setter TargetName="Shell" Property="BorderBrush" Value="#8BE6FA"/><Setter TargetName="Shell" Property="Background" Value="#0B6BDCF5"/></Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate></Setter.Value></Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border BorderBrush="#263E4A54" BorderThickness="1" Background="#02070C">
+        <Grid>
+            <controls:AmbientField x:Name="Ambient" Panel.ZIndex="0"/>
+            <Grid Panel.ZIndex="1">
+                <Grid.RowDefinitions><RowDefinition Height="42"/><RowDefinition Height="*"/><RowDefinition Height="44"/></Grid.RowDefinitions>
+                <Grid x:Name="TitleBar" Grid.Row="0" MouseLeftButtonDown="TitleBar_OnMouseLeftButtonDown">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="18,0,0,0">
+                        <Ellipse Width="5" Height="5" Fill="#62D7F1" Margin="0,0,10,0"><Ellipse.Effect><DropShadowEffect Color="#62D7F1" BlurRadius="9" ShadowDepth="0" Opacity=".8"/></Ellipse.Effect></Ellipse>
+                        <TextBlock Text="J A R V I S" FontFamily="Segoe UI Semibold" FontSize="10" Foreground="#BBDCE5E9"/>
+                        <TextBlock Text=" / MARK VII" FontSize="9" Foreground="#586F7880" Margin="6,1,0,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button Style="{StaticResource CaptionButton}" Content="―" Click="Minimize_OnClick"/>
+                        <Button x:Name="MaximizeButton" Style="{StaticResource CaptionButton}" Content="□" Click="Maximize_OnClick"/>
+                        <Button Style="{StaticResource CaptionButton}" Content="×" Click="Close_OnClick"/>
+                    </StackPanel>
+                    <Border VerticalAlignment="Bottom" Height="1" Background="#132E3A43" Margin="18,0"/>
+                </Grid>
+
+                <Grid Grid.Row="1" ClipToBounds="True">
+                    <Viewbox Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <Grid Width="1160" Height="630">
+                            <controls:JarvisCore x:Name="Core" Width="620" Height="620" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Canvas IsHitTestVisible="False">
+                                <Path x:Name="VoiceConnection" Data="M 203,541 L 263,541 L 326,475" Stroke="#65CFE8" StrokeThickness="0.7" Opacity="0"/>
+                                <Path x:Name="CognitiveConnection" Data="M 834,190 L 900,124 L 963,124" Stroke="#65CFE8" StrokeThickness="0.7" Opacity="0"/>
+                                <Path x:Name="TaskConnection" Data="M 839,373 L 927,373 L 985,400" Stroke="#E7B557" StrokeThickness="0.7" Opacity="0"/>
+                                <Path x:Name="ConversationConnection" Data="M 294,486 L 350,486 L 406,446" Stroke="#65CFE8" StrokeThickness="0.6" Opacity="0"/>
+                                <StackPanel x:Name="IdentityPanel" Canvas.Left="34" Canvas.Top="54">
+                                    <TextBlock Style="{StaticResource Micro}" Text="SYSTEM IDENTITY"/>
+                                    <TextBlock Style="{StaticResource HudValue}" Text="MARK VII" Margin="0,5,0,0" FontSize="20"/>
+                                    <Border Height="1" Width="148" HorizontalAlignment="Left" Background="#376B8994" Margin="0,8"/>
+                                    <TextBlock x:Name="SystemStatus" Style="{StaticResource Micro}" Text="●  SYSTEM NOMINAL" Foreground="#7095D3DF"/>
+                                </StackPanel>
+                                <StackPanel x:Name="LocalCorePanel" Canvas.Left="37" Canvas.Top="260" Width="160">
+                                    <TextBlock Style="{StaticResource Micro}" Text="LOCAL CORE"/>
+                                    <Grid Margin="0,8,0,0"><Border Height="2" Background="#172D444D"/><Border x:Name="CoreLoadBar" Height="2" Width="99" HorizontalAlignment="Left" Background="#6BCFEA"/></Grid>
+                                    <TextBlock Style="{StaticResource HudValue}" Text="STABLE  /  07 ms" Margin="0,7,0,0" FontSize="10"/>
+                                </StackPanel>
+                                <StackPanel x:Name="VoiceLinkPanel" Canvas.Left="48" Canvas.Top="492" Width="155">
+                                    <TextBlock Style="{StaticResource Micro}" Text="VOICE LINK"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                        <Rectangle Width="2" Height="7" Fill="#4BADC3" Margin="0,0,3,0"/><Rectangle Width="2" Height="12" Fill="#6AD5EC" Margin="0,0,3,0"/><Rectangle Width="2" Height="5" Fill="#397C8D" Margin="0,0,3,0"/><Rectangle Width="2" Height="9" Fill="#56B9CF" Margin="0,0,8,0"/>
+                                        <TextBlock x:Name="VoiceStatus" Style="{StaticResource HudValue}" Text="STANDBY" FontSize="10"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel x:Name="CognitivePanel" Canvas.Left="963" Canvas.Top="74" Width="155">
+                                    <TextBlock Style="{StaticResource Micro}" Text="COGNITIVE ARRAY" HorizontalAlignment="Right"/><TextBlock x:Name="CognitiveStatus" Style="{StaticResource HudValue}" Text="ONLINE" HorizontalAlignment="Right" Margin="0,5,0,0"/><Border Height="1" Background="#315C7782" Margin="0,8,0,0"/>
+                                </StackPanel>
+                                <StackPanel x:Name="TelemetryPanel" Canvas.Left="985" Canvas.Top="236" Width="128">
+                                    <TextBlock Style="{StaticResource Micro}" Text="MEMORY" HorizontalAlignment="Right"/><TextBlock x:Name="MemoryValue" Style="{StaticResource HudValue}" Text="68.0%" HorizontalAlignment="Right" Margin="0,5,0,14"/>
+                                    <TextBlock Style="{StaticResource Micro}" Text="VISION" HorizontalAlignment="Right"/><TextBlock x:Name="VisionValue" Style="{StaticResource HudValue}" Text="PASSIVE" HorizontalAlignment="Right" Margin="0,5,0,14"/>
+                                    <TextBlock Style="{StaticResource Micro}" Text="TASK QUEUE" HorizontalAlignment="Right"/><TextBlock x:Name="TaskQueueValue" Style="{StaticResource HudValue}" Text="00" HorizontalAlignment="Right" Margin="0,5,0,0"/>
+                                </StackPanel>
+
+                                <Grid x:Name="AnalysisPanel" Canvas.Left="836" Canvas.Top="405" Width="278" Height="164" Opacity="0" RenderTransformOrigin=".5,.5">
+                                    <Grid.RenderTransform><TranslateTransform Y="8"/></Grid.RenderTransform>
+                                    <Border BorderBrush="#4A9A7C36" BorderThickness="1,0,0,1" Background="#09000000" Padding="15,10">
+                                        <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                                            <TextBlock x:Name="AnalysisHeader" Text="SYSTEM ANALYSIS  /  PROCESS MEMORY" FontSize="8" Foreground="#D3B36E"/>
+                                            <StackPanel x:Name="AnalysisValues" Grid.Row="1" Orientation="Horizontal" Margin="0,10,0,9"><TextBlock Text="CPU  23%" FontSize="11" Foreground="#E5EDF0" Margin="0,0,28,0"/><TextBlock Text="MEMORY  68%" FontSize="11" Foreground="#F0C66C"/></StackPanel>
+                                            <Grid x:Name="AnalysisProcesses" Grid.Row="2"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                                <StackPanel><TextBlock Text="Chrome" Foreground="#829BA3" FontSize="10" Margin="0,2"/><TextBlock Text="Ollama" Foreground="#829BA3" FontSize="10" Margin="0,2"/><TextBlock Text="VS Code" Foreground="#829BA3" FontSize="10" Margin="0,2"/></StackPanel>
+                                                <StackPanel Grid.Column="1"><TextBlock Text="3.4 GB" Foreground="#E0EBEE" FontSize="10" Margin="0,2"/><TextBlock Text="1.8 GB" Foreground="#E0EBEE" FontSize="10" Margin="0,2"/><TextBlock Text="1.3 GB" Foreground="#E0EBEE" FontSize="10" Margin="0,2"/></StackPanel>
+                                            </Grid>
+                                        </Grid>
+                                    </Border>
+                                </Grid>
+
+                                <StackPanel x:Name="ConversationPanel" Canvas.Left="294" Canvas.Top="486" Width="568" Opacity=".4">
+                                    <Border BorderBrush="#244A5B66" BorderThickness="0,1,0,0" Padding="0,12,0,0"><StackPanel>
+                                        <StackPanel x:Name="UserExchange">
+                                            <TextBlock Style="{StaticResource Micro}" Text="YOU  /  20:07:14" Foreground="#506E7982"/>
+                                            <TextBlock x:Name="UserTranscript" Text="Check what’s using my memory." FontFamily="Segoe UI Light" FontSize="13" Foreground="#7E9AA4AB" Margin="0,4,0,13"/>
+                                        </StackPanel>
+                                        <StackPanel x:Name="JarvisExchange">
+                                            <TextBlock Style="{StaticResource Micro}" Text="JARVIS  /  LOCAL RESPONSE" Foreground="#72BFD3DD"/>
+                                            <TextBlock x:Name="JarvisResponse" Text="Chrome is taking most of it. Nothing concerning." FontFamily="Segoe UI Light" FontSize="15" Foreground="#DBF3F8FA" Margin="0,4,0,0"/>
+                                        </StackPanel>
+                                    </StackPanel></Border>
+                                </StackPanel>
+                                <TextBlock x:Name="StateReadout" Canvas.Left="494" Canvas.Top="404" Width="172" Text="I D L E" TextAlignment="Center" FontSize="9" FontWeight="SemiBold" Foreground="#78CAE0E8">
+                                    <TextBlock.Effect><DropShadowEffect Color="#02070C" BlurRadius="7" ShadowDepth="0" Opacity="1"/></TextBlock.Effect>
+                                </TextBlock>
+                                <TextBlock x:Name="StateDetail" Canvas.Left="502" Canvas.Top="421" Width="156" Text="CORE  SYNCHRONIZED" TextAlignment="Center" FontSize="7" Foreground="#4D82929A">
+                                    <TextBlock.Effect><DropShadowEffect Color="#02070C" BlurRadius="6" ShadowDepth="0" Opacity="1"/></TextBlock.Effect>
+                                </TextBlock>
+                            </Canvas>
+                        </Grid>
+                    </Viewbox>
+                </Grid>
+
+                <Grid Grid.Row="2">
+                    <Border Height="1" VerticalAlignment="Top" Margin="18,0" Background="#102B3740"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock Text="DEV / STATE" Style="{StaticResource Micro}" FontSize="7" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="#445A626A"/>
+                        <RadioButton Style="{StaticResource StateChoice}" Content="DORMANT" Tag="Dormant" Checked="State_OnChecked"/>
+                        <RadioButton Style="{StaticResource StateChoice}" Content="IDLE" Tag="Idle" IsChecked="True" Checked="State_OnChecked"/>
+                        <RadioButton Style="{StaticResource StateChoice}" Content="LISTENING" Tag="Listening" Checked="State_OnChecked"/>
+                        <RadioButton Style="{StaticResource StateChoice}" Content="THINKING" Tag="Thinking" Checked="State_OnChecked"/>
+                        <RadioButton Style="{StaticResource StateChoice}" Content="SPEAKING" Tag="Speaking" Checked="State_OnChecked"/>
+                        <RadioButton Style="{StaticResource StateChoice}" Content="EXECUTING" Tag="Executing" Checked="State_OnChecked"/>
+                        <RadioButton Style="{StaticResource StateChoice}" Content="ALERT" Tag="Alert" Checked="State_OnChecked"/>
+                    </StackPanel>
+                    <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,20,0" Text="VISUAL PROTOTYPE  0.7" Style="{StaticResource Micro}" FontSize="7" Foreground="#344A535A"/>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
