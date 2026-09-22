@@ -36,10 +36,10 @@ _TRANSLATOR_READY = False
 
 try:
     from deep_translator import GoogleTranslator as _GoogleTranslator
-    _GoogleTranslator(source="auto", target="en").translate("test")
     _TRANSLATOR_READY = True
-    print("[core] deep-translator loaded (Malayalam support active).")
+    print("[core] deep-translator available (Malayalam translation on demand).")
 except Exception as _trans_err:
+    _GoogleTranslator = None
     print(f"[core] deep-translator not available — Malayalam translation disabled. ({_trans_err})")
 
 # ── langdetect (Module 4) ─────────────────────────────────────────────────────
@@ -193,11 +193,10 @@ def translate_to_english(text: str) -> str:
     if not _TRANSLATOR_READY:
         return text
     try:
-        from deep_translator import GoogleTranslator
-        translated = GoogleTranslator(source="auto", target="en").translate(text.strip())
+        translated = _GoogleTranslator(source="auto", target="en").translate(text.strip())
         if translated and translated.strip():
             result = translated.strip()
-            print(f"[core][ML→EN] '{text}' → '{result}'")
+            print(f"[core][ML->EN] '{text}' -> '{result}'")
             return result
     except Exception as e:
         print(f"[core] translation failed: {e}")
@@ -1068,7 +1067,7 @@ def classify_intent(text: str) -> dict:
     if len(lowered.split()) <= 4:
         short_result = _check_short_command(resolved)
         if short_result is not None:
-            print(f"[core][SHORT] classified '{resolved}' → {short_result['intent']}")
+            print(f"[core][SHORT] classified '{resolved}' -> {short_result['intent']}")
             return short_result
 
     # ══════════════════════════════════════════════════════════════════════════
@@ -1381,7 +1380,7 @@ def classify_intent(text: str) -> dict:
     if _NLP_READY and doc is not None:
         nlp_result = _nlp_classify_intent(resolved, doc)
         if nlp_result is not None:
-            print(f"[core][NLP] classified '{resolved}' → {nlp_result['intent']}")
+            print(f"[core][NLP] classified '{resolved}' -> {nlp_result['intent']}")
             return nlp_result
 
     entities = _extract_entities(doc, resolved) if doc is not None else {}

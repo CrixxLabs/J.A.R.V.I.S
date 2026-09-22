@@ -113,6 +113,17 @@ class TestPlannerIntegration:
         assert action is not None
         assert action.get("action") == "open_app"
         assert action.get("app") == "notepad"
+        mock_ask.assert_not_called()
+
+    @patch('planner.brain.get_last_provider_model', return_value='NVIDIA: nvidia/test-model')
+    @patch('planner.brain.ask_llm', return_value='A concise answer.')
+    def test_planner_reports_actual_provider_model(self, _mock_ask, _mock_provider):
+        from planner import ask
+
+        action, response, provider_model = ask("Why is the sky blue?")
+        assert action is None
+        assert response == "A concise answer."
+        assert provider_model == "NVIDIA: nvidia/test-model"
 
 
 if __name__ == "__main__":

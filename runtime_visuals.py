@@ -18,6 +18,8 @@ import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Callable, Iterator
 
+from status_registry import EvidenceLevel, get_registry
+
 
 VALID_STATES = {"dormant", "idle", "listening", "thinking", "speaking", "executing", "alert"}
 STATE_PRIORITY = {"dormant": 0, "idle": 10, "listening": 40, "thinking": 50,
@@ -216,11 +218,20 @@ def start_bridge(host: str | None = None, port: int | None = None) -> tuple[str,
         _server = _VisualBridgeServer((bind_host, bind_port), _handler_type(hub))
     except OSError as exc:
         _server = None
-        print(f"[VisualBridge] Unavailable on {bind_host}:{bind_port}: {exc}. JARVIS will continue without the native UI.")
-        return bind_host, bind_port
+        raise RuntimeError(
+            f"Visual bridge {bind_host}:{bind_port} is already owned or unavailable; "
+            "refusing to start a duplicate JARVIS runtime"
+        ) from exc
     _server.daemon_threads = True
     _server_thread = threading.Thread(target=_server.serve_forever, name="jarvis-visual-bridge", daemon=True)
     _server_thread.start()
+    registry = get_registry()
+    registry.set_evidence("RUNTIME_SSE", EvidenceLevel.LIVE,
+                          f"Listening on {_server.server_address[0]}:{_server.server_address[1]}",
+                          source="SSE bind")
+    registry.set_capability_evidence("RUNTIME_SSE", EvidenceLevel.LIVE,
+                                     "Local SSE bridge bound and serving",
+                                     source="SSE bind")
     print(f"[VisualBridge] Listening on http://{_server.server_address[0]}:{_server.server_address[1]}")
     return _server.server_address
 
@@ -234,6 +245,8 @@ def stop_bridge() -> None:
         server.server_close()
     if thread is not None and thread is not threading.current_thread():
         thread.join(timeout=2)
+    get_registry().set_evidence("RUNTIME_SSE", EvidenceLevel.UNKNOWN,
+                                "Local SSE bridge is not running", source="SSE shutdown")
 
 
 def _handler_type(state_hub: VisualStateHub):

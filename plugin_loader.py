@@ -45,6 +45,9 @@ def load_skills():
             if not hasattr(module, "SKILL_NAME") or not hasattr(module, "TRIGGERS"):
                 print(f"[PluginLoader] Skipping {filename} — missing SKILL_NAME or TRIGGERS")
                 continue
+            if getattr(module, "ENABLED", True) is False:
+                print(f"[PluginLoader] Skipping {filename} — disabled template/example skill")
+                continue
 
             priority = getattr(module, "PRIORITY", 50)
 

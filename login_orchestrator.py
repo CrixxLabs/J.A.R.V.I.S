@@ -13,10 +13,15 @@
 
 import os
 import subprocess
+import shlex
 import time
 from typing import Callable, Optional
 
-import pyautogui
+try:
+    import pyautogui
+except Exception as _pyautogui_err:
+    pyautogui = None
+    print(f"[login] pyautogui unavailable: {_pyautogui_err}")
 
 import app_installer
 import auto_login_profiles as profiles
@@ -38,8 +43,9 @@ _APP_APPEAR_TIMEOUT = 30
 _LOGIN_STABILIZE_TIMEOUT = 15
 
 # Configure pyautogui safely
-pyautogui.FAILSAFE = True   # move mouse to corner to abort
-pyautogui.PAUSE = 0.05      # small pause between actions
+if pyautogui is not None:
+    pyautogui.FAILSAFE = True   # move mouse to corner to abort
+    pyautogui.PAUSE = 0.05      # small pause between actions
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -59,28 +65,34 @@ def _launch_app(app_name: str) -> dict:
     launch_value = launch.get("value", "")
 
     if launch_type == "path":
-        # Direct executable path
-        if not os.path.exists(launch_value):
-            # Try to resolve via shell (handles cases like Update.exe with args)
-            if " " in launch_value:
-                # Has arguments — try shell execution
-                try:
-                    subprocess.Popen(launch_value, shell=True)
-                    return {"success": True, "message": "Launched via shell", "method_used": "shell"}
-                except Exception as exc:
-                    return {"success": False, "message": f"Shell launch failed: {exc}", "method_used": None}
-            return {"success": False, "message": f"App path not found: {launch_value}", "method_used": None}
+        # Direct executable path, optionally followed by arguments.  Never pass
+        # profile-controlled command text through a shell.
+        try:
+            parts = shlex.split(str(launch_value), posix=False)
+            parts = [part[1:-1] if len(part) >= 2 and part[0] == part[-1] == '"' else part for part in parts]
+        except (TypeError, ValueError) as exc:
+            return {"success": False, "message": f"Invalid launch command: {exc}", "method_used": None}
+
+        if not parts:
+            return {"success": False, "message": "Empty app launch path", "method_used": None}
+
+        executable = parts[0]
+        if not os.path.exists(executable):
+            return {"success": False, "message": f"App path not found: {executable}", "method_used": None}
 
         try:
-            os.startfile(launch_value)
-            return {"success": True, "message": f"Launched {app_name}", "method_used": "startfile"}
+            if len(parts) == 1:
+                os.startfile(executable)
+                return {"success": True, "message": f"Launched {app_name}", "method_used": "startfile"}
+            subprocess.Popen(parts, shell=False)
+            return {"success": True, "message": f"Launched {app_name}", "method_used": "direct"}
         except Exception as exc:
             return {"success": False, "message": f"Launch failed: {exc}", "method_used": None}
 
     elif launch_type == "start_menu":
         # Launch via Windows start menu search
         try:
-            subprocess.Popen(["start", launch_value], shell=True)
+            subprocess.Popen(["cmd", "/c", "start", "", launch_value])
             return {"success": True, "message": f"Launched {app_name} via start menu", "method_used": "start"}
         except Exception as exc:
             return {"success": False, "message": f"Start menu launch failed: {exc}", "method_used": None}

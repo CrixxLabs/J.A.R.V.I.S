@@ -115,13 +115,13 @@ class TestExecutor:
         """Test web search functionality."""
         from executor import web_search
         
-        with patch('executor.requests.get') as mock_get:
-            mock_response = Mock()
-            mock_response.text = '<html><div class="result__snippet">Test result</div></html>'
-            mock_get.return_value = mock_response
+        with patch('executor.DDGS') as mock_ddgs_class:
+            mock_ddgs = Mock()
+            mock_ddgs_class.return_value = mock_ddgs
+            mock_ddgs.text.return_value = [{"body": "Test result"}]
             
-            with patch('executor._ask_fn') as mock_ask:
-                mock_ask.return_value = (None, "Summary of results")
+            with patch('brain.ask_llm') as mock_brain:
+                mock_brain.return_value = "Summary of results"
                 result = web_search("test query")
                 
                 assert "Summary of results" in result
@@ -183,6 +183,20 @@ class TestExecutorIntegration:
         
         success, msg = execute_with_retry({"action": "invalid_action"})
         assert success is False
+
+    def test_process_file_inspect_uses_result_size_human(self, tmp_path):
+        from executor import execute
+
+        source = tmp_path / "sample.txt"
+        source.write_text("hello", encoding="utf-8")
+        success, message = execute({
+            "action": "process_file",
+            "file_path": str(source),
+            "file_action": "inspect",
+        })
+        assert success is True
+        assert "sample.txt" in message
+        assert "5.0 B" in message
 
 
 if __name__ == "__main__":

@@ -39,6 +39,24 @@ class TestLifecycle:
         
         assert success is False
 
+    def test_startup_failure_cleans_started_components_and_skips_remaining(self):
+        lm = lifecycle.LifecycleManager()
+        events = []
+
+        lm.register("first", lambda: events.append("start_first"),
+                    lambda: events.append("stop_first"), priority=10)
+
+        def fail():
+            events.append("start_failure")
+            raise RuntimeError("boom")
+
+        lm.register("failure", fail, lambda: events.append("stop_failure"), priority=20)
+        lm.register("later", lambda: events.append("start_later"),
+                    lambda: events.append("stop_later"), priority=30)
+
+        assert lm.start_all() is False
+        assert events == ["start_first", "start_failure", "stop_first"]
+
     def test_shutdown_stops_components_in_reverse_order(self):
         """Test shutdown stops components in reverse priority order.
         
@@ -84,6 +102,56 @@ class TestLifecycle:
         
         # stop should only be called once
         assert stop_mock.call_count == 1
+
+    def test_duplicate_start_does_not_start_components_twice(self):
+        lm = lifecycle.LifecycleManager()
+        start_mock = Mock()
+        lm.register("test", start_mock, Mock())
+        assert lm.start_all() is True
+        assert lm.start_all() is True
+        start_mock.assert_called_once()
+        lm.shutdown("test complete")
+
+    def test_externally_owned_component_is_not_stopped(self):
+        lm = lifecycle.LifecycleManager()
+        stop_mock = Mock()
+        lm.register("external", Mock(), stop_mock, owned=False, already_started=True)
+        assert lm.start_all() is True
+        lm.shutdown("UI detached")
+        stop_mock.assert_not_called()
+
+    def test_shutdown_is_bounded_and_continues_after_slow_stop(self):
+        lm = lifecycle.LifecycleManager(component_stop_timeout=0.05, total_shutdown_timeout=0.2)
+        stopped = []
+        blocker = threading.Event()
+        lm.register("first", Mock(), lambda: stopped.append("first"), priority=10)
+        lm.register("slow", Mock(), lambda: blocker.wait(2), priority=20)
+        lm.start_all()
+        started = time.monotonic()
+        clean = lm.shutdown("bounded test")
+        elapsed = time.monotonic() - started
+        blocker.set()
+        assert clean is False
+        assert elapsed < 0.5
+        assert stopped == ["first"]
+
+    def test_shutdown_signals_worker(self):
+        lm = lifecycle.LifecycleManager()
+        stop_event = threading.Event()
+        worker = threading.Thread(target=stop_event.wait)
+
+        def start_worker():
+            worker.start()
+
+        def stop_worker():
+            stop_event.set()
+            worker.join(timeout=1)
+
+        lm.register("worker", start_worker, stop_worker)
+        assert lm.start_all() is True
+        assert worker.is_alive()
+        assert lm.shutdown("worker test") is True
+        assert not worker.is_alive()
 
     def test_is_shutting_down(self):
         """Test is_shutting_down flag."""

@@ -22,12 +22,17 @@ _speak_cb  = None
 _action_cb = None
 
 def init(speak_fn, action_fn):
-    global _speak_cb, _action_cb
+    global _speak_cb, _action_cb, _task_thread
+    if _task_thread and _task_thread.is_alive():
+        return
     _speak_cb  = speak_fn
     _action_cb = action_fn
+    _tasks_stop.clear()
+    _reminder_stop.clear()
     _load_tasks()
     _rehydrate_reminders()
-    threading.Thread(target=_task_loop, daemon=True).start()
+    _task_thread = threading.Thread(target=_task_loop, daemon=True, name="jarvis-task-worker")
+    _task_thread.start()
     print("[Tasks] Task engine started with reminder support.")
 
 def _load_tasks():
@@ -98,8 +103,8 @@ def _cooldown_ok(task):
     try:
         last_dt = datetime.datetime.fromisoformat(last)
         mins    = task.get("cooldown_minutes", 60)
-        return (datetime.datetime.now() - last_dt).seconds / 60 >= mins
-    except:
+        return (datetime.datetime.now() - last_dt).total_seconds() / 60 >= mins
+    except (TypeError, ValueError):
         return True
 
 def _mark_triggered(task):
@@ -121,12 +126,14 @@ def _evaluate_condition(condition, snap):
     return False
 
 _task_thread: threading.Thread | None = None
-_tasks_shutdown = False
+_tasks_stop = threading.Event()
+_reminder_stop = threading.Event()
+_reminder_threads: dict[str, threading.Thread] = {}
 
 
 def _task_loop():
     from observer import get_state_snapshot
-    while not _tasks_shutdown:
+    while not _tasks_stop.is_set():
         try:
             now  = datetime.datetime.now()
             snap = get_state_snapshot()
@@ -157,7 +164,7 @@ def _task_loop():
         except Exception as e:
             print(f"[Tasks] loop error: {e}")
 
-        time.sleep(30)
+        _tasks_stop.wait(30)
 
 def _trigger_task(task):
     action  = task.get("action", "speak")
@@ -180,23 +187,33 @@ def _trigger_task(task):
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _spawn_reminder_thread(task, delay_seconds):
-    """Spawn a daemon thread that sleeps then fires the reminder."""
+    """Schedule one cancellable reminder worker for this process."""
     message = task.get("message", "something")
+    task_id = task.get("id")
+    previous = _reminder_threads.get(task_id)
+    if previous and previous.is_alive():
+        return
 
     def _delayed():
-        time.sleep(delay_seconds)
+        if _reminder_stop.wait(delay_seconds):
+            return
+        should_fire = False
         with _lock:
-            # Check if still active (might have been cancelled)
             for t in _tasks:
-                if t.get("id") == task.get("id") and t.get("active", True):
+                if t.get("id") == task_id and t.get("active", True) and not _reminder_stop.is_set():
                     t["active"] = False
                     _save_tasks()
+                    should_fire = True
                     break
+        if not should_fire:
+            return
         if _speak_cb:
             _speak_cb(f"hey Arju — {message}")
         log_activity("reminder_fired", message[:40])
 
-    threading.Thread(target=_delayed, daemon=True).start()
+    worker = threading.Thread(target=_delayed, daemon=True, name=f"jarvis-reminder-{task_id}")
+    _reminder_threads[task_id] = worker
+    worker.start()
 
 
 def _rehydrate_reminders():
@@ -282,12 +299,10 @@ def add_reminder(message: str, seconds: int = 3600, entities: dict = None) -> st
         "entities":         entities or {},
     }
 
-    # Spawn the countdown thread for this session
-    _spawn_reminder_thread(task, seconds)
-
     with _lock:
         _tasks.append(task)
     _save_tasks()
+    _spawn_reminder_thread(task, seconds)
 
     mins = seconds // 60
     if mins == 0:
@@ -345,8 +360,14 @@ def disable_task(task_id):
 
 def stop_tasks():
     """Signal the task loop to stop."""
-    global _tasks_shutdown, _task_thread
-    _tasks_shutdown = True
+    global _task_thread
+    _tasks_stop.set()
+    _reminder_stop.set()
     if _task_thread and _task_thread.is_alive():
         _task_thread.join(timeout=3.0)
+    for worker in list(_reminder_threads.values()):
+        if worker.is_alive():
+            worker.join(timeout=3.0)
+    _reminder_threads.clear()
+    _task_thread = None
     print("[Tasks] Task engine stopped.")

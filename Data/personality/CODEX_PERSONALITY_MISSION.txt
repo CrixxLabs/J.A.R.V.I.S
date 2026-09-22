@@ -1,0 +1,125 @@
+You are working locally in:
+
+D:\J.A.R.V.I.S
+
+This is a MARK VII.x PERSONALITY / USER-ADAPTATION pass.
+
+The supplied folder `arju_jarvis_personality_seed` is an APPROVED SEED PROFILE.
+Do not invent additional personal facts. Do not scrape unrelated memories or files.
+Do not fine-tune any foundation model in this mission.
+
+GOAL
+Build a model-independent personality layer so NVIDIA, Gemini, and Ollama all behave like the same JARVIS and adapt to Arju using a small, privacy-aware, retrieval-based profile.
+
+ABSOLUTE RULES
+- Inspect current architecture before editing.
+- Preserve current working MARK VII runtime, provider routing, WPF, voice, planner/executor/observer/memory, task queue, and SSE integration.
+- No redesign.
+- No destructive git commands.
+- No git reset, git restore ., git checkout ., git clean, or broad git add .
+- Do not expose/log secrets.
+- Do not send the entire profile to every cloud request.
+- Do not add mandatory paid services.
+- Explicit user corrections override inferred/default preferences.
+
+REQUIRED CAPABILITIES
+
+1. PROFILE STORE
+Load the seed JSONL files from a dedicated data directory.
+Validate schema and survive malformed/empty lines.
+Keep source files human-editable.
+Do not mutate seed files during ordinary runtime.
+
+2. RELEVANCE RETRIEVAL
+Given current user text, runtime state, and optional planner intent, retrieve only a small relevant subset.
+Prefer lexical/TF-IDF/local embedding mechanisms already in the repo.
+Do not add a heavy vector DB unless necessary.
+Support communication, behavioral preferences, technical preferences, project context, examples, and corrections.
+
+3. PERSONALITY CONTEXT ASSEMBLER
+Build a compact provider-independent context:
+- stable core rules
+- 3-8 relevant profile entries
+- 0-3 relevant examples
+- strongest recent corrections
+Keep token overhead bounded.
+
+4. PRIVACY GATE
+Support privacy classes including normal/private/sensitive.
+Cloud prompts must exclude restricted classes unless explicitly allowed for the current request.
+Do not assume future sensitive data may be uploaded to cloud providers.
+
+5. CORRECTION / FEEDBACK LEARNING
+Support explicit feedback such as:
+- don't talk to me like that
+- don't say that again
+- be shorter
+- that's exactly how I want you to answer
+- remember that I prefer X
+
+Store correction candidates with:
+timestamp, context, original_response, feedback, derived_rule, confidence, scope, active.
+
+Do not turn every emotional sentence into a permanent preference.
+
+6. PRECEDENCE
+explicit correction > approved profile > inferred runtime preference > generic default.
+
+7. RESPONSE STYLE
+Do not add a second LLM call to every response.
+Prefer pre-generation personality context.
+Only add an optional cheap critic/rewrite path for clear high-priority violations if latency remains acceptable.
+
+8. PROVIDER CONSISTENCY
+NVIDIA, Gemini, and Ollama must receive the same personality contract.
+Provider fallback must not erase personality context.
+
+9. LOCAL ACTIONS
+Do not force obvious deterministic actions through heavy personality retrieval.
+Action acknowledgements stay brief.
+
+10. MEMORY INTEGRATION
+Inspect memory.py before creating parallel storage.
+Keep stable profile, learned corrections, and ephemeral conversation memory conceptually separate.
+
+11. AUDITABILITY
+Provide a developer-only way to inspect which profile entries/corrections were applied and why.
+Do not clutter normal WPF UI.
+
+12. TESTS
+Add tests for:
+- profile loading
+- malformed JSONL handling
+- relevance retrieval
+- entry/token caps
+- privacy filtering
+- correction precedence
+- positive feedback
+- negative feedback
+- provider-independent context assembly
+- deterministic action path unaffected
+- provider fallback preserves personality context
+- no full-profile dump to cloud prompt
+- full regression suite
+
+Run:
+python -m pytest tests/ -q
+
+If WPF/C# is untouched, do not modify or rebuild it.
+
+13. FINAL REPORT
+Return:
+A. verdict
+B. exact files changed
+C. architecture
+D. retrieval strategy
+E. privacy strategy
+F. correction-learning behavior
+G. precedence rules
+H. tests and exact count
+I. performance/token overhead
+J. deferred items
+K. manual acceptance steps
+
+SUCCESS CONDITION
+The same Arju/JARVIS personality survives provider changes, only relevant profile data is injected, explicit corrections can improve behavior over time, and current MARK VII functionality remains intact.

@@ -3,7 +3,11 @@
 # Handles multi-step sequences + safety
 import subprocess
 import webbrowser
-import pyautogui
+try:
+    import pyautogui
+except Exception as _pyautogui_err:
+    pyautogui = None
+    print(f"[executor] pyautogui unavailable: {_pyautogui_err}")
 import psutil
 import datetime
 import os
@@ -11,17 +15,36 @@ import json
 import glob
 import re
 import time
+import ipaddress
+import socket
+from urllib.parse import urljoin, urlparse, parse_qs
 import threading
 import pyperclip
 import smtplib
-import pywhatkit
+try:
+    import pywhatkit
+except Exception as _pywhatkit_err:
+    pywhatkit = None
+    print(f"[executor] pywhatkit unavailable: {_pywhatkit_err}")
 import requests
-from mss import mss
-import cv2
+try:
+    from mss import mss
+except Exception:
+    mss = None
+try:
+    import cv2
+except Exception:
+    cv2 = None
 import numpy as np
-import pytesseract
 from bs4 import BeautifulSoup
-from youtube_transcript_api import YouTubeTranscriptApi
+try:
+    from ddgs import DDGS
+except Exception:
+    DDGS = None
+try:
+    from youtube_transcript_api import YouTubeTranscriptApi
+except Exception:
+    YouTubeTranscriptApi = None
 from dotenv import load_dotenv
 from memory import remember, recall_all, log_activity, update_daily_stats, log_failure
 
@@ -45,7 +68,7 @@ from email.mime.multipart import MIMEMultipart
 # Reliability imports
 import status_registry
 import runtime_visuals
-from status_registry import SubsystemState, get_registry
+from status_registry import EvidenceLevel, SubsystemState, get_registry
 import error_handler
 
 # Spotify (safe optional)
@@ -78,10 +101,17 @@ GCAL_CREDS_FILE       = os.path.join(BASE_DIR, "credentials.json")
 GCAL_SCOPES           = ["https://www.googleapis.com/auth/calendar"]
 API_KEY               = os.getenv("OPENROUTER_API_KEY", "")
 
-pytesseract.pytesseract.tesseract_cmd = os.getenv(
-    "TESSERACT_PATH",
-    r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-)
+
+def _require_pyautogui():
+    if pyautogui is None:
+        raise RuntimeError("Windows UI automation is unavailable in this environment")
+    return pyautogui
+
+
+def _discover_tesseract() -> str | None:
+    """Compatibility wrapper around canonical Tesseract discovery."""
+    from ocr_runtime import probe_tesseract
+    return probe_tesseract().path
 
 # Injected callbacks
 _speak_fn  = None
@@ -90,6 +120,7 @@ _ask_fn    = None
 # Safety: actions requiring confirmation
 CONFIRM_ACTIONS = {"shutdown_pc", "restart_pc"}
 _pending_confirm = None
+_CONFIRM_TTL = float(os.getenv("JARVIS_CONFIRM_TTL", "20"))
 
 def init(speak_fn, ask_fn):
     global _speak_fn, _ask_fn
@@ -133,8 +164,8 @@ AVAILABLE_ACTIONS = {
         "track what apps Arju uses", "log daily activity"
     ],
     "generation": [
-        "generate an image from a text prompt (stub)",
-        "generate a short video from a text prompt"
+        "image generation status (currently unavailable)",
+        "experimental video generation status"
     ],
     "obligations": [
         "add assignment / exam / deadline obligation",
@@ -235,7 +266,10 @@ def get_spotify():
             cache_path=os.path.join(BASE_DIR, ".spotify_cache")
         )
         _spotify = spotipy.Spotify(auth_manager=auth)
-        registry.set_status("SPOTIFY", SubsystemState.READY, "Spotify OAuth linked successfully")
+        registry.set_evidence("SPOTIFY", EvidenceLevel.PROBED, "Spotify OAuth client initialized",
+                              source="Spotify OAuth")
+        registry.set_capability_evidence("SPOTIFY", EvidenceLevel.PROBED,
+                                         "Spotify OAuth client initialized", source="Spotify OAuth")
         return _spotify
     except Exception as e:
         error_handler.log_and_demote("SPOTIFY", e, "Spotify client connection initialization", SubsystemState.DEGRADED)
@@ -257,7 +291,11 @@ def spotify_play(query):
         sp.start_playback(device_id=devices[0]["id"], uris=[t["uri"]])
         time.sleep(1)
         log_activity("spotify_play", t["name"])
-        get_registry().set_status("SPOTIFY", SubsystemState.READY, f"Playing {t['name']}")
+        registry = get_registry()
+        registry.set_evidence("SPOTIFY", EvidenceLevel.LIVE, "Playback request succeeded",
+                              source="Spotify playback")
+        registry.set_capability_evidence("SPOTIFY", EvidenceLevel.LIVE,
+                                         "Playback request succeeded", source="Spotify playback")
         return f"Playing {t['name']} by {t['artists'][0]['name']}."
     except Exception as e:
         error_handler.log_and_demote("SPOTIFY", e, f"Spotify search and play for query '{query}'", SubsystemState.DEGRADED)
@@ -310,7 +348,12 @@ def get_cal_service():
                     f.write(creds.to_json())
         if creds:
             svc = build("calendar", "v3", credentials=creds)
-            registry.set_status("CALENDAR", SubsystemState.READY, "Calendar API active")
+            registry.set_evidence("CALENDAR", EvidenceLevel.PROBED,
+                                  "OAuth credentials accepted and API client built",
+                                  source="Calendar authentication")
+            registry.set_capability_evidence("CALENDAR", EvidenceLevel.PROBED,
+                                             "OAuth credentials accepted and API client built",
+                                             source="Calendar authentication")
             return svc
         return None
     except Exception as e:
@@ -360,12 +403,11 @@ def calendar_add(title, date_str, time_str="09:00"):
 
 # ── Web & content ──
 def web_search(query):
+    if DDGS is None:
+        return "Web search is unavailable because the ddgs package is not installed."
     try:
-        headers = {"User-Agent": "Mozilla/5.0"}
-        url     = f"https://html.duckduckgo.com/html/?q={requests.utils.quote(query)}"
-        res     = requests.get(url, headers=headers, timeout=8)
-        soup    = BeautifulSoup(res.text, "html.parser")
-        results = [r.get_text(strip=True) for r in soup.select(".result__snippet")[:4] if r.get_text(strip=True)]
+        hits = DDGS(timeout=10).text(query, max_results=4)
+        results = [str(hit.get("body", "")).strip() for hit in hits if hit.get("body")]
 
         if not results:
             return "I couldn't find anything on that."
@@ -374,23 +416,31 @@ def web_search(query):
         raw_snippets = re.sub(r"\s+", " ", raw_snippets)
         raw_snippets = raw_snippets.replace(" | ", ". ")
 
-        if _ask_fn:
-            try:
-                resp = _ask_fn(
-                    f"Based on this web search for '{query}', give a natural short answer "
-                    f"in 2-3 sentences. Don't quote raw text:\n\n{raw_snippets}"
-                )
-                summary = resp[1] if isinstance(resp, tuple) else resp
-                if summary and len(summary.strip()) > 10:
-                    return summary.strip()
-            except Exception as exc:
-                print(f"[Search] LLM summarize failed: {exc}")
+        summary = _summarize_source(raw_snippets,
+                                    f"Answer this web search for {query} in 2-3 sentences.")
+        if summary:
+            return summary
 
         return raw_snippets[:400]
 
     except Exception as e:
         print(f"[Search] {e}")
         return "Search failed."
+
+
+def _summarize_source(text: str, instruction: str) -> str:
+    """Summarize retrieved text at the provider boundary, outside planner/plugins."""
+    if not text.strip():
+        return ""
+    try:
+        import brain
+        result = brain.ask_llm(f"{instruction}\n\nSource text:\n{text[:6000]}", allow_actions=False)
+        if result.startswith("I can't reach an AI provider"):
+            return ""
+        return result.strip()
+    except Exception as exc:
+        print(f"[Summary] {type(exc).__name__}")
+        return ""
 
 def get_weather(city):
     try:
@@ -433,7 +483,7 @@ def get_news():
 def morning_briefing() -> str:
     now      = datetime.datetime.now()
     greeting = f"Good morning Arju. It's {now.strftime('%I:%M %p')} on {now.strftime('%A, %d %B')}."
-    weather  = get_weather("your city")
+    weather  = get_weather(os.getenv("JARVIS_HOME_CITY", "Bengaluru"))
     cal      = calendar_today()
     news     = get_news()
     log_activity("morning_briefing", "completed")
@@ -442,12 +492,8 @@ def morning_briefing() -> str:
 
 # ── OCR + Screenshot ──
 def read_screen_text():
-    from vision import capture_screen
-
-    img  = capture_screen()
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    gray = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)[1]
-    return pytesseract.image_to_string(gray).strip()
+    from vision import read_screen
+    return read_screen()
 
 
 # ── File manager ──
@@ -493,7 +539,10 @@ def send_email(to, subject, body):
             srv.login(GMAIL_ADDRESS, GMAIL_PASSWORD)
             srv.sendmail(GMAIL_ADDRESS, to, msg.as_string())
         log_activity("email_sent", to)
-        registry.set_status("EMAIL", SubsystemState.READY, "Gmail SMTP validated")
+        registry.set_evidence("EMAIL", EvidenceLevel.LIVE, "SMTP delivery call completed",
+                              source="email send")
+        registry.set_capability_evidence("GMAIL", EvidenceLevel.LIVE,
+                                         "SMTP delivery call completed", source="email send")
         return f"Email sent successfully to {to}."
     except Exception as e:
         error_handler.log_and_demote("EMAIL", e, f"Gmail SMTP mailing to {to}", SubsystemState.DEGRADED)
@@ -501,11 +550,19 @@ def send_email(to, subject, body):
 
 def send_whatsapp(phone, message):
     registry = get_registry()
+    if pywhatkit is None:
+        registry.set_status("WHATSAPP_SEND", SubsystemState.DISABLED, "pywhatkit is not installed")
+        return "WhatsApp sending is unavailable because pywhatkit is not installed."
     try:
         now = datetime.datetime.now()
         pywhatkit.sendwhatmsg(phone, message, now.hour, now.minute + 2, wait_time=15, tab_close=True)
         log_activity("whatsapp_sent", phone)
-        registry.set_status("WHATSAPP_SEND", SubsystemState.READY, "WhatsApp Web automated queue active")
+        registry.set_evidence("WHATSAPP_SEND", EvidenceLevel.LIVE,
+                              "PyWhatKit accepted the browser send operation",
+                              source="WhatsApp send")
+        registry.set_capability_evidence("WHATSAPP_SEND", EvidenceLevel.LIVE,
+                                         "PyWhatKit accepted the browser send operation",
+                                         source="WhatsApp send")
         return f"WhatsApp queued to {phone}."
     except Exception as e:
         error_handler.log_and_demote("WHATSAPP_SEND", e, f"pywhatkit messaging pipeline to {phone}", SubsystemState.DEGRADED)
@@ -513,9 +570,9 @@ def send_whatsapp(phone, message):
 
 
 # ── PC control ──
-def lock_pc():     subprocess.run("rundll32.exe user32.dll,LockWorkStation", shell=True)
-def shutdown_pc(): subprocess.run("shutdown /s /t 5", shell=True)
-def restart_pc():  subprocess.run("shutdown /r /t 5", shell=True)
+def lock_pc():     subprocess.run(["rundll32.exe", "user32.dll,LockWorkStation"], check=False)
+def shutdown_pc(): subprocess.run(["shutdown", "/s", "/t", "5"], check=False)
+def restart_pc():  subprocess.run(["shutdown", "/r", "/t", "5"], check=False)
 
 
 # ── Clipboard ──
@@ -538,39 +595,140 @@ def clipboard_write(text):
 
 # ── YouTube ──
 def get_youtube_id(url):
-    if "youtu.be" in url:
-        return url.split("/")[-1].split("?")[0]
-    if "youtube.com" in url and "v=" in url:
-        return url.split("v=")[1].split("&")[0]
-    return None
+    """Extract a YouTube video id from common watch/share/short/embed/live URLs."""
+    try:
+        parsed = urlparse(str(url).strip())
+        host = (parsed.hostname or "").lower()
+        if host in {"youtu.be", "www.youtu.be"}:
+            candidate = parsed.path.strip("/").split("/")[0]
+        elif host.endswith("youtube.com"):
+            if parsed.path == "/watch":
+                candidate = (parse_qs(parsed.query).get("v") or [""])[0]
+            else:
+                parts = [p for p in parsed.path.split("/") if p]
+                candidate = parts[1] if len(parts) >= 2 and parts[0] in {"shorts", "embed", "live"} else ""
+        else:
+            return None
+        candidate = re.sub(r"[^A-Za-z0-9_-]", "", candidate)
+        return candidate if 6 <= len(candidate) <= 32 else None
+    except Exception:
+        return None
+
+def _fetch_youtube_transcript(video_id: str) -> str:
+    """Support both current and legacy youtube-transcript-api interfaces."""
+    if YouTubeTranscriptApi is None:
+        raise RuntimeError("youtube-transcript-api is not installed")
+    class _BoundedSession(requests.Session):
+        def request(self, method, url, **kwargs):
+            kwargs.setdefault("timeout", (3, 12))
+            return super().request(method, url, **kwargs)
+
+    session = _BoundedSession()
+    api = YouTubeTranscriptApi(http_client=session)
+    if hasattr(api, "fetch"):
+        try:
+            transcript = api.fetch(video_id)
+            chunks = [getattr(seg, "text", None) or (seg.get("text", "") if isinstance(seg, dict) else "") for seg in transcript]
+        finally:
+            session.close()
+    else:
+        session.close()
+        raise RuntimeError("youtube-transcript-api >= 1.2 is required for bounded transcript fetching")
+    return " ".join(c.strip() for c in chunks if c and c.strip())
 
 def summarize_youtube(url):
     try:
         vid = get_youtube_id(url)
         if not vid:
-            return "that URL doesn't look right"
-        tl  = YouTubeTranscriptApi.get_transcript(vid)
-        txt = " ".join([t["text"] for t in tl])[:4000]
-        resp = _ask_fn(f"Summarize naturally in under 5 sentences:\n\n{txt}")
-        s = resp[1] if isinstance(resp, tuple) else resp
-        return s
+            return "That doesn't look like a supported YouTube video URL."
+        txt = _fetch_youtube_transcript(vid)[:12000]
+        if not txt.strip():
+            return "The video has no accessible transcript."
+        return _summarize_source(txt, "Summarize this YouTube transcript in under 5 sentences.") or "Transcript found, but summarization is unavailable."
     except Exception as e:
-        print(f"[YouTube] {e}")
-        return "couldn't get the transcript"
+        print(f"[YouTube] {type(e).__name__}: {e}")
+        return "I couldn't retrieve an accessible transcript for that video."
+
+def _is_public_http_url(url: str) -> bool:
+    """Reject local/file/private targets before article fetching."""
+    try:
+        parsed = urlparse(str(url).strip())
+        if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+            return False
+        host = parsed.hostname.lower()
+        if host in {"localhost", "0.0.0.0"} or host.endswith(".local"):
+            return False
+        try:
+            addresses = {info[4][0] for info in socket.getaddrinfo(host, None)}
+        except socket.gaierror:
+            return False
+        for addr in addresses:
+            ip = ipaddress.ip_address(addr)
+            if ip.is_private or ip.is_loopback or ip.is_link_local or ip.is_multicast or ip.is_reserved:
+                return False
+        return True
+    except Exception:
+        return False
 
 def summarize_article(url):
     try:
-        res  = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=8)
-        soup = BeautifulSoup(res.text, "html.parser")
-        for tag in soup(["script", "style", "nav", "footer", "header"]):
+        current_url = str(url).strip()
+        res = None
+        for _ in range(6):
+            if not _is_public_http_url(current_url):
+                return "I can only summarize public HTTP or HTTPS pages."
+            res = requests.get(
+                current_url,
+                headers={"User-Agent": "Mozilla/5.0 (JARVIS MARK VII)"},
+                timeout=(3, 10),
+                allow_redirects=False,
+                stream=True,
+            )
+            if res.status_code not in {301, 302, 303, 307, 308}:
+                break
+            location = res.headers.get("Location")
+            if not location:
+                res.close()
+                return "That page returned an invalid redirect."
+            res.close()
+            current_url = urljoin(current_url, location)
+        else:
+            return "That page redirected too many times."
+
+        if res is None:
+            return "I had trouble reading that page."
+        res.raise_for_status()
+        ctype = (res.headers.get("Content-Type") or "").lower()
+        if "html" not in ctype and "text/" not in ctype:
+            res.close()
+            return "That URL doesn't appear to contain readable article text."
+        declared_length = res.headers.get("Content-Length")
+        if declared_length and int(declared_length) > 2_000_000:
+            res.close()
+            return "That page is too large to summarize safely."
+        chunks = []
+        total = 0
+        for chunk in res.iter_content(chunk_size=64 * 1024):
+            if not chunk:
+                continue
+            total += len(chunk)
+            if total > 2_000_000:
+                res.close()
+                return "That page is too large to summarize safely."
+            chunks.append(chunk)
+        encoding = res.encoding or "utf-8"
+        res.close()
+        page_text = b"".join(chunks).decode(encoding, errors="replace")
+        soup = BeautifulSoup(page_text, "html.parser")
+        for tag in soup(["script", "style", "nav", "footer", "header", "aside", "noscript"]):
             tag.decompose()
-        txt = soup.get_text(separator=" ", strip=True)[:4000]
-        resp = _ask_fn(f"Summarize naturally in under 5 sentences:\n\n{txt}")
-        s = resp[1] if isinstance(resp, tuple) else resp
-        return s
+        txt = re.sub(r"\s+", " ", soup.get_text(separator=" ", strip=True)).strip()
+        if len(txt) < 80:
+            return "I couldn't extract enough readable article text from that page."
+        return _summarize_source(txt[:12000], "Summarize this article in under 5 sentences using only the supplied source text.") or "Article read, but summarization is unavailable."
     except Exception as e:
-        print(f"[Article] {e}")
-        return "had trouble reading that page"
+        print(f"[Article] {type(e).__name__}: {e}")
+        return "I had trouble reading that page."
 
 
 def _extract_class_subject(text):
@@ -608,14 +766,14 @@ def _join_google_meet(link):
     try:
         webbrowser.open(link)
         time.sleep(6)
-        pyautogui.hotkey("ctrl", "d")
+        _require_pyautogui().hotkey("ctrl", "d")
         time.sleep(0.3)
-        pyautogui.hotkey("ctrl", "e")
+        _require_pyautogui().hotkey("ctrl", "e")
         time.sleep(1)
         for _ in range(10):
-            pyautogui.press("tab")
+            _require_pyautogui().press("tab")
             time.sleep(0.15)
-        pyautogui.press("enter")
+        _require_pyautogui().press("enter")
         return True
     except Exception as e:
         print(f"[Meet Join Error] {e}")
@@ -654,6 +812,16 @@ def _stable_success(message=""):
 
 def _stable_failure(message=""):
     return False, message
+
+
+def _stable_from_text(message, failure_markers=()):
+    """Convert string-returning integrations into truthful executor success/failure."""
+    text = str(message or "").strip()
+    lowered = text.lower()
+    markers = tuple(m.lower() for m in failure_markers)
+    if not text or any(m in lowered for m in markers):
+        return _stable_failure(text or "Action failed.")
+    return _stable_success(text)
 
 
 def _stable_learn_action(action_name):
@@ -716,14 +884,14 @@ def _stable_join_meeting(link, subject="class"):
     try:
         webbrowser.open(link)
         time.sleep(5)
-        pyautogui.hotkey("ctrl", "d")
+        _require_pyautogui().hotkey("ctrl", "d")
         time.sleep(0.4)
-        pyautogui.hotkey("ctrl", "e")
+        _require_pyautogui().hotkey("ctrl", "e")
         time.sleep(0.8)
         for _ in range(8):
-            pyautogui.press("tab")
+            _require_pyautogui().press("tab")
             time.sleep(0.2)
-        pyautogui.press("enter")
+        _require_pyautogui().press("enter")
         log_activity("join_meeting", f"{subject}: {link[:60]}")
         _stable_learn_action("join_meeting")
         return _stable_success(f"Joined the meeting for {subject}.")
@@ -746,7 +914,7 @@ def _stable_whatsapp_read():
         time.sleep(1.5)
         open_group("24 BATCH 3")
         time.sleep(3)
-        pyautogui.scroll(-300)
+        _require_pyautogui().scroll(-300)
         time.sleep(0.8)
 
         raw_text = extract_whatsapp_text()
@@ -845,9 +1013,9 @@ def _clean_video_prompt(raw_prompt: str) -> str:
 
 
 def generate_video(prompt: str, duration: int = 5) -> str:
-    """
-    Generate a short video using kwaivgi/kling-v3.0-std via OpenRouter.
-    """
+    """Experimental video generation; disabled unless explicitly enabled."""
+    if os.getenv("JARVIS_ENABLE_EXPERIMENTAL_VIDEO_GENERATION", "false").lower() != "true":
+        return "Video generation is experimental and disabled in this MARK VII release."
     if not API_KEY:
         return "OpenRouter API key is missing. Add OPENROUTER_API_KEY to your .env file."
 
@@ -1509,8 +1677,10 @@ def _handle_process_file(action: dict) -> tuple:
             # Format response based on action type
             if file_action == "inspect":
                 meta = result.metadata
+                inspect_data = result.result if isinstance(result.result, dict) else {}
+                size_human = inspect_data.get("size_human", f"{meta.size} bytes")
                 response = (
-                    f"File: {meta.name} ({meta.size_human})\n"
+                    f"File: {meta.name} ({size_human})\n"
                     f"Type: {meta.mime_type}\n"
                     f"SHA256: {meta.sha256[:16]}...\n"
                     f"Modified: {meta.modified.strftime('%Y-%m-%d %H:%M')}"
@@ -1699,6 +1869,9 @@ def _handle_read_image_text(action: dict) -> tuple:
             return _stable_failure("Which image file should I read? Provide a file path.")
         
         result = read_image_text(file_path)
+        if result.startswith(("OCR unavailable:", "OCR failed:", "OCR timed out.",
+                              "No text detected", "File not found:", "Could not read image")):
+            return _stable_failure(result)
         return _stable_success(result)
         
     except Exception as exc:
@@ -1740,11 +1913,15 @@ def execute(action, speak_fn=None):
 
     try:
         if act in CONFIRM_ACTIONS:
-            if _pending_confirm == act:
+            now = time.monotonic()
+            if (isinstance(_pending_confirm, tuple) and _pending_confirm[0] == act
+                    and now - _pending_confirm[1] <= _CONFIRM_TTL):
                 _pending_confirm = None
             else:
-                _pending_confirm = act
-                return _stable_failure(f"Say '{act.replace('_', ' ')}' again to confirm.")
+                _pending_confirm = (act, now)
+                return _stable_failure(
+                    f"Say '{act.replace('_', ' ')}' again within {int(_CONFIRM_TTL)} seconds to confirm."
+                )
 
         if act == "open_app":
             return _stable_open_app(action.get("app", ""))
@@ -1753,19 +1930,19 @@ def execute(action, speak_fn=None):
         if act == "join_meeting":
             return _stable_join_meeting(action.get("link", ""), action.get("subject", "class"))
         if act == "media":
-            pyautogui.press(action.get("key", "space"))
+            _require_pyautogui().press(action.get("key", "space"))
             _stable_learn_action("media")
             return _stable_success("")
         if act == "scroll":
-            pyautogui.scroll(500 if action.get("direction") == "up" else -500)
+            _require_pyautogui().scroll(500 if action.get("direction") == "up" else -500)
             _stable_learn_action("scroll")
             return _stable_success("")
         if act == "click":
-            pyautogui.click()
+            _require_pyautogui().click()
             _stable_learn_action("click")
             return _stable_success("")
         if act in {"type_text", "voice_type"}:
-            pyautogui.write(action.get("text", ""), interval=0.04)
+            _require_pyautogui().write(action.get("text", ""), interval=0.04)
             log_activity(act, action.get("text", "")[:40])
             _stable_learn_action(act)
             return _stable_success("")
@@ -1813,7 +1990,10 @@ def execute(action, speak_fn=None):
             return _stable_success(f"It's {now.strftime('%I:%M %p')}, {now.strftime('%A %d %B %Y')}.")
         if act == "web_search":
             try:
-                return _stable_success(web_search(action.get("query", "")))
+                return _stable_from_text(
+                    web_search(action.get("query", "")),
+                    ("unavailable", "couldn't find", "search failed"),
+                )
             except Exception as exc:
                 print(f"[DEBUG][executor] web_search error: {exc}")
                 return _stable_failure("Search failed.")
@@ -1821,8 +2001,16 @@ def execute(action, speak_fn=None):
             url = action.get("url", "")
             try:
                 if "youtube" in url or "youtu.be" in url:
-                    return _stable_success(summarize_youtube(url))
-                return _stable_success(summarize_article(url))
+                    result = summarize_youtube(url)
+                else:
+                    result = summarize_article(url)
+                return _stable_from_text(
+                    result,
+                    ("doesn't look", "no accessible transcript", "couldn't retrieve",
+                     "summarization is unavailable", "only summarize public",
+                     "invalid redirect", "redirected too many", "doesn't appear",
+                     "couldn't extract", "trouble reading"),
+                )
             except Exception as exc:
                 print(f"[DEBUG][executor] summarize_url error: {exc}")
                 return _stable_failure("Couldn't summarize that.")
@@ -1848,13 +2036,13 @@ def execute(action, speak_fn=None):
             from tasks import list_reminders
             return _stable_success(list_reminders())
         if act == "lock_pc":
-            subprocess.run("rundll32.exe user32.dll,LockWorkStation", shell=True)
+            subprocess.run(["rundll32.exe", "user32.dll,LockWorkStation"], check=False)
             return _stable_success("Locking it.")
         if act == "shutdown_pc":
-            subprocess.run("shutdown /s /t 5", shell=True)
+            subprocess.run(["shutdown", "/s", "/t", "5"], check=False)
             return _stable_success("Shutting down in 5.")
         if act == "restart_pc":
-            subprocess.run("shutdown /r /t 5", shell=True)
+            subprocess.run(["shutdown", "/r", "/t", "5"], check=False)
             return _stable_success("Restarting in 5.")
         if act == "clipboard_read":
             result = clipboard_read()
@@ -1917,33 +2105,34 @@ def execute(action, speak_fn=None):
         # ── Safe Gated Reconnected Actions (Phase 4 Re-wired) ──────────────────
         if act == "send_whatsapp":
             res = send_whatsapp(action.get("phone", ""), action.get("message", ""))
-            return _stable_success(res)
+            return _stable_from_text(res, ("unavailable", "not installed", "failed", "couldn't", "not configured"))
         if act == "send_email":
             res = send_email(action.get("to", ""), action.get("subject", ""), action.get("body", ""))
-            return _stable_success(res)
+            return _stable_from_text(res, ("not set up", "failed", "couldn't", "check smtp"))
         if act == "spotify_play":
             res = spotify_play(action.get("query", action.get("song", "")))
-            return _stable_success(res)
+            return _stable_from_text(res, ("not configured", "couldn't", "trouble", "no active", "failed"))
         if act == "spotify_control":
             res = spotify_control(action.get("command", action.get("cmd", "pause")))
-            return _stable_success(res)
+            return _stable_from_text(res, ("not connected", "invalid", "failed", "nothing is currently playing"))
         if act == "calendar_today":
             res = calendar_today()
-            return _stable_success(res)
+            return _stable_from_text(res, ("not connected", "couldn't fetch"))
         if act == "calendar_add":
             res = calendar_add(action.get("title", ""), action.get("date", ""), action.get("time", "09:00"))
-            return _stable_success(res)
+            return _stable_from_text(res, ("not connected", "couldn't add"))
 
         if act == "exit":
             return _stable_success("")
         if act == "generate_image":
-            return _stable_success(generate_image(
+            return _stable_failure(generate_image(
                 action.get("prompt", ""), action.get("style", "realistic")
             ))
         if act == "generate_video":
-            return _stable_success(generate_video(
-                action.get("prompt", ""), int(action.get("duration", 5))
-            ))
+            msg = generate_video(action.get("prompt", ""), int(action.get("duration", 5)))
+            if os.getenv("JARVIS_ENABLE_EXPERIMENTAL_VIDEO_GENERATION", "false").lower() != "true":
+                return _stable_failure(msg)
+            return _stable_from_text(msg, ("failed", "timed out", "couldn't", "missing", "unexpected", "rate-limited"))
 
         # ── Obligation actions ────────────────────────────────────────────────
         if act == "add_obligation":
@@ -2016,10 +2205,12 @@ def execute(action, speak_fn=None):
 
         if act == "declarative_fact":
             try:
-                from user_profile import add_single_fact, confirm_and_save_profile
+                from user_profile import add_single_fact, confirm_and_save_profile, is_safe_explicit_fact
                 statement = action.get("statement", "")
                 if not statement:
                     return _stable_failure("What should I remember?")
+                if not is_safe_explicit_fact(statement):
+                    return _stable_failure("I won't save that as a profile fact unless you state it explicitly.")
                 proposed = add_single_fact(statement)
                 if not proposed:
                     return _stable_failure("Couldn't extract that. Try rephrasing.")
@@ -2032,21 +2223,13 @@ def execute(action, speak_fn=None):
 
         if act == "fact_query":
             try:
-                from user_profile import get_profile_summary
+                from user_profile import find_profile_fact
                 fact_name = action.get("fact_name", "")
                 if not fact_name:
                     return _stable_failure("What fact would you like to know?")
-                summary = get_profile_summary()
-                if not summary or summary.strip() == "No profile entries yet.":
-                    return _stable_failure("I don't have any facts saved about you yet.")
-                # Search for the fact in the summary
-                summary_lower = summary.lower()
-                fact_name_lower = fact_name.lower()
-                if fact_name_lower in summary_lower:
-                    # Find the relevant line
-                    for line in summary.split('\n'):
-                        if fact_name_lower in line.lower():
-                            return _stable_success(line.strip())
+                match = find_profile_fact(fact_name)
+                if match:
+                    return _stable_success(match)
                 return _stable_failure(f"I don't have a fact about '{fact_name}' saved.")
             except Exception as exc:
                 print(f"[DEBUG][executor] fact_query error: {exc}")

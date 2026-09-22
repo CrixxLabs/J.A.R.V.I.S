@@ -30,6 +30,7 @@ from session_logger import log_event
 # ── Reliability imports ───────────────────────────────────────────────────────
 import status_registry
 import runtime_visuals
+import personality
 from status_registry import SubsystemState
 import self_model
 
@@ -121,13 +122,13 @@ def _validate_and_route_action(action: dict | None, response: str) -> tuple[dict
         if cap and cap.get("fallbacks"):
             for fallback_id in cap["fallbacks"]:
                 fallback_cap = model.get_capability(fallback_id)
-                if fallback_cap and fallback_cap["status"] in (SubsystemState.READY.value, SubsystemState.DEGRADED.value):
+                if fallback_cap and fallback_cap["evidence"] in ("PROBED", "LIVE"):
                     if fallback_cap["actions"]:
                         new_action = dict(action)
                         new_action["action"] = fallback_cap["actions"][0]
                         warning = f"My {cap['name']} engine is offline. Let me try using my {fallback_cap['name']} engine instead."
                         new_response = f"{warning} {response}" if response else warning
-                        print(f"[Planner][SelfModel] Routed action '{action_name}' → '{new_action['action']}' due to dependency: {reason}")
+                        print(f"[Planner][SelfModel] Routed action '{action_name}' -> '{new_action['action']}' due to dependency: {reason}")
                         return new_action, new_response
 
         print(f"[Planner][SelfModel] Blocked '{action_name}': {reason}")
@@ -416,6 +417,73 @@ def _resolve_reminder_seconds(entities: dict, raw_text: str) -> int:
     return 3600
 
 
+
+def _is_conversational_nonfact(text: str) -> bool:
+    raw = (text or "").strip()
+    low = raw.lower()
+    if not low or raw.endswith("?"):
+        return True
+    prefixes = (
+        "i'm asking ", "im asking ", "i am asking ",
+        "i'm talking about ", "im talking about ", "i am talking about ",
+        "i mean ", "what i mean ", "i meant ",
+        "my question is ", "the question is ",
+        "in your opinion", "what do you think", "do you think",
+        "would you ", "could you ", "can you ", "should you ",
+        "why ", "how ", "what ", "when ", "where ", "who ",
+    )
+    return low.startswith(prefixes)
+
+
+def _is_explicit_memory_write(text: str) -> bool:
+    raw = (text or "").strip()
+    low = raw.lower()
+    if not raw or _is_conversational_nonfact(raw):
+        return False
+    if re.match(r"^(?:please\s+)?(?:always\s+)?remember\s+(?:that\s+)?(?:i|my)\b", low):
+        return True
+    return bool(re.match(r"^my\s+.{1,80}?\s+is\s+.+", low))
+
+
+def _is_direct_generation_request(text: str, media: str) -> bool:
+    raw = (text or "").strip()
+    low = raw.lower()
+    if not raw or _is_conversational_nonfact(raw):
+        return False
+    noun = r"(?:video|clip)" if media == "video" else r"(?:image|picture|photo)"
+    command = rf"^(?:please\s+)?(?:create|generate|make|draw)\s+(?:me\s+)?(?:an?\s+|the\s+)?{noun}\b"
+    return bool(re.search(command, low))
+
+
+def _deterministic_profile_intent(text: str) -> tuple[dict | None, str] | None:
+    """Protect profile memory from LLM/classifier mistakes on obvious facts/questions."""
+    raw = (text or "").strip()
+    low = raw.lower().strip()
+    # Broad profile questions must read the real approved profile, never let the
+    # conversational LLM invent what is or is not stored.
+    broad_profile_patterns = (
+        r"^(?:so\s+)?what(?:\s+all)?(?:\s+things)?\s+do\s+you\s+know\s+about\s+me[?.!]*$",
+        r"^(?:so\s+)?tell\s+me\s+what(?:\s+all)?\s+you\s+know\s+about\s+me[?.!]*$",
+        r"^(?:so\s+)?what(?:\s+all)?\s+(?:do\s+you\s+)?(?:remember|have\s+saved|know)\s+about\s+me[?.!]*$",
+        r"^(?:so\s+)?(?:show|read|give)\s+(?:me\s+)?my\s+(?:saved\s+)?profile[?.!]*$",
+    )
+    if any(re.match(pattern, low) for pattern in broad_profile_patterns):
+        return {"action": "profile_query"}, ""
+
+    # Questions about "my X" are reads, never writes.
+    q = re.match(r"^(?:so\s+)?(?:what|which)\s+(?:is|was)\s+my\s+(.+?)[?.!]*$", low)
+    if q:
+        fact = re.sub(r"[?.!]+$", "", q.group(1)).strip()
+        return {"action": "fact_query", "fact_name": fact}, ""
+    q = re.match(r"^(?:so\s+)?is\s+my\s+(.+?)\s+(.+?)[?.!]*$", low)
+    if q and raw.endswith("?"):
+        return {"action": "fact_query", "fact_name": q.group(1).strip()}, ""
+    # Permanent writes require deterministic, explicit user intent.
+    if _is_explicit_memory_write(raw):
+        return {"action": "declarative_fact", "statement": raw}, ""
+    return None
+
+
 def _handle_local_intent(intent_data: dict) -> tuple | None:
     intent   = intent_data.get("intent", "")
     params   = intent_data.get("params", {})
@@ -593,8 +661,29 @@ def _trim_context_for_tokens(system_context: str, max_chars: int = 3500) -> str:
     keep_start = max_chars // 2
     keep_end   = max_chars // 2
     trimmed    = system_context[:keep_start] + "\n...[trimmed]...\n" + system_context[-keep_end:]
-    print(f"[DEBUG][planner] context trimmed from {len(system_context)} → {len(trimmed)} chars")
+    print(f"[DEBUG][planner] context trimmed from {len(system_context)} -> {len(trimmed)} chars")
     return trimmed
+
+
+def _last_assistant_response() -> str:
+    for turn in reversed(_history):
+        if turn.get("role") == "assistant":
+            return str(turn.get("content", ""))
+    return ""
+
+
+def _personality_context(user_input: str, planner_intent: str = "") -> str:
+    """Build the cloud-safe contract once; every provider fallback reuses it."""
+    try:
+        return personality.assemble_personality_context(
+            user_input,
+            runtime_state=get_state_snapshot(),
+            planner_intent=planner_intent,
+            provider="cloud",
+        )
+    except Exception as exc:
+        print(f"[DEBUG][planner] personality context unavailable: {type(exc).__name__}")
+        return ""
 
 
 @runtime_visuals.visual_activity("thinking")
@@ -614,25 +703,52 @@ def ask(user_input: str, image_b64=None, extra_context: str = "") -> tuple:
     sentiment_state = conversation_manager.get_sentiment()
     tone_prefix     = core.get_tone_prefix(sentiment_state.get("label", "neutral"))
 
+    truthful_answer = self_model.get_model().answer_capability_question(user_input)
+    if truthful_answer:
+        return None, truthful_answer, "fast"
     if is_capability_question(user_input):
         return None, get_capability_response(), "fast"
 
     if image_b64:
-        return None, "Vision is disabled for now.", "fast"
+        try:
+            import vision
+            result = vision.analyze_image_base64(
+                image_b64,
+                user_input or "Describe this image in detail",
+            )
+            return None, result, "action"
+        except Exception as exc:
+            print(f"[Planner] image_b64 processing failed: {exc}")
+            return None, "Could not process the image.", "fast"
 
     lowered_input = (user_input or "").lower().strip()
+
+    try:
+        correction = personality.capture_explicit_feedback(
+            user_input,
+            context="direct conversation feedback",
+            original_response=_last_assistant_response(),
+        )
+    except Exception as exc:
+        print(f"[DEBUG][planner] correction capture unavailable: {type(exc).__name__}")
+        correction = None
+    if correction:
+        acknowledgement = "Got it. I'll keep that preference active."
+        add_to_history("user", user_input)
+        add_to_history("assistant", acknowledgement)
+        conversation_manager.add_turn("user", user_input)
+        conversation_manager.add_turn("assistant", acknowledgement)
+        return None, acknowledgement, "fast"
 
     if lowered_input in ("exit", "quit", "close"):
         return None, "Shutting down.", "fast"
 
-    if "video" in lowered_input and any(w in lowered_input for w in ("create", "generate", "make")):
+    if _is_direct_generation_request(user_input, "video"):
         action = {"action": "generate_video", "prompt": user_input}
         action, msg = _validate_and_route_action(action, "Generating video.")
         return action, msg, "action"
 
-    if any(w in lowered_input for w in ("image", "picture")) and any(
-        w in lowered_input for w in ("create", "generate", "make", "draw")
-    ):
+    if _is_direct_generation_request(user_input, "image"):
         action = {"action": "generate_image", "prompt": user_input}
         action, msg = _validate_and_route_action(action, "Generating image.")
         return action, msg, "action"
@@ -660,6 +776,7 @@ def ask(user_input: str, image_b64=None, extra_context: str = "") -> tuple:
         add_to_history("user", user_input)
         conversation_manager.add_turn("user", user_input)
 
+        brain.reset_last_provider()
         raw = brain.ask_llm(
             user_input,
             context       = self_context,
@@ -667,6 +784,7 @@ def ask(user_input: str, image_b64=None, extra_context: str = "") -> tuple:
             model_type    = "chat",
             sentiment     = sentiment_state,
             allow_actions = False,
+            profile_context = _personality_context(user_input, "self_awareness"),
         )
         add_to_history("assistant", raw)
         conversation_manager.add_turn("assistant", raw)
@@ -680,7 +798,7 @@ def ask(user_input: str, image_b64=None, extra_context: str = "") -> tuple:
             response = f"{tone_prefix} {response}"
 
         log_event("planner_decision", {"action": None, "response": response})
-        return None, response, "chat"
+        return None, response, brain.get_last_provider_model() or "chat"
     # ─────────────────────────────────────────────────────────────────────────
 
     try:
@@ -689,7 +807,23 @@ def ask(user_input: str, image_b64=None, extra_context: str = "") -> tuple:
             log_event("planner_decision", {"skill": skill_name, "response": skill_response})
             return None, skill_response, "action"
 
-        intent_data  = core.classify_intent(user_input)
+        profile_guard = _deterministic_profile_intent(user_input)
+        if profile_guard is not None:
+            action, response = profile_guard
+            action = _normalize_action(action)
+            action, response = _validate_and_route_action(action, response)
+            log_event("planner_decision", {"action": action, "response": response, "route": "profile_guard"})
+            return action, response, "action"
+
+        intent_data = core.classify_intent(user_input)
+
+        # Classifier output is advisory; it cannot authorize permanent memory.
+        if intent_data.get("intent") in ("declarative_fact", "profile_remember"):
+            if not _is_explicit_memory_write(user_input):
+                intent_data = dict(intent_data)
+                intent_data["intent"] = "conversation"
+                intent_data["params"] = {}
+
         local_result = _handle_local_intent(intent_data)
 
         if local_result is not None:
@@ -730,18 +864,20 @@ def ask(user_input: str, image_b64=None, extra_context: str = "") -> tuple:
             + (f"\n{extra_context}" if extra_context else "")
         )
 
-        system_context = _trim_context_for_tokens(system_context, max_chars=3500)
+        system_context = _trim_context_for_tokens(system_context, max_chars=1800)
 
         add_to_history("user", user_input)
         conversation_manager.add_turn("user", user_input)
 
+        brain.reset_last_provider()
         raw = brain.ask_llm(
             user_input,
             context       = system_context,
-            history       = _history[:-1][-6:],
+            history       = _history[:-1][-3:],
             model_type    = model_type,
             sentiment     = sentiment_state,
             allow_actions = allow_actions,
+            profile_context = _personality_context(user_input, intent_data.get("intent", model_type)),
         )
         add_to_history("assistant", raw)
         conversation_manager.add_turn("assistant", raw)
@@ -767,10 +903,10 @@ def ask(user_input: str, image_b64=None, extra_context: str = "") -> tuple:
         if action and action.get("action") == "join_meeting" and response and "want me to join" in response.lower():
             set_pending_followup({"action": action, "response": response})
             log_event("planner_decision", {"action": None, "response": response})
-            return None, response, model_type
+            return None, response, brain.get_last_provider_model() or model_type
 
         log_event("planner_decision", {"action": action, "response": response})
-        return action, response, model_type
+        return action, response, brain.get_last_provider_model() or model_type
 
     except Exception as exc:
         print(f"[DEBUG][planner] ask error: {exc}")

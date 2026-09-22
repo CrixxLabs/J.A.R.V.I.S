@@ -2,6 +2,7 @@
 # Template for creating new Jarvis skills
 
 SKILL_NAME = "example_skill"
+ENABLED = False  # Template only; never hijack production routing
 TRIGGERS = [
     "example",
     "demo skill",

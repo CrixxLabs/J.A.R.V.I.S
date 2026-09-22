@@ -18,6 +18,7 @@ import os
 import uuid
 import datetime
 import threading
+import re
 
 BASE_DIR          = os.path.dirname(os.path.abspath(__file__))
 PROFILE_FILE      = os.path.join(BASE_DIR, "user_profile.json")
@@ -331,6 +332,58 @@ def confirm_and_save_profile(entries: list) -> str:
     return result
 
 
+
+def _normalise_fact_key(text: str) -> str:
+    text = (text or "").lower().strip()
+    text = re.sub(r"[^a-z0-9\s]", " ", text)
+    text = re.sub(r"\b(what|which|is|are|was|were|my|the|a|an|do|does|did|so|tell|me|please)\b", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+def find_profile_fact(fact_name: str) -> str | None:
+    """Return the best matching saved fact instead of dumping the whole profile."""
+    key = _normalise_fact_key(fact_name)
+    if not key:
+        return None
+    entries = _load()
+    best = None
+    best_score = 0
+    key_tokens = set(key.split())
+    for entry in entries:
+        value = str(entry.get("value", "")).strip()
+        norm = _normalise_fact_key(value)
+        tokens = set(norm.split())
+        score = len(key_tokens & tokens) * 10
+        if key in norm:
+            score += 50
+        if entry.get("verified"):
+            score += 2
+        if entry.get("source") == "manual":
+            score += 1
+        if score > best_score:
+            best_score, best = score, value
+    return best if best_score >= 10 else None
+
+
+def is_safe_explicit_fact(statement: str) -> bool:
+    raw = (statement or "").strip()
+    low = raw.lower()
+    if not raw or raw.endswith("?"):
+        return False
+    blocked = (
+        "i'm asking ", "im asking ", "i am asking ",
+        "i'm talking about ", "im talking about ", "i am talking about ",
+        "i mean ", "what i mean ", "i meant ",
+        "my question is ", "the question is ",
+        "in your opinion", "what do you think", "do you think",
+        "why ", "how ", "what ", "when ", "where ", "who ",
+    )
+    if low.startswith(blocked):
+        return False
+    if re.match(r"^(?:please\s+)?(?:always\s+)?remember\s+(?:that\s+)?(?:i|my)\b", low):
+        return True
+    return bool(re.match(r"^my\s+.{1,80}?\s+is\s+.+", low))
+
+
 def add_single_fact(statement: str, verified: bool = True) -> list:
     """
     Quick intake for "remember that I [statement]".
@@ -340,18 +393,29 @@ def add_single_fact(statement: str, verified: bool = True) -> list:
     """
     if not (statement or "").strip():
         return []
+    if not is_safe_explicit_fact(statement):
+        print("[user_profile] Refusing conversational text as permanent profile memory.")
+        return []
 
     try:
-        import brain
-
         clean_statement = statement.strip()
         for prefix in ("remember that i ", "remember i "):
             if clean_statement.lower().startswith(prefix):
                 clean_statement = clean_statement[len(prefix):].strip()
                 break
 
+        # Never ask an LLM to reinterpret simple explicit "my X is Y" facts.
+        # This prevents hallucinated permanent memories (e.g. 47 becoming six).
+        simple = re.match(r"^(?:always\s+)?(?:remember\s+that\s+)?my\s+(.{1,80}?)\s+is\s+(.{1,160}?)[.!?]*$", clean_statement, re.IGNORECASE)
+        if simple:
+            key, value = simple.group(1).strip(), simple.group(2).strip()
+            category = "preferences" if any(w in key.lower() for w in ("favorite", "favourite", "prefer", "preference")) else "other"
+            rendered = f"My {key} is {value}."
+            return [_make_entry(category, rendered, "manual", 1.0, verified)]
+
         print(f"[user_profile] Extracting single fact: '{clean_statement}'")
 
+        import brain
         # Single fact is small — ask_llm() token limit is fine here
         raw = brain.ask_llm(
             query         = f"remember that I {clean_statement}",

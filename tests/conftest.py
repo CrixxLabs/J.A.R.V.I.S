@@ -27,12 +27,28 @@ def pytest_configure(config):
 
 
 @pytest.fixture(autouse=True)
-def setup_test_environment():
+def setup_test_environment(tmp_path):
     """Set up test environment for each test."""
-    # Set up any global test state
     os.environ.setdefault("TESTING", "1")
+    import status_registry
+    previous_registry = status_registry._registry_instance
+    status_registry._registry_instance = status_registry.RuntimeStatus(
+        tmp_path / "status.json", session_id="pytest", pid=os.getpid()
+    )
+    _reset_provider_state_if_loaded()
     yield
-    # Cleanup after each test
+    _reset_provider_state_if_loaded()
+    status_registry._registry_instance = previous_registry
+
+
+def _reset_provider_state_if_loaded():
+    """Keep unit tests independent from provider calls made by earlier tests."""
+    brain = sys.modules.get("brain")
+    if brain is None:
+        return
+    brain.provider_health.reset()
+    brain.reset_ollama_runtime_state()
+    brain.reset_last_provider()
 
 
 @pytest.fixture

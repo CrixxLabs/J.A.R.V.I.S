@@ -377,21 +377,36 @@ def run_evolution_cycle():
 
 
 # ── Background runner ──
+_evolver_stop = threading.Event()
+_evolver_thread = None
+
+
 def start_evolver(interval_hours=6):
     """Runs evolution cycle every N hours in background."""
+    global _evolver_thread
+    if _evolver_thread and _evolver_thread.is_alive():
+        return
+    _evolver_stop.clear()
     def _loop():
         # First run after 5 min delay (let system warm up)
-        time.sleep(300)
-        while True:
+        if _evolver_stop.wait(300):
+            return
+        while not _evolver_stop.is_set():
             try:
                 run_evolution_cycle()
             except Exception as e:
                 print(f"[Evolver] Error: {e}")
-            time.sleep(interval_hours * 3600)
+            _evolver_stop.wait(interval_hours * 3600)
 
-    t = threading.Thread(target=_loop, daemon=True)
-    t.start()
+    _evolver_thread = threading.Thread(target=_loop, daemon=True)
+    _evolver_thread.start()
     print(f"[Evolver] Started - cycle every {interval_hours}h. Proposals -> /patches/")
+
+
+def stop_evolver():
+    _evolver_stop.set()
+    if _evolver_thread and _evolver_thread.is_alive():
+        _evolver_thread.join(timeout=3.0)
 
 
 # ── Manual trigger ──

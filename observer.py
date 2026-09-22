@@ -9,14 +9,20 @@ import time
 import datetime
 import os
 import psutil
-import win32gui
-from mss import mss
+try:
+    import win32gui
+except Exception:
+    win32gui = None
+try:
+    from mss import mss
+except Exception:
+    mss = None
 from memory import log_context_change, log_activity
 
 # Reliability imports
 import status_registry
 import runtime_visuals
-from status_registry import SubsystemState, get_registry
+from status_registry import EvidenceLevel, SubsystemState, get_registry
 import error_handler
 
 # ── Shared state (read-only from outside) ──
@@ -119,7 +125,12 @@ def mark_user_input():
 # ── Context Observer Thread ──
 def _context_observer():
     registry = get_registry()
-    while not _shutdown:
+    if win32gui is None:
+        registry.set_evidence("OBSERVER", EvidenceLevel.BLOCKED, "win32gui unavailable; foreground-window observation disabled", source="observer startup")
+        while not _shutdown_event.wait(1.0):
+            pass
+        return
+    while not _shutdown_event.is_set():
         try:
             hwnd  = win32gui.GetForegroundWindow()
             title = win32gui.GetWindowText(hwnd)
@@ -135,23 +146,26 @@ def _context_observer():
                     state["last_app_change"] = time.time()
                 print(f"[Observer] App: {app}")
             
-            # Keep observer status healthy
-            registry.set_status("PLUGINS", SubsystemState.READY, "Observer contexts parsing fine")
+            registry.set_evidence("OBSERVER", EvidenceLevel.LIVE, "Foreground context observation succeeded",
+                                  source="observer loop")
+            registry.set_capability_evidence("OBSERVER", EvidenceLevel.LIVE,
+                                             "Foreground context observation succeeded",
+                                             source="observer loop")
         except Exception as exc:
             # Demote dynamically if win32 calls fail continuously
             error_handler.log_and_demote(
-                subsystem="PLUGINS",
+                subsystem="OBSERVER",
                 exception=exc,
                 context="Background context window tracker",
                 demote_to=SubsystemState.DEGRADED
             )
-        time.sleep(3)
+        _shutdown_event.wait(3)
 
 
 # ── System Observer Thread ──
 def _system_observer():
     registry = get_registry()
-    while not _shutdown:
+    while not _shutdown_event.is_set():
         try:
             cpu = psutil.cpu_percent(interval=None)
             ram = psutil.virtual_memory()
@@ -166,23 +180,26 @@ def _system_observer():
                     state["battery_charging"] = bat.power_plugged
             runtime_visuals.update(memory_usage=ram.percent)
             
-            # We track general tasks/monitor health with this thread
-            registry.set_status("TASKS", SubsystemState.READY, "System telemetry engine healthy")
+            registry.set_evidence("OBSERVER", EvidenceLevel.LIVE, "System telemetry sample succeeded",
+                                  source="observer loop")
+            registry.set_capability_evidence("OBSERVER", EvidenceLevel.LIVE,
+                                             "System telemetry sample succeeded",
+                                             source="observer loop")
         except Exception as exc:
             error_handler.log_and_demote(
-                subsystem="TASKS",
+                subsystem="OBSERVER",
                 exception=exc,
                 context="Background psutil telemetry monitor",
                 demote_to=SubsystemState.DEGRADED
             )
-        time.sleep(5)
+        _shutdown_event.wait(5)
 
 
 # ── Screen Change Observer Thread ──
 def _screen_observer():
     registry = get_registry()
     last_hash = None
-    while not _shutdown:
+    while not _shutdown_event.is_set():
         try:
             with mss() as sct:
                 img = np.array(sct.grab(sct.monitors[1]))
@@ -198,22 +215,25 @@ def _screen_observer():
                     state["screen_change_time"] = time.time()
             last_hash = h
             
-            # Grabbing screens directly affects our OCR capability health!
-            registry.set_status("TESSERACT_OCR", SubsystemState.READY, "Screen grab active, pixels feeding OCR")
+            registry.set_evidence("VISION", EvidenceLevel.LIVE, "Observer captured screen pixels",
+                                  source="observer screen loop")
+            registry.set_capability_evidence("SCREEN_CAPTURE", EvidenceLevel.LIVE,
+                                             "Observer captured screen pixels",
+                                             source="observer screen loop")
         except Exception as exc:
             # If screen grabbing is completely broken (e.g. display disconnected/admin block), OCR is OFFLINE
             error_handler.log_and_demote(
-                subsystem="TESSERACT_OCR",
+                subsystem="VISION",
                 exception=exc,
                 context="Screen capture loop for AI parsing",
                 demote_to=SubsystemState.OFFLINE
             )
-        time.sleep(4)
+        _shutdown_event.wait(4)
 
 
 # ── YouTube Time Tracker ──
 def _youtube_tracker():
-    while not _shutdown:
+    while not _shutdown_event.is_set():
         try:
             with _lock:
                 app = state["active_app"]
@@ -229,16 +249,21 @@ def _youtube_tracker():
                 severity="warning",
                 module="observer"
             )
-        time.sleep(30)
+        _shutdown_event.wait(30)
 
 
 # Thread references for graceful shutdown
 _observer_threads: list[threading.Thread] = []
+_shutdown_event = threading.Event()
 
 
 # ── Start all observers ──
 def start_observers():
-    global _observer_threads
+    global _observer_threads, _shutdown
+    if any(t.is_alive() for t in _observer_threads):
+        return
+    _shutdown = False
+    _shutdown_event.clear()
     _observer_threads = [
         threading.Thread(target=_context_observer, daemon=True),
         threading.Thread(target=_system_observer,  daemon=True),
@@ -254,10 +279,12 @@ def stop_observers():
     """Signal all observer threads to stop and wait for them."""
     global _shutdown
     _shutdown = True
+    _shutdown_event.set()
     # Give threads time to exit cleanly
     for t in _observer_threads:
         if t.is_alive():
             t.join(timeout=2.0)
+    _observer_threads.clear()
     print("[Observer] All observers stopped.")
 
 

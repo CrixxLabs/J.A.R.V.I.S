@@ -1,364 +1,287 @@
-# vision.py — Screenshot & Screen Reader (Phase 2)
-# Uses Gemini Vision for screen understanding
-# Fully compatible with conversation_manager
+"""MARK VII visual awareness.
+
+Visual understanding is local-first: jarvis:latest (Ministral 3 3B) through brain.py, with Gemini
+as a cloud fallback. OCR remains a separate Tesseract capability.
+"""
+from __future__ import annotations
 
 import base64
 import os
-import numpy as np
-from mss import mss
+from pathlib import Path
+
 import cv2
+import numpy as np
 import requests
 from dotenv import load_dotenv
-import pytesseract
+try:
+    from mss import mss
+except Exception:
+    mss = None
 
-# Reliability imports
-import status_registry
-from status_registry import SubsystemState, get_registry
 import error_handler
+from ocr_runtime import (
+    OCREmptyResultError, OCRTimeoutError, OCRUnavailableError,
+    extract_image_text, probe_tesseract,
+)
+from status_registry import EvidenceLevel, SubsystemState, get_registry
 
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_VISION_MODEL = os.getenv("GEMINI_VISION_MODEL", "gemini-3.1-flash-lite")
+GEMINI_VISION_TIMEOUT = float(os.getenv("GEMINI_VISION_TIMEOUT", "15.0"))
 
-# Tesseract path (same as executor.py)
-pytesseract.pytesseract.tesseract_cmd = os.getenv(
-    "TESSERACT_PATH",
-    r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-)
+
+def discover_tesseract() -> str | None:
+    return probe_tesseract().path
 
 
 def capture_screen():
-    """Capture screenshot using mss — returns numpy array in BGR format for cv2."""
+    """Capture the primary desktop as a BGR numpy image."""
     try:
+        if mss is None:
+            raise RuntimeError("MSS screen capture dependency is unavailable")
         with mss() as sct:
-            # mss returns BGRA format — convert to BGR for cv2 compatibility
             screenshot = np.array(sct.grab(sct.monitors[1]))
-            img = cv2.cvtColor(screenshot, cv2.COLOR_BGRA2BGR)
-            return img
+        img = cv2.cvtColor(screenshot, cv2.COLOR_BGRA2BGR)
+        registry = get_registry()
+        registry.set_evidence("VISION", EvidenceLevel.LIVE, "Desktop frame captured", source="mss capture")
+        registry.set_capability_evidence("SCREEN_CAPTURE", EvidenceLevel.LIVE, "Desktop frame captured", source="mss capture")
+        return img
     except Exception as exc:
-        # If capture fails, it degrades both Gemini screen read and Tesseract OCR
-        error_handler.log_and_demote(
-            subsystem="TESSERACT_OCR",
-            exception=exc,
-            context="Capture screen mss interface",
-            demote_to=SubsystemState.OFFLINE
-        )
-        raise exc
-
-
-def screenshot_to_base64():
-    """Capture screen and encode to base64 PNG for Gemini API."""
-    img = capture_screen()
-    success, buffer = cv2.imencode('.png', img)
-    if not success:
-        raise ValueError("Failed to encode screenshot as PNG")
-    return base64.b64encode(buffer).decode('utf-8')
-
-
-def describe_screen(prompt="describe what you see"):
-    """Send screenshot to Gemini for description."""
-    registry = get_registry()
-
-    if not GEMINI_API_KEY:
-        print("[Vision] No Gemini API key — falling back to OCR")
-        registry.set_status(
-            "GEMINI",
-            SubsystemState.DISABLED,
-            "Gemini API key is empty in environment"
-        )
-        return "Gemini API key not configured. Using OCR fallback."
-
-    try:
-        b64 = screenshot_to_base64()
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
-
-        payload = {
-            "contents": [{
-                "parts": [
-                    {"text": prompt},
-                    {
-                        "inline_data": {
-                            "mime_type": "image/png",
-                            "data": b64
-                        }
-                    }
-                ]
-            }]
-        }
-
-        res = requests.post(url, json=payload, timeout=15)
-        res.raise_for_status()
-        data = res.json()
-
-        # Debug: print full response if it fails
-        if "candidates" not in data or not data["candidates"]:
-            print(f"[Vision] Gemini API error response: {data}")
-            
-            # Check for specific error messages
-            if "error" in data:
-                error_msg = data["error"].get("message", "Unknown error")
-                print(f"[Vision] Gemini error: {error_msg}")
-                
-                if "API_KEY_INVALID" in error_msg or "API key not valid" in error_msg:
-                    registry.set_status(
-                        "GEMINI",
-                        SubsystemState.DEGRADED,
-                        "Invalid API Key verified by Gemini API endpoint"
-                    )
-                    return "Your Gemini API key is invalid. Get a new one from https://aistudio.google.com/apikey"
-                
-                registry.set_status(
-                    "GEMINI",
-                    SubsystemState.DEGRADED,
-                    f"Gemini API returned error: {error_msg}"
-                )
-                return f"Gemini API error: {error_msg}"
-            
-            registry.set_status(
-                "GEMINI",
-                SubsystemState.DEGRADED,
-                "Gemini API payload lacks candidates"
-            )
-            return "Could not describe the screen."
-
-        # Extract text from response and mark GEMINI status READY
-        text = data["candidates"][0]["content"]["parts"][0]["text"]
-        registry.set_status(
-            "GEMINI",
-            SubsystemState.READY,
-            "Gemini Vision responding normally"
-        )
-        return text.strip()
-
-    except requests.exceptions.Timeout as timeout_exc:
-        error_handler.log_and_demote(
-            subsystem="GEMINI",
-            exception=timeout_exc,
-            context="Gemini vision endpoint timeout",
-            demote_to=SubsystemState.DEGRADED
-        )
-        return "Screen description timed out. Falling back to OCR."
-    except Exception as exc:
-        error_handler.log_and_demote(
-            subsystem="GEMINI",
-            exception=exc,
-            context="Querying Gemini Vision endpoint",
-            demote_to=SubsystemState.DEGRADED
-        )
-        return "Screen description failed. Falling back to OCR."
-
-
-def read_screen():
-    """OCR fallback — reads actual text from screen using pytesseract."""
-    registry = get_registry()
-    try:
-        img = capture_screen()
-        
-        # Preprocess for better OCR accuracy
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        
-        # Apply thresholding to make text clearer
-        _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
-        
-        # Extract text using pytesseract
-        text = pytesseract.image_to_string(thresh).strip()
-        
-        # Mark READY if we successfully pass through pytesseract calls
-        registry.set_status(
-            "TESSERACT_OCR",
-            SubsystemState.READY,
-            "Pytesseract engine parsed successfully"
-        )
-
-        if not text:
-            return "No text detected on screen."
-        
-        # Return first 500 chars
-        return text[:500]
-        
-    except Exception as exc:
-        error_handler.log_and_demote(
-            subsystem="TESSERACT_OCR",
-            exception=exc,
-            context="Pytesseract local OCR fallback engine",
-            demote_to=SubsystemState.OFFLINE
-        )
-        return "OCR failed."
-
-
-def analyze_screen_context():
-    """Combines vision with conversation context."""
-    try:
-        import conversation_manager
-        description = describe_screen("Describe the current screen in detail, including any text, apps, or important elements.")
-        context = conversation_manager.get_context_block()
-        return f"Screen: {description}\n\nContext: {context}"
-    except Exception as exc:
-        # Don't demote here as describe_screen handles its own status; just fallback safely
-        print(f"[Vision] analyze_screen_context error: {exc}")
-        return describe_screen("Describe what you see on this screen.")
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# MARK VII — Extended Vision Capabilities
-# ══════════════════════════════════════════════════════════════════════════════
-
-def capture_screen_region(left: int, top: int, width: int, height: int):
-    """Capture a specific screen region using mss."""
-    try:
-        with mss() as sct:
-            monitor = {"left": left, "top": top, "width": width, "height": height}
-            screenshot = np.array(sct.grab(monitor))
-            img = cv2.cvtColor(screenshot, cv2.COLOR_BGRA2BGR)
-            return img
-    except Exception as exc:
-        error_handler.log_and_demote(
-            subsystem="TESSERACT_OCR",
-            exception=exc,
-            context="Capture screen region mss interface",
-            demote_to=SubsystemState.OFFLINE
-        )
-        raise exc
-
-
-def capture_webcam(camera_index: int = 0):
-    """Capture a frame from the webcam."""
-    registry = get_registry()
-    try:
-        cap = cv2.VideoCapture(camera_index, cv2.CAP_DSHOW)
-        if not cap.isOpened():
-            registry.set_status("WEBCAM", SubsystemState.OFFLINE, "Webcam not accessible")
-            return None
-        
-        ret, frame = cap.read()
-        cap.release()
-        
-        if not ret or frame is None:
-            registry.set_status("WEBCAM", SubsystemState.OFFLINE, "Failed to capture frame")
-            return None
-        
-        registry.set_status("WEBCAM", SubsystemState.READY, "Webcam capture successful")
-        return frame
-    except Exception as exc:
-        error_handler.log_and_demote(
-            subsystem="WEBCAM",
-            exception=exc,
-            context="Webcam capture via cv2",
-            demote_to=SubsystemState.OFFLINE
-        )
-        return None
+        error_handler.log_and_demote("VISION", exc, "Capture screen mss interface", SubsystemState.DEGRADED)
+        raise
 
 
 def image_to_base64(img: np.ndarray) -> str:
-    """Encode numpy image array to base64 PNG."""
-    success, buffer = cv2.imencode('.png', img)
+    if img is None or not isinstance(img, np.ndarray) or img.size == 0:
+        raise ValueError("Image is empty")
+    success, buffer = cv2.imencode(".png", img)
     if not success:
         raise ValueError("Failed to encode image as PNG")
-    return base64.b64encode(buffer).decode('utf-8')
+    return base64.b64encode(buffer).decode("ascii")
+
+
+def screenshot_to_base64() -> str:
+    return image_to_base64(capture_screen())
+
+
+def _extract_gemini_text(data: object) -> str:
+    if not isinstance(data, dict):
+        return ""
+    candidates = data.get("candidates")
+    if not isinstance(candidates, list) or not candidates:
+        return ""
+    content = candidates[0].get("content", {}) if isinstance(candidates[0], dict) else {}
+    parts = content.get("parts", []) if isinstance(content, dict) else []
+    texts = [part.get("text", "") for part in parts if isinstance(part, dict) and part.get("text")]
+    return "\n".join(texts).strip()
+
+
+def _gemini_vision(prompt: str, image_b64: str, mime_type: str = "image/png") -> tuple[str, str]:
+    """Bounded Gemini visual fallback. Returns (content, status)."""
+    registry = get_registry()
+    if not GEMINI_API_KEY:
+        registry.set_capability_evidence("GEMINI_VISION", EvidenceLevel.DISABLED, "GEMINI_API_KEY is not configured", source="vision fallback")
+        return "", "unavailable"
+    try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_VISION_MODEL}:generateContent"
+        payload = {"contents": [{"parts": [
+            {"text": str(prompt or "Describe this image accurately.")},
+            {"inline_data": {"mime_type": mime_type, "data": image_b64}},
+        ]}]}
+        response = requests.post(url, headers={"x-goog-api-key": GEMINI_API_KEY}, json=payload, timeout=GEMINI_VISION_TIMEOUT)
+        response.raise_for_status()
+        text = _extract_gemini_text(response.json())
+        if not text:
+            registry.set_capability_evidence("GEMINI_VISION", EvidenceLevel.BROKEN, "Gemini returned no visual content", source="vision fallback")
+            return "", "empty"
+        registry.set_evidence("GEMINI", EvidenceLevel.LIVE, f"Gemini vision succeeded ({GEMINI_VISION_MODEL})", source="vision generation")
+        registry.set_capability_evidence("GEMINI_VISION", EvidenceLevel.LIVE, "Cloud multimodal response succeeded", source="vision generation")
+        return text, "ok"
+    except requests.exceptions.Timeout:
+        registry.set_capability_evidence("GEMINI_VISION", EvidenceLevel.BLOCKED, "Gemini vision request timed out", source="vision fallback")
+        return "", "timeout"
+    except Exception as exc:
+        registry.set_capability_evidence("GEMINI_VISION", EvidenceLevel.BROKEN, f"{type(exc).__name__}: {str(exc)[:140]}", source="vision fallback")
+        return "", "error"
+
+
+def analyze_image_base64(image_b64: str, prompt: str = "describe what you see", mime_type: str = "image/png") -> str:
+    """Local-first visual router: jarvis:latest (Ministral 3 3B), then Gemini cloud fallback."""
+    registry = get_registry()
+    if not isinstance(image_b64, str) or not image_b64.strip():
+        registry.set_capability_evidence("VISION_ROUTER", EvidenceLevel.BROKEN, "Image payload is empty", source="vision router")
+        return "Visual analysis failed: image payload is empty."
+    payload = image_b64.strip()
+    if payload.startswith("data:"):
+        header, separator, encoded = payload.partition(",")
+        if not separator or ";base64" not in header.lower():
+            registry.set_capability_evidence("VISION_ROUTER", EvidenceLevel.BROKEN, "Unsupported image data URL", source="vision router")
+            return "Visual analysis failed: invalid image payload."
+        declared_mime = header[5:].split(";", 1)[0].strip()
+        if declared_mime.startswith("image/"):
+            mime_type = declared_mime
+        payload = encoded.strip()
+    try:
+        # Validate base64 before any provider call. This prevents malformed UI
+        # payloads from being misreported as provider failures.
+        base64.b64decode(payload, validate=True)
+    except Exception:
+        registry.set_capability_evidence("VISION_ROUTER", EvidenceLevel.BROKEN, "Image payload is not valid base64", source="vision router")
+        return "Visual analysis failed: invalid image payload."
+
+    brain_module = None
+    try:
+        import brain as brain_module
+        local_text, local_status = brain_module.local_vision_request(prompt, payload)
+    except Exception as exc:
+        local_text, local_status = "", "error"
+        registry.set_capability_evidence("OLLAMA_VISION", EvidenceLevel.BROKEN, f"Router error: {type(exc).__name__}", source="vision router")
+
+    if local_status == "ok" and local_text.strip():
+        registry.set_capability_evidence("OLLAMA_VISION", EvidenceLevel.LIVE, "jarvis:latest handled visual request locally", source="vision router")
+        registry.set_capability_evidence("VISION_ROUTER", EvidenceLevel.LIVE, "jarvis:latest handled visual request locally", source="vision router")
+        registry.set_capability_evidence("IMAGE_INPUT", EvidenceLevel.LIVE, "Visual input handled by local vision route", source="vision router")
+        return local_text.strip()
+
+    cloud_text, cloud_status = _gemini_vision(prompt, payload, mime_type)
+    if cloud_status == "ok" and cloud_text.strip():
+        if brain_module is not None:
+            brain_module.record_provider_success("GEMINI", GEMINI_VISION_MODEL)
+        registry.set_capability_evidence("VISION_ROUTER", EvidenceLevel.LIVE, f"Gemini fallback succeeded after local status={local_status}", source="vision router")
+        registry.set_capability_evidence("IMAGE_INPUT", EvidenceLevel.LIVE, "Visual input handled by Gemini fallback", source="vision router")
+        return cloud_text.strip()
+
+    registry.set_capability_evidence("VISION_ROUTER", EvidenceLevel.BLOCKED, f"No visual provider succeeded (local={local_status}, gemini={cloud_status})", source="vision router")
+    return f"Visual analysis unavailable (local: {local_status}; cloud fallback: {cloud_status})."
 
 
 def describe_image(img: np.ndarray, prompt: str = "describe what you see") -> str:
-    """Send an image to Gemini for description."""
+    return analyze_image_base64(image_to_base64(img), prompt, "image/png")
+
+
+def describe_screen(prompt: str = "describe what you see") -> str:
+    return describe_image(capture_screen(), prompt)
+
+
+def read_screen() -> str:
+    """Read screen text with local OCR. This is deliberately separate from VLM vision."""
     registry = get_registry()
-
-    if not GEMINI_API_KEY:
-        print("[Vision] No Gemini API key — falling back to OCR")
-        registry.set_status(
-            "GEMINI",
-            SubsystemState.DISABLED,
-            "Gemini API key is empty in environment"
-        )
-        return "Gemini API key not configured. Using OCR fallback."
-
+    if not probe_tesseract().available:
+        registry.set_evidence("TESSERACT_OCR", EvidenceLevel.BLOCKED, "Tesseract executable not found", source="OCR pre-check")
+        registry.set_capability_evidence("OCR", EvidenceLevel.BLOCKED, "Tesseract executable not found", source="OCR pre-check")
+        return "OCR unavailable: Tesseract executable not installed."
     try:
-        b64 = image_to_base64(img)
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
-
-        payload = {
-            "contents": [{
-                "parts": [
-                    {"text": prompt},
-                    {
-                        "inline_data": {
-                            "mime_type": "image/png",
-                            "data": b64
-                        }
-                    }
-                ]
-            }]
-        }
-
-        res = requests.post(url, json=payload, timeout=15)
-        res.raise_for_status()
-        data = res.json()
-
-        if "candidates" not in data or not data["candidates"]:
-            if "error" in data:
-                error_msg = data["error"].get("message", "Unknown error")
-                if "API_KEY_INVALID" in error_msg or "API key not valid" in error_msg:
-                    registry.set_status("GEMINI", SubsystemState.DEGRADED, "Invalid API Key")
-                    return "Your Gemini API key is invalid."
-                registry.set_status("GEMINI", SubsystemState.DEGRADED, f"Gemini API error: {error_msg}")
-                return f"Gemini API error: {error_msg}"
-            registry.set_status("GEMINI", SubsystemState.DEGRADED, "Gemini API payload lacks candidates")
-            return "Could not describe the image."
-
-        text = data["candidates"][0]["content"]["parts"][0]["text"]
-        registry.set_status("GEMINI", SubsystemState.READY, "Gemini Vision responding normally")
-        return text.strip()
-
-    except requests.exceptions.Timeout as timeout_exc:
-        error_handler.log_and_demote("GEMINI", timeout_exc, "Gemini vision timeout", SubsystemState.DEGRADED)
-        return "Image description timed out."
+        img = capture_screen()
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
+        return extract_image_text(thresh)[:500]
+    except OCREmptyResultError:
+        return "No text detected on screen."
+    except OCRTimeoutError:
+        return "OCR timed out."
+    except OCRUnavailableError:
+        return "OCR unavailable: Tesseract executable not installed."
     except Exception as exc:
-        error_handler.log_and_demote("GEMINI", exc, "Gemini vision query", SubsystemState.DEGRADED)
-        return "Image description failed."
+        error_handler.log_and_demote("TESSERACT_OCR", exc, "Local screen OCR", SubsystemState.OFFLINE)
+        return "OCR failed."
+
+
+def analyze_screen_context() -> str:
+    try:
+        import conversation_manager
+        description = describe_screen("Describe the current screen in detail, including visible apps, text, and important elements.")
+        return f"Screen: {description}\n\nContext: {conversation_manager.get_context_block()}"
+    except Exception:
+        return describe_screen("Describe what you see on this screen.")
+
+
+def capture_screen_region(left: int, top: int, width: int, height: int):
+    if width <= 0 or height <= 0:
+        raise ValueError("Screen region width and height must be positive")
+    try:
+        if mss is None:
+            raise RuntimeError("MSS screen capture dependency is unavailable")
+        with mss() as sct:
+            shot = np.array(sct.grab({"left": int(left), "top": int(top), "width": int(width), "height": int(height)}))
+        return cv2.cvtColor(shot, cv2.COLOR_BGRA2BGR)
+    except Exception as exc:
+        error_handler.log_and_demote("VISION", exc, "Capture screen region", SubsystemState.DEGRADED)
+        raise
+
+
+def capture_webcam(camera_index: int = 0):
+    registry = get_registry()
+    cap = None
+    try:
+        backend = getattr(cv2, "CAP_DSHOW", 0) if os.name == "nt" else 0
+        cap = cv2.VideoCapture(int(camera_index), backend) if backend else cv2.VideoCapture(int(camera_index))
+        if not cap.isOpened():
+            registry.set_evidence("WEBCAM", EvidenceLevel.BLOCKED, "Webcam not accessible", source="cv2 capture")
+            return None
+        ok, frame = cap.read()
+        if not ok or frame is None:
+            registry.set_evidence("WEBCAM", EvidenceLevel.BROKEN, "Webcam opened but frame capture failed", source="cv2 capture")
+            return None
+        registry.set_evidence("WEBCAM", EvidenceLevel.LIVE, "Webcam frame captured", source="cv2 capture")
+        registry.set_capability_evidence("WEBCAM", EvidenceLevel.LIVE, "Webcam frame captured", source="cv2 capture")
+        return frame
+    except Exception as exc:
+        error_handler.log_and_demote("WEBCAM", exc, "Webcam capture", SubsystemState.OFFLINE)
+        return None
+    finally:
+        if cap is not None:
+            cap.release()
 
 
 def analyze_image_file(file_path: str, prompt: str = "describe what you see") -> str:
-    """Analyze an image file using Gemini Vision."""
-    registry = get_registry()
-    try:
-        if not os.path.exists(file_path):
-            return f"File not found: {file_path}"
-        
-        img = cv2.imread(file_path)
-        if img is None:
-            return f"Could not read image file: {file_path}"
-        
-        return describe_image(img, prompt)
-    except Exception as exc:
-        error_handler.log_and_demote("VISION", exc, f"Analyze image file {file_path}", SubsystemState.DEGRADED)
-        return f"Image analysis failed: {exc}"
+    path = Path(file_path)
+    if not path.is_file():
+        return f"File not found: {file_path}"
+    img = cv2.imread(str(path))
+    if img is None:
+        return f"Could not read image file: {file_path}"
+    return describe_image(img, prompt)
 
 
 def read_image_text(file_path: str) -> str:
-    """OCR text extraction from an image file."""
     registry = get_registry()
+    if not probe_tesseract().available:
+        registry.set_evidence("TESSERACT_OCR", EvidenceLevel.BLOCKED, "Tesseract executable not found", source="OCR pre-check")
+        registry.set_capability_evidence("OCR", EvidenceLevel.BLOCKED, "Tesseract executable not found", source="OCR pre-check")
+        return "OCR unavailable: Tesseract executable not installed."
+    path = Path(file_path)
+    if not path.is_file():
+        return f"File not found: {file_path}"
     try:
-        if not os.path.exists(file_path):
-            return f"File not found: {file_path}"
-        
-        img = cv2.imread(file_path)
+        img = cv2.imread(str(path))
         if img is None:
             return f"Could not read image file: {file_path}"
-        
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
-        text = pytesseract.image_to_string(thresh).strip()
-        
-        registry.set_status("TESSERACT_OCR", SubsystemState.READY, "Pytesseract file OCR successful")
-        
-        return text[:1000] if text else "No text detected in image."
+        return extract_image_text(thresh)[:1000]
+    except OCREmptyResultError:
+        return "No text detected in image."
+    except OCRTimeoutError:
+        return "OCR timed out."
+    except OCRUnavailableError:
+        return "OCR unavailable: Tesseract executable not installed."
     except Exception as exc:
         error_handler.log_and_demote("TESSERACT_OCR", exc, f"OCR file {file_path}", SubsystemState.OFFLINE)
         return f"OCR failed: {exc}"
 
 
 def get_vision_status() -> dict:
-    """Get status of all vision subsystems."""
     registry = get_registry()
+    def status(name: str) -> dict:
+        return registry.get_status(name) or {"state": "UNKNOWN", "evidence": "UNKNOWN", "detail": "No evidence recorded", "current": False}
+    def capability(name: str) -> dict:
+        return registry.get_capability(name) or {"state": "UNKNOWN", "evidence": "UNKNOWN", "detail": "No evidence recorded", "current": False}
     return {
-        "gemini": registry.get_status("GEMINI"),
-        "tesseract_ocr": registry.get_status("TESSERACT_OCR"),
-        "webcam": registry.get_status("WEBCAM"),
+        "screen_capture": status("VISION"),
+        "ollama_vision": capability("OLLAMA_VISION"),
+        "vision_router": capability("VISION_ROUTER"),
+        "gemini": capability("GEMINI_VISION"),
+        "tesseract_ocr": status("TESSERACT_OCR"),
+        "webcam": status("WEBCAM"),
     }

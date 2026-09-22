@@ -1,0 +1,14 @@
+JARVIS MARK VII — Phase 5 Vision Router patch
+
+Overwrite these paths in D:\J.A.R.V.I.S with the files from this archive:
+- brain.py
+- vision.py
+- planner.py
+- boot_check.py
+- status_registry.py
+- .env.example
+- tests\test_vision_router.py
+- phase5_vision_acceptance.py
+- docs\PHASE5_IMPLEMENTATION_REPORT.md
+
+No .env, memory, profile, credentials, user data, model files, WPF binaries, or Ollama installation files are included in this patch.

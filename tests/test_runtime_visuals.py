@@ -45,3 +45,12 @@ def test_local_bridge_snapshot_and_event_stream():
     finally:
         runtime_visuals.stop_bridge()
 
+
+def test_actual_provider_model_can_update_without_alerting():
+    state = runtime_visuals.VisualStateHub()
+    state.set_base_state("thinking")
+    state.update(provider_model="NVIDIA: nvidia/nemotron-test")
+    snapshot = state.snapshot()
+    assert snapshot["operational_state"] == "thinking"
+    assert snapshot["provider_model"] == "NVIDIA: nvidia/nemotron-test"
+    assert snapshot["alert_information"] is None

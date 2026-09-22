@@ -1,0 +1,38 @@
+# MARK VII Python 3.11 runtime. Native tools are documented in MARK_VII_SETUP.md.
+requests>=2.32,<3
+python-dotenv>=1.0,<2
+ollama>=0.6,<1
+flask>=3.1,<4
+flask-cors>=6,<7
+beautifulsoup4>=4.12,<5
+ddgs>=9,<10
+youtube-transcript-api>=1.2,<2
+numpy>=2,<3
+opencv-python>=4.10,<5
+mss>=10,<11
+pytesseract>=0.3.13,<1
+Pillow>=11,<13
+PyPDF2>=3,<4
+python-docx>=1,<2
+openpyxl>=3.1,<4
+ffmpeg-python>=0.2,<1
+psutil>=6,<8
+pyautogui>=0.9.54,<1
+pygame>=2.6,<3
+SpeechRecognition>=3.14,<4
+PyAudio>=0.2.14,<1
+edge-tts>=7,<8
+pyttsx3>=2.99,<3
+pywin32>=306; sys_platform == "win32"
+spacy>=3.8,<4
+nltk>=3.9,<4
+langdetect>=1,<2
+deep-translator>=1.11,<2
+pyperclip>=1.10,<2
+pywhatkit>=5.4,<6
+pygetwindow>=0.0.9,<1; sys_platform == "win32"
+sounddevice>=0.5,<1
+soundfile>=0.13,<1
+keyring>=25,<26
+
+# Optional integrations and heavy voice/face packages: requirements-optional.txt.

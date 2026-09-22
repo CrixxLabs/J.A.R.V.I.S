@@ -211,27 +211,34 @@ def is_face_registered():
 # ── Background continuous watcher (optional) ──
 # Runs in background so recognize_face() always has a fresh cached result
 _watching = False
+_watch_stop = threading.Event()
+_watch_thread = None
 
 def start_face_watcher():
     """Start a background thread that keeps the face cache warm."""
-    global _watching
+    global _watching, _watch_thread
     if _watching:
         return
     _watching = True
+    _watch_stop.clear()
 
     def _watch():
-        while _watching:
+        while not _watch_stop.is_set():
             try:
                 recognize_face()
             except:
                 pass
-            time.sleep(COOLDOWN_SECS)
+            _watch_stop.wait(COOLDOWN_SECS)
 
-    t = threading.Thread(target=_watch, daemon=True)
-    t.start()
+    _watch_thread = threading.Thread(target=_watch, daemon=True, name="face-watcher")
+    _watch_thread.start()
     print("[FaceRec] Background watcher started.")
 
 
 def stop_face_watcher():
-    global _watching
+    global _watching, _watch_thread
     _watching = False
+    _watch_stop.set()
+    if _watch_thread and _watch_thread.is_alive() and _watch_thread is not threading.current_thread():
+        _watch_thread.join(timeout=3.0)
+    _watch_thread = None

@@ -25,6 +25,17 @@ from dataclasses import dataclass, field
 from datetime import datetime
 import logging
 
+from status_registry import EvidenceLevel, get_registry
+from fractions import Fraction
+
+from ocr_runtime import (
+    OCREmptyResultError,
+    OCRExecutionError,
+    OCRTimeoutError,
+    OCRUnavailableError,
+    extract_image_text,
+)
+
 logger = logging.getLogger(__name__)
 
 # Optional imports with graceful degradation
@@ -53,12 +64,6 @@ except ImportError:
     HAS_PIL = False
 
 try:
-    import pytesseract
-    HAS_TESSERACT = True
-except ImportError:
-    HAS_TESSERACT = False
-
-try:
     import whisper
     HAS_WHISPER = True
 except ImportError:
@@ -81,13 +86,13 @@ MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
 MAX_TOTAL_SIZE = 500 * 1024 * 1024  # 500MB total
 ALLOWED_EXTENSIONS = {
     # Documents
-    '.pdf', '.docx', '.doc', '.txt', '.md', '.rtf',
+    '.pdf', '.docx', '.txt', '.md', '.rtf',
     # Code
     '.py', '.js', '.ts', '.jsx', '.tsx', '.html', '.css', '.json', '.xml', '.yaml', '.yml',
     '.java', '.cpp', '.c', '.h', '.cs', '.go', '.rs', '.php', '.rb', '.swift', '.kt',
     '.sh', '.bat', '.ps1', '.sql', '.ini', '.cfg', '.toml', '.ini',
     # Data
-    '.csv', '.tsv', '.xlsx', '.xls', '.json', '.parquet',
+    '.csv', '.tsv', '.xlsx', '.json', '.parquet',
     # Images
     '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp', '.tiff', '.ico', '.svg',
     # Audio
@@ -109,7 +114,7 @@ TEXT_EXTENSIONS = {
 
 # Binary extensions that need special handling
 BINARY_EXTENSIONS = {
-    '.pdf', '.docx', '.doc', '.xlsx', '.xls', '.png', '.jpg', '.jpeg',
+    '.pdf', '.docx', '.xlsx', '.png', '.jpg', '.jpeg',
     '.gif', '.bmp', '.webp', '.tiff', '.ico', '.mp3', '.wav', '.ogg',
     '.flac', '.m4a', '.aac', '.mp4', '.mov', '.avi', '.mkv', '.webm',
     '.wmv', '.zip', '.tar', '.gz', '.bz2', '.xz', '.7z', '.rar',
@@ -242,7 +247,7 @@ class FileProcessor:
         """Check if file extension is allowed"""
         ext = path.suffix.lower()
         if ext not in self.allowed_extensions:
-            raise ValueError(f"File extension not allowed: {ext}")
+            raise UnsupportedFormatError(f"File extension not allowed: {ext}")
     
     def _compute_hash(self, path: Path, algorithm: str = 'sha256') -> str:
         """Compute file hash"""
@@ -316,7 +321,7 @@ class FileProcessor:
                     metadata.extra['duration'] = float(video_info.get('duration', 0))
                     metadata.extra['width'] = int(video_info.get('width', 0))
                     metadata.extra['height'] = int(video_info.get('height', 0))
-                    metadata.extra['fps'] = eval(video_info.get('r_frame_rate', '0/1'))
+                    metadata.extra['fps'] = float(Fraction(str(video_info.get('r_frame_rate', '0/1'))))
                 except:
                     pass
             
@@ -342,12 +347,16 @@ class FileProcessor:
                     pass
             
             elif ext in {'.xlsx', '.xls'} and HAS_OPENPYXL:
+                wb = None
                 try:
                     wb = openpyxl.load_workbook(path, read_only=True)
                     metadata.extra['sheets'] = wb.sheetnames
                     metadata.extra['sheet_count'] = len(wb.sheetnames)
                 except:
                     pass
+                finally:
+                    if wb is not None:
+                        wb.close()
                     
         except Exception as e:
             logger.warning(f"Failed to extract extended metadata for {path}: {e}")
@@ -374,60 +383,81 @@ class FileProcessor:
                             text_parts.append(text)
                         if sum(len(t) for t in text_parts) > max_chars:
                             break
-                return '\n\n'.join(text_parts)[:max_chars]
+                extracted = '\n\n'.join(text_parts)[:max_chars].strip()
+                if not extracted:
+                    raise NoExtractableTextError(
+                        "PDF contains no extractable text; PDF OCR is not implemented"
+                    )
+                return extracted
             except Exception as e:
+                if isinstance(e, NoExtractableTextError):
+                    raise
                 logger.warning(f"PDF text extraction failed: {e}")
-                return f"[PDF extraction failed: {e}]"
+                raise ExtractionError(f"PDF extraction failed ({type(e).__name__})") from e
         
-        elif ext in {'.docx', '.doc'} and HAS_DOCX:
+        elif ext == '.docx' and HAS_DOCX:
             try:
                 doc = docx.Document(path)
                 paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
-                return '\n'.join(paragraphs)[:max_chars]
+                table_rows = []
+                for table in doc.tables:
+                    for row in table.rows:
+                        values = [cell.text.strip() for cell in row.cells]
+                        if any(values):
+                            table_rows.append('\t'.join(values))
+                return '\n'.join(paragraphs + table_rows)[:max_chars]
             except Exception as e:
                 logger.warning(f"DOCX text extraction failed: {e}")
-                return f"[DOCX extraction failed: {e}]"
+                raise ExtractionError(f"DOCX extraction failed ({type(e).__name__})") from e
         
-        elif ext in {'.xlsx', '.xls'} and HAS_OPENPYXL:
+        elif ext == '.xlsx' and HAS_OPENPYXL:
+            wb = None
             try:
-                wb = openpyxl.load_workbook(path, read_only=True)
+                wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
                 sheets_data = []
+                total_chars = 0
                 for sheet_name in wb.sheetnames:
                     ws = wb[sheet_name]
                     rows = []
                     for row in ws.iter_rows(values_only=True):
                         if any(v is not None for v in row):
-                            rows.append([str(v) if v is not None else '' for v in row])
+                            rendered = '\t'.join(str(v) if v is not None else '' for v in row)
+                            rows.append(rendered)
+                            total_chars += len(rendered) + 1
+                            if total_chars >= max_chars:
+                                break
                     if rows:
-                        sheets_data.append(f"--- {sheet_name} ---\n" + '\n'.join('\t'.join(map(str, r)) for r in rows))
+                        sheets_data.append(f"--- {sheet_name} ---\n" + '\n'.join(rows))
+                    if total_chars >= max_chars:
+                        break
                 return '\n\n'.join(sheets_data)[:max_chars]
             except Exception as e:
                 logger.warning(f"Excel text extraction failed: {e}")
-                return f"[Excel extraction failed: {e}]"
+                raise ExtractionError(f"XLSX extraction failed ({type(e).__name__})") from e
+            finally:
+                if wb is not None:
+                    wb.close()
         
         elif ext == '.pdf' and not HAS_PYPDF2:
-            return "[PDF processing requires PyPDF2]"
+            raise MissingDependencyError("PDF processing requires PyPDF2")
         
-        elif ext in {'.docx', '.doc'} and not HAS_DOCX:
-            return "[DOCX processing requires python-docx]"
+        elif ext == '.docx' and not HAS_DOCX:
+            raise MissingDependencyError("DOCX processing requires python-docx")
         
-        elif ext in {'.xlsx', '.xls'} and not HAS_OPENPYXL:
-            return "[Excel processing requires openpyxl]"
+        elif ext == '.xlsx' and not HAS_OPENPYXL:
+            raise MissingDependencyError("XLSX processing requires openpyxl")
         
-        else:
+        elif ext in TEXT_EXTENSIONS:
             # Plain text files
-            try:
-                with open(path, 'r', encoding='utf-8', errors='replace') as f:
-                    return f.read()[:max_chars]
-            except UnicodeDecodeError:
-                # Try with different encodings
-                for encoding in ['latin-1', 'cp1252', 'iso-8859-1']:
-                    try:
-                        with open(path, 'r', encoding=encoding) as f:
-                            return f.read()[:max_chars]
-                    except:
-                        continue
-                return "[Unable to decode file as text]"
+            for encoding in ('utf-8-sig', 'cp1252', 'latin-1'):
+                try:
+                    with open(path, 'r', encoding=encoding) as f:
+                        return f.read(max_chars)
+                except UnicodeDecodeError:
+                    continue
+            raise ExtractionError("Unable to decode file as text")
+        else:
+            raise UnsupportedFormatError(f"Text extraction is not supported for {ext or 'this file type'}")
     
     def process_file(
         self,
@@ -456,6 +486,7 @@ class FileProcessor:
         start_time = time.time()
         
         session_id = session_id or self._get_session_id()
+        reserved_size = 0
         
         try:
             path = self._validate_path(file_path, session_id)
@@ -464,7 +495,9 @@ class FileProcessor:
             
             # Track session size
             size = path.stat().st_size
-            self._session_sizes[session_id] = self._session_sizes.get(session_id, 0) + size
+            with self._lock:
+                self._session_sizes[session_id] = self._session_sizes.get(session_id, 0) + size
+            reserved_size = size
             
             metadata = self.extract_metadata(str(path), session_id)
             
@@ -516,7 +549,7 @@ class FileProcessor:
                     processing_time=time.time() - start_time
                 )
             
-            return ProcessingResult(
+            response = ProcessingResult(
                 success=True,
                 action=action,
                 file_path=file_path,
@@ -525,16 +558,28 @@ class FileProcessor:
                 warnings=warnings,
                 processing_time=time.time() - start_time
             )
+            self._publish_processing_result(path.suffix.lower(), action, response)
+            return response
             
         except Exception as e:
             logger.exception(f"File processing failed: {file_path}")
-            return ProcessingResult(
+            response = ProcessingResult(
                 success=False,
                 action=action,
                 file_path=file_path,
                 error=str(e),
                 processing_time=time.time() - start_time
             )
+            self._publish_processing_result(Path(file_path).suffix.lower(), action, response, e)
+            return response
+        finally:
+            if reserved_size:
+                with self._lock:
+                    remaining = max(0, self._session_sizes.get(session_id, 0) - reserved_size)
+                    if remaining:
+                        self._session_sizes[session_id] = remaining
+                    else:
+                        self._session_sizes.pop(session_id, None)
     
     # ── Action Implementations ─────────────────────────────────────────
     
@@ -639,36 +684,84 @@ class FileProcessor:
         }
     
     def _action_ocr(self, path: Path, metadata: FileMetadata, **kwargs) -> str:
-        """OCR extraction from images/PDFs"""
-        if not HAS_TESSERACT:
-            return "[OCR unavailable: pytesseract not installed]"
-        
+        """Bounded OCR extraction from image files only."""
         ext = path.suffix.lower()
         
         if ext in {'.png', '.jpg', '.jpeg', '.bmp', '.tiff', '.webp'} and HAS_PIL:
-            try:
-                with Image.open(path) as img:
-                    # Preprocess for better OCR
-                    if img.mode != 'RGB':
-                        img = img.convert('RGB')
-                    # Enhance contrast
+            with Image.open(path) as source:
+                image = source.convert('RGB')
+                try:
                     from PIL import ImageEnhance
-                    enhancer = ImageEnhance.Contrast(img)
-                    img = enhancer.enhance(2.0)
-                    text = pytesseract.image_to_string(img)
-                    return text.strip() or "[No text detected]"
-            except Exception as e:
-                return f"[OCR failed: {e}]"
-        
-        elif ext == '.pdf' and HAS_PIL and HAS_PYPDF2:
-            try:
-                # Convert PDF pages to images and OCR
-                # This is a simplified version - full implementation would use pdf2image
-                return "[PDF OCR requires pdf2image package]"
-            except Exception as e:
-                return f"[PDF OCR failed: {e}]"
-        
-        return "[OCR not supported for this file type]"
+                    image = ImageEnhance.Contrast(image).enhance(2.0)
+                    return extract_image_text(image, timeout=kwargs.get('timeout'))
+                finally:
+                    image.close()
+        if ext == '.pdf':
+            raise UnsupportedFormatError("PDF OCR is not implemented; only embedded PDF text extraction is supported")
+        if not HAS_PIL:
+            raise MissingDependencyError("Image OCR requires Pillow")
+        raise UnsupportedFormatError(f"OCR is not supported for {ext or 'this file type'}")
+
+    @staticmethod
+    def _format_status(extension: str) -> tuple[str | None, str | None]:
+        return {
+            '.pdf': ('FILE_PDF_PARSER', 'FILE_PDF'),
+            '.docx': ('FILE_DOCX_PARSER', 'FILE_DOCX'),
+            '.xlsx': ('FILE_XLSX_PARSER', 'FILE_XLSX'),
+        }.get(extension, ('FILE_TEXT_PARSER', 'FILE_TEXT') if extension in TEXT_EXTENSIONS else (None, None))
+
+    def _publish_processing_result(self, extension: str, action: str,
+                                   result: ProcessingResult, exc: Exception | None = None) -> None:
+        registry = get_registry()
+        if action == 'ocr':
+            # ocr_runtime owns detailed Tesseract/OCR evidence; this layer owns
+            # the file-processing claim around that operation.
+            if result.success:
+                detail = f"Image OCR extracted {len(str(result.result))} characters"
+                registry.set_evidence("FILE_PROCESSOR", EvidenceLevel.LIVE, detail,
+                                      source="file OCR operation")
+                registry.set_evidence("FILE_IMAGE_PARSER", EvidenceLevel.LIVE,
+                                      "Pillow opened and processed the source image",
+                                      source="file OCR operation")
+                registry.set_capability_evidence("FILE_IMAGE_OCR", EvidenceLevel.LIVE, detail,
+                                                 source="file OCR operation")
+            else:
+                evidence = (EvidenceLevel.BLOCKED if isinstance(exc, (MissingDependencyError, OCRUnavailableError))
+                            else EvidenceLevel.PROBED if isinstance(exc, (OCREmptyResultError, UnsupportedFormatError))
+                            else EvidenceLevel.BROKEN)
+                detail = result.error or "Image OCR failed"
+                registry.set_evidence("FILE_PROCESSOR", evidence, detail,
+                                      source="file OCR operation")
+                registry.set_capability_evidence("FILE_IMAGE_OCR", evidence, detail,
+                                                 source="file OCR operation")
+            return
+        subsystem, capability = self._format_status(extension)
+        if result.success:
+            detail = f"{extension or 'file'} {action} completed"
+            registry.set_evidence("FILE_PROCESSOR", EvidenceLevel.LIVE, detail,
+                                  source="file processing operation")
+            extraction_actions = {'extract', 'summarize', 'explain', 'code_review', 'debug'}
+            if subsystem and action in extraction_actions:
+                registry.set_evidence(subsystem, EvidenceLevel.LIVE, detail,
+                                      source="file extraction")
+            if capability and action in extraction_actions:
+                registry.set_capability_evidence(capability, EvidenceLevel.LIVE, detail,
+                                                 source="file extraction")
+            return
+        if isinstance(exc, MissingDependencyError):
+            evidence = EvidenceLevel.BLOCKED
+        elif isinstance(exc, (ExtractionError, UnsupportedFormatError)):
+            evidence = EvidenceLevel.PROBED
+        else:
+            evidence = EvidenceLevel.BROKEN
+        detail = result.error or "File processing failed"
+        registry.set_evidence("FILE_PROCESSOR", evidence, detail,
+                              source="file processing operation")
+        if subsystem:
+            registry.set_evidence(subsystem, evidence, detail, source="file extraction")
+        if capability:
+            registry.set_capability_evidence(capability, evidence, detail,
+                                             source="file extraction")
     
     def _action_transcribe(self, path: Path, metadata: FileMetadata, **kwargs) -> str:
         """Transcribe audio/video using Whisper"""
@@ -886,7 +979,58 @@ class UnsupportedFormatError(FileProcessorError):
     pass
 
 
+class MissingDependencyError(FileProcessorError):
+    """A parser or native prerequisite is unavailable."""
+    pass
+
+
+class ExtractionError(FileProcessorError):
+    """A supported parser could not extract the file."""
+    pass
+
+
+class NoExtractableTextError(ExtractionError):
+    """A valid document contains no embedded/selectable text."""
+    pass
+
+
 # ── Convenience Functions ─────────────────────────────────────────────
+
+def parser_availability() -> Dict[str, dict]:
+    """Return import-level parser truth without claiming extraction success."""
+    return {
+        "text": {"available": True, "dependency": "Python text I/O"},
+        "pdf": {"available": HAS_PYPDF2, "dependency": "PyPDF2"},
+        "docx": {"available": HAS_DOCX, "dependency": "python-docx"},
+        "xlsx": {"available": HAS_OPENPYXL, "dependency": "openpyxl"},
+        "image": {"available": HAS_PIL, "dependency": "Pillow"},
+    }
+
+
+def publish_parser_availability() -> Dict[str, dict]:
+    """Publish parser presence as CONFIGURED/BLOCKED, never PROBED or LIVE."""
+    availability = parser_availability()
+    registry = get_registry()
+    registry.set_evidence("FILE_PROCESSOR", EvidenceLevel.CONFIGURED,
+                          "File processor loaded; extraction not yet tested",
+                          source="file parser imports")
+    mapping = {
+        "text": ("FILE_TEXT_PARSER", "FILE_TEXT"),
+        "pdf": ("FILE_PDF_PARSER", "FILE_PDF"),
+        "docx": ("FILE_DOCX_PARSER", "FILE_DOCX"),
+        "xlsx": ("FILE_XLSX_PARSER", "FILE_XLSX"),
+        "image": ("FILE_IMAGE_PARSER", "FILE_IMAGE_OCR"),
+    }
+    for kind, info in availability.items():
+        subsystem, capability = mapping[kind]
+        evidence = EvidenceLevel.CONFIGURED if info["available"] else EvidenceLevel.BLOCKED
+        detail = (f"{info['dependency']} import available; extraction not yet tested"
+                  if info["available"] else f"{info['dependency']} is not installed")
+        registry.set_evidence(subsystem, evidence, detail, source="file parser imports")
+        registry.set_capability_evidence(capability, evidence, detail,
+                                         source="file parser imports")
+    return availability
+
 
 _default_processor: Optional[FileProcessor] = None
 _processor_lock = threading.Lock()

@@ -1,0 +1,15 @@
+MARK VII Stabilization Patch 01
+
+Purpose:
+- Reconcile stale qwen3-vl:4b release/config/docs references to authoritative jarvis:latest.
+- Correct local text and local vision provider assertions in release acceptance.
+- Correct boot configuration validation.
+
+This patch intentionally does NOT change brain routing, planner/executor/observer, memory, TTS, lifecycle, WPF, private state, or provider fallback behavior.
+
+Validation performed in audit environment:
+- Modified Python files compile successfully.
+- 17/21 focused Ollama/vision tests passed here.
+- 4 Ollama tests cannot execute normally in this Linux audit environment because the Ollama Python SDK is not installed; this is environment-specific and not treated as an Acer failure.
+
+Next gate after applying: run the focused model-contract tests on the Acer.

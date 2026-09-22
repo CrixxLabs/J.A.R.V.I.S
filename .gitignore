@@ -39,6 +39,7 @@ user_voice.npy
 user_voice_sample.wav
 user_face.pkl
 self_awareness_state.json
+self_model.json
 status_registry.json
 memory.json
 tasks.json
@@ -59,3 +60,22 @@ gcal_token.json
 # Runtime
 *.pid
 *.lock
+.pytest_cache/
+uploads/
+desktop/**/bin/
+desktop/**/obj/
+
+# Personal runtime profile/state (keep local; never publish)
+Data/personality/\n
+# MARK VII local stabilization/audit artifacts (never publish)
+_mark_vii_*_backup_*/
+*.pre_publish_fix.bak
+MARK_VII_*_SOURCE.txt
+APPLY_STABILIZATION_01.ps1
+MARK_VII_RELEASE_AUDIT_*/
+MARK_VII_RELEASE_AUDIT_*.zip
+
+# Local scratch files
+calc.html
+temp.html
+temp.py

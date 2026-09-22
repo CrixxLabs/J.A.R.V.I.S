@@ -54,7 +54,7 @@ _IGNORE_DIRS = {
 # Curated descriptions for known files (fills in what pure code inspection can't)
 _FILE_DESCRIPTIONS = {
     "jarvis.py":               "Main entry point, event loop, user interaction",
-    "brain.py":                "LLM router — Ollama (local) → Groq → OpenRouter fallback chain",
+    "brain.py":               "LLM router: NVIDIA, then Gemini, then local Ollama",
     "planner.py":              "Decision router — decides local action vs LLM call",
     "core.py":                 "Intent classification, spaCy NLP, Malayalam translation",
     "executor.py":             "Executes actions (open apps, web search, reminders, etc.)",
@@ -137,7 +137,7 @@ def _scan_core_files() -> dict:
 
     for entry in entries:
         # Skip ignored files
-        if entry in _IGNORE_FILES:
+        if entry in _IGNORE_FILES or entry.startswith(("test_", "add_", "fix_", "apply_", "update_")) or entry == "restore_run_smoke_test.py":
             continue
 
         full_path = os.path.join(BASE_DIR, entry)

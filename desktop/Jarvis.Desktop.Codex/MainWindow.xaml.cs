@@ -37,10 +37,10 @@ public partial class MainWindow : Window
         if (!_devOverride) _stateController.Set(signals.OperationalState);
         TaskQueueValue.Text = Math.Clamp(signals.TaskCount ?? 0, 0, 99).ToString("00");
         MemoryValue.Text = signals.MemoryUsage.HasValue ? $"{Math.Clamp(signals.MemoryUsage.Value, 0, 100):0.0}%" : "--";
-        VisionValue.Text = string.IsNullOrWhiteSpace(signals.VisionStatus) ? "UNWIRED" : signals.VisionStatus.ToUpperInvariant();
+        VisionValue.Text = string.IsNullOrWhiteSpace(signals.VisionStatus) ? "UNKNOWN" : signals.VisionStatus.ToUpperInvariant();
         UserTranscript.Text = signals.CurrentUserTranscript ?? "";
         JarvisResponse.Text = signals.CurrentJarvisResponse ?? "";
-        if (!string.IsNullOrWhiteSpace(signals.ProviderModel) && signals.OperationalState == JarvisState.Thinking)
+        if (!string.IsNullOrWhiteSpace(signals.ProviderModel))
             CognitiveStatus.Text = signals.ProviderModel.ToUpperInvariant();
         AnalysisHeader.Text = string.IsNullOrWhiteSpace(signals.CurrentAction)
             ? "SYSTEM ANALYSIS  /  RUNTIME TASK"
@@ -60,7 +60,16 @@ public partial class MainWindow : Window
         _runtimeConnected = connected;
         RuntimeOwnership.Text = connected ? "RUNTIME / LIVE" : "RUNTIME / WAITING";
         RuntimeOwnership.Foreground = new SolidColorBrush(connected ? Color.FromRgb(88, 174, 193) : Color.FromRgb(82, 105, 114));
-        if (!connected && !_devOverride) _stateController.Set(JarvisState.Dormant);
+        if (!connected && !_devOverride)
+        {
+            _stateController.Set(JarvisState.Dormant);
+            Core.SetInputAmplitude(0);
+            Core.SetSpeechAmplitude(0);
+            TaskQueueValue.Text = "--";
+            MemoryValue.Text = "UNKNOWN";
+            VisionValue.Text = "UNKNOWN";
+            CognitiveStatus.Text = "PROVIDER UNKNOWN";
+        }
     }
 
     private void State_OnChecked(object sender, RoutedEventArgs e)
@@ -72,6 +81,7 @@ public partial class MainWindow : Window
     private void DevOverride_OnChanged(object sender, RoutedEventArgs e)
     {
         _devOverride = DevOverrideToggle.IsChecked == true;
+        Core.DemoMode = _devOverride;
         if (_devOverride)
         {
             RuntimeOwnership.Text = "VISUAL / OVERRIDE";
@@ -104,7 +114,6 @@ public partial class MainWindow : Window
             JarvisState.Alert => "FAULT  ISOLATION",
             _ => "CORE  SYNCHRONIZED"
         };
-        TaskQueueValue.Text = state == JarvisState.Executing ? "03" : "00";
         var color = state switch
         {
             JarvisState.Executing => Color.FromRgb(239, 186, 83),
@@ -118,11 +127,18 @@ public partial class MainWindow : Window
             JarvisState.Alert => "●  ATTENTION REQUIRED",
             JarvisState.Dormant => "○  LOW POWER STATE",
             JarvisState.Executing => "●  ACTIVE EXECUTION",
-            _ => "●  SYSTEM NOMINAL"
+            _ => "●  RUNTIME CONNECTED"
         };
         SystemStatus.Foreground = new SolidColorBrush(Color.FromArgb(190, color.R, color.G, color.B));
         VoiceStatus.Text = state switch { JarvisState.Listening => "RECEIVING", JarvisState.Speaking => "OUTPUT", JarvisState.Dormant => "QUIET", _ => "STANDBY" };
-        CognitiveStatus.Text = state switch { JarvisState.Thinking => "ROUTING", JarvisState.Alert => "ISOLATING", JarvisState.Dormant => "PASSIVE", _ => "ONLINE" };
+        CognitiveStatus.Text = state switch
+        {
+            JarvisState.Thinking => "ROUTING",
+            JarvisState.Alert => "ISOLATING",
+            JarvisState.Dormant => "PASSIVE",
+            _ when !string.IsNullOrWhiteSpace(_latestRuntimeSignals?.ProviderModel) => _latestRuntimeSignals!.ProviderModel!.ToUpperInvariant(),
+            _ => "PROVIDER UNKNOWN"
+        };
         VisionValue.Foreground = new SolidColorBrush(state == JarvisState.Alert ? Color.FromRgb(221, 91, 97) : Color.FromRgb(215, 234, 240));
         TaskQueueValue.Foreground = new SolidColorBrush(state == JarvisState.Executing ? Color.FromRgb(239, 186, 83) : Color.FromRgb(215, 234, 240));
         // Peripheral telemetry behaves as one nervous system: only the relevant path wakes.
@@ -158,8 +174,6 @@ public partial class MainWindow : Window
             Fade(UserExchange, state == JarvisState.Executing ? .48 : .38, 380);
             Fade(JarvisExchange, state == JarvisState.Executing ? .9 : .58, 380);
         }
-        var width = state switch { JarvisState.Thinking => 132, JarvisState.Executing => 142, JarvisState.Dormant => 34, _ => 99 };
-        CoreLoadBar.BeginAnimation(WidthProperty, new DoubleAnimation(width, TimeSpan.FromMilliseconds(550)) { EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut } });
     }
 
     private static void AnimateElement(UIElement element, double opacity, double y, int milliseconds)

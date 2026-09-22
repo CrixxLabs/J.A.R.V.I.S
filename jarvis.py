@@ -12,14 +12,41 @@ import tempfile
 import threading
 import time
 
-import edge_tts
-import pygame
-import pyautogui
+_runtime_instance_guard = None
+if __name__ == "__main__":
+    from runtime_instance import DuplicateRuntimeError, acquire_runtime_guard
+
+    try:
+        _runtime_instance_guard = acquire_runtime_guard()
+    except DuplicateRuntimeError as exc:
+        print(f"[Startup] Refusing duplicate runtime: {exc}")
+        raise SystemExit(2)
+
+try:
+    import edge_tts
+except Exception as _edge_tts_err:
+    edge_tts = None
+    print(f"[jarvis] edge_tts unavailable: {_edge_tts_err}")
+try:
+    import pygame
+except Exception as _pygame_err:
+    pygame = None
+    print(f"[jarvis] pygame unavailable: {_pygame_err}")
+try:
+    import pyautogui
+except Exception as _pyautogui_err:
+    pyautogui = None
+    print(f"[jarvis] pyautogui unavailable: {_pyautogui_err}")
 import speech_recognition as sr
-import win32com.client
+try:
+    import win32com.client as _win32com_client
+except Exception as _win32com_err:
+    _win32com_client = None
+    print(f"[jarvis] SAPI unavailable: {_win32com_err}")
 from dotenv import load_dotenv
 
 import core
+import brain
 import executor
 import memory
 import observer
@@ -29,6 +56,7 @@ import conversation_manager
 import proactive_scheduler
 import listener
 import runtime_visuals
+from lifecycle import LifecycleManager
 from memory import log_failure, log_usage
 from session_logger import log_event, save_session
 
@@ -46,13 +74,13 @@ from status_registry import SubsystemState, get_registry
 import error_handler
 import self_model
 
-# ── Optional: F5-TTS module ───────────────────────────────────────────────────
+# ── Optional: Pocket-TTS persistent voice module ───────────────────────────────
 try:
     import jarvis_tts
     _JARVIS_TTS_AVAILABLE = True
 except Exception as _tts_err:
     _JARVIS_TTS_AVAILABLE = False
-    print(f"[jarvis] F5-TTS module not available: {_tts_err}")
+    print(f"[jarvis] Pocket-TTS module not available: {_tts_err}")
 
 # ── self-awareness module ────────────────────────────────────────────────
 try:
@@ -65,11 +93,30 @@ except Exception as _sa_err:
 load_dotenv()
 
 VOICE = "en-US-GuyNeural"
-USE_F5_TTS = os.getenv("USE_F5_TTS", "false").lower() == "true"
+USE_POCKET_TTS = os.getenv("USE_POCKET_TTS", "true").lower() == "true"
+# Compatibility alias retained for older tests/config while F5 is retired.
+USE_F5_TTS = USE_POCKET_TTS
+
+
+def _ui_press(key: str) -> bool:
+    if pyautogui is None:
+        return False
+    pyautogui.press(key)
+    return True
+
+def _ui_scroll(amount: int) -> bool:
+    if pyautogui is None:
+        return False
+    pyautogui.scroll(amount)
+    return True
 
 stop_speaking = False
 is_speaking = False
 _startup_done = False
+_proactive_stop = threading.Event()
+_proactive_thread = None
+_lifecycle = None
+_startup_lock = threading.RLock()
 ACTIVE = False
 last_active = time.time()
 
@@ -78,6 +125,8 @@ _pending_save_login = None
 
 def _ensure_mixer():
     """Ensure pygame mixer is ready."""
+    if pygame is None:
+        return False
     try:
         if not pygame.mixer.get_init():
             pygame.mixer.init()
@@ -86,9 +135,6 @@ def _ensure_mixer():
     except Exception as exc:
         print(f"[DEBUG][audio] mixer init failed: {exc}")
         return False
-
-
-_ensure_mixer()
 
 
 _STRIP_PHRASES = [
@@ -268,8 +314,10 @@ def speak(text):
     stop_speaking = False
     is_speaking = True
 
+    # Do not arm interruption while TTS audio is still being generated.
+    # The watcher is started only when playback actually begins, otherwise
+    # ambient noise during network/TTS latency can pre-arm an interruption.
     listener.reset_interrupt()
-    listener.start_interrupt_watcher()
 
     registry = get_registry()
 
@@ -279,6 +327,8 @@ def speak(text):
             if not _ensure_mixer():
                 return
             pygame.mixer.music.load(path)
+            listener.reset_interrupt()
+            listener.start_interrupt_watcher()
             pygame.mixer.music.play()
 
             while pygame.mixer.music.get_busy():
@@ -299,29 +349,40 @@ def speak(text):
             is_speaking = False
             listener.stop_interrupt_watcher()
 
-    # F5-TTS Option
-    if USE_F5_TTS and _JARVIS_TTS_AVAILABLE:
+    # Pocket-TTS persistent CUDA streaming option.
+    if USE_POCKET_TTS and _JARVIS_TTS_AVAILABLE:
         try:
-            if hasattr(jarvis_tts, "generate_speech_wav") and callable(getattr(jarvis_tts, "generate_speech_wav")):
-                wav_path = jarvis_tts.generate_speech_wav(final_text)
-                if wav_path:
-                    registry.set_status("VOICE_TTS", SubsystemState.READY, "F5-TTS active")
-                    _play_audio_file(wav_path)
-                    return
-            elif hasattr(jarvis_tts, "speak_jarvis") and callable(getattr(jarvis_tts, "speak_jarvis")):
-                registry.set_status("VOICE_TTS", SubsystemState.DEGRADED, "F5-TTS direct playback (no interrupt)")
-                jarvis_tts.speak_jarvis(final_text)
+            def _pocket_playback_started():
+                listener.reset_interrupt()
+                listener.start_interrupt_watcher()
+
+            def _pocket_should_stop():
+                return bool(stop_speaking or listener.check_interrupt())
+
+            if jarvis_tts.stream_speech(
+                final_text,
+                should_stop=_pocket_should_stop,
+                on_playback_start=_pocket_playback_started,
+            ):
+                registry.set_status("VOICE_TTS", SubsystemState.READY,
+                                    "Pocket-TTS CUDA streaming active")
                 is_speaking = False
                 listener.stop_interrupt_watcher()
                 return
         except Exception as exc:
-            error_handler.log_and_demote("VOICE_TTS", exc, "F5-TTS speak pipeline", SubsystemState.DEGRADED)
+            error_handler.log_and_demote(
+                "VOICE_TTS", exc, "Pocket-TTS streaming pipeline", SubsystemState.DEGRADED
+            )
+        finally:
+            listener.stop_interrupt_watcher()
 
     # Edge-TTS Option
     try:
         async def _tts():
             tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
             tmp.close()
+            if edge_tts is None:
+                raise RuntimeError("edge_tts is unavailable")
             communicator = edge_tts.Communicate(final_text, VOICE, rate="+5%")
             await communicator.save(tmp.name)
             return tmp.name
@@ -336,8 +397,17 @@ def speak(text):
 
         # SAPI fallback
         try:
-            speaker = win32com.client.Dispatch("SAPI.SpVoice")
-            speaker.Speak(final_text)
+            if _win32com_client is None:
+                raise RuntimeError("Windows SAPI is unavailable")
+            speaker = _win32com_client.Dispatch("SAPI.SpVoice")
+            listener.reset_interrupt()
+            listener.start_interrupt_watcher()
+            speaker.Speak(final_text, 1)  # SVSFlagsAsync
+            while not speaker.WaitUntilDone(50):
+                if stop_speaking or listener.check_interrupt():
+                    speaker.Speak("", 3)  # async + purge queued speech
+                    print("[Speak] Interrupted by user")
+                    break
             registry.set_status("VOICE_TTS", SubsystemState.DEGRADED, "SAPI fallback OK")
         except Exception as fallback_exc:
             print(f"[DEBUG][speak] SAPI fallback failed: {fallback_exc}")
@@ -592,31 +662,31 @@ def handle_fast_command(command):
         speak(datetime.datetime.now().strftime("%A, %d %B %Y."))
         return True
     if "volume up" in cmd:
-        pyautogui.press("volumeup")
+        _ui_press("volumeup")
         return True
     if "volume down" in cmd:
-        pyautogui.press("volumedown")
+        _ui_press("volumedown")
         return True
     if "mute" in cmd:
-        pyautogui.press("volumemute")
+        _ui_press("volumemute")
         return True
     if any(item in cmd for item in ("pause", "resume")) and any(item in cmd for item in ("music", "song", "video", "this")):
-        pyautogui.press("space")
+        _ui_press("space")
         return True
     if "play" in cmd and any(item in cmd for item in ("this", "video")) and not any(item in cmd for item in ("song", "music", "track")):
-        pyautogui.press("space")
+        _ui_press("space")
         return True
     if any(item in cmd for item in ("next song", "next track", "skip this")):
-        pyautogui.press("nexttrack")
+        _ui_press("nexttrack")
         return True
     if any(item in cmd for item in ("previous song", "previous track")):
-        pyautogui.press("prevtrack")
+        _ui_press("prevtrack")
         return True
     if "scroll down" in cmd:
-        pyautogui.scroll(-500)
+        _ui_scroll(-500)
         return True
     if "scroll up" in cmd:
-        pyautogui.scroll(500)
+        _ui_scroll(500)
         return True
 
     if (
@@ -640,8 +710,9 @@ def handle_fast_command(command):
 
 
 def proactive_loop():
-    time.sleep(30)
-    while True:
+    if _proactive_stop.wait(30):
+        return
+    while not _proactive_stop.is_set():
         try:
             if ACTIVE:
                 should_speak, message = planner.should_speak_proactively()
@@ -650,7 +721,7 @@ def proactive_loop():
                     memory.log_activity("proactive", message[:60])
         except Exception as exc:
             print(f"[DEBUG][proactive] {exc}")
-        time.sleep(60)
+        _proactive_stop.wait(60)
 
 
 def _init_face_recognition():
@@ -662,7 +733,7 @@ def _init_face_recognition():
             face_module.start_face_watcher()
             _face_rec_available = True
             print("[DEBUG][face] face recognition active")
-            get_registry().set_status("FACE_RECOGNITION", SubsystemState.READY, "Face watcher online")
+            get_registry().set_status("FACE_RECOGNITION", SubsystemState.READY, "Face watcher process started")
         else:
             print("[DEBUG][face] no face registered")
             get_registry().set_status("FACE_RECOGNITION", SubsystemState.DISABLED, "No face registered")
@@ -883,50 +954,132 @@ def _run_boot_syntax_scan():
     threading.Thread(target=_scan, daemon=True).start()
 
 
-def startup():
-    global _startup_done
-    if _startup_done:
-        return
-    _startup_done = True
+def _stop_proactive_loop():
+    _proactive_stop.set()
+    if _proactive_thread and _proactive_thread.is_alive():
+        _proactive_thread.join(timeout=3.0)
 
-    runtime_visuals.start_bridge()
-    runtime_visuals.set_base_state("dormant")
 
-    print("[Startup] Calibrating audio listener...")
-    listener.calibrate_ambient_noise()
+def _stop_face_watcher():
+    global _face_rec_available
+    if _face_module is not None:
+        _face_module.stop_face_watcher()
+    _face_rec_available = False
 
-    observer.start_observers()
-    executor.init(speak_fn=speak, ask_fn=planner.ask)
-    tasks.init(speak_fn=speak, action_fn=lambda action: executor.execute(action))
 
-    # Start async task queue (MARK VII Phase 1)
-    if _TASK_QUEUE_AVAILABLE:
-        try:
-            asyncio.run(init_task_queue(max_workers=4, use_dedicated_thread=True))
-            print("[Startup] Task queue initialized with 4 workers")
-        except Exception as exc:
-            print(f"[DEBUG][startup] task queue init failed: {exc}")
-
-    threading.Thread(target=proactive_loop, daemon=True).start()
-    threading.Thread(target=_init_face_recognition, daemon=True).start()
-
-    proactive_scheduler.start(
-        speak_fn      = speak,
-        active_getter = lambda: ACTIVE,
-    )
-
-    speak("Systems up.")
-    memory.log_activity("startup", "Jarvis online")
-    memory.update_daily_stats("sessions")
-
+def _stop_voice_resources():
+    """Release voice interruption, playback, and the owned Pocket-TTS worker."""
+    global is_speaking, stop_speaking
+    stop_speaking = True
+    listener.stop_interrupt_watcher()
     try:
-        import evolver
-        evolver.start_evolver(interval_hours=6)
+        if _JARVIS_TTS_AVAILABLE and hasattr(jarvis_tts, "shutdown_engine"):
+            jarvis_tts.shutdown_engine()
     except Exception as exc:
-        print(f"[DEBUG][startup] evolver not started: {exc}")
+        print(f"[DEBUG][shutdown] Pocket-TTS cleanup failed: {exc}")
+    try:
+        if pygame is not None and pygame.mixer.get_init():
+            pygame.mixer.music.stop()
+            pygame.mixer.quit()
+    except Exception as exc:
+        print(f"[DEBUG][shutdown] audio cleanup failed: {exc}")
+    is_speaking = False
+
+def _start_task_queue():
+    asyncio.run(init_task_queue(max_workers=4, use_dedicated_thread=True))
+
+
+def _stop_task_queue():
+    asyncio.run(shutdown_task_queue(timeout=10.0))
+
+
+def _start_proactive_loop():
+    global _proactive_thread
+    if _proactive_thread and _proactive_thread.is_alive():
+        return
+    _proactive_stop.clear()
+    _proactive_thread = threading.Thread(
+        target=proactive_loop, daemon=True, name="jarvis-proactive-loop"
+    )
+    _proactive_thread.start()
+
+
+def _start_evolver():
+    import evolver
+    evolver.start_evolver(interval_hours=6)
+
+
+def _stop_evolver():
+    import evolver
+    evolver.stop_evolver()
+
+
+def _publish_vision_status():
+    """Publish only current, observed vision evidence to the native client."""
+    try:
+        import vision
+        statuses = vision.get_vision_status()
+        live = [name.upper() for name in ("screen_capture", "gemini", "tesseract_ocr")
+                if statuses[name].get("evidence") == "LIVE" and statuses[name].get("current")]
+        runtime_visuals.update(vision_status=" / ".join(live) if live else "UNKNOWN")
+    except Exception:
+        runtime_visuals.update(vision_status="UNKNOWN")
+
+
+def startup() -> bool:
+    global _startup_done, _lifecycle, _proactive_thread
+    with _startup_lock:
+        if _startup_done:
+            return bool(_lifecycle and _lifecycle.is_started())
+        _startup_done = True
+        _lifecycle = LifecycleManager(component_stop_timeout=5.0, total_shutdown_timeout=25.0)
+
+        def start_visual_bridge():
+            runtime_visuals.start_bridge()
+            runtime_visuals.set_base_state("dormant")
+            _publish_vision_status()
+
+        def start_voice():
+            print("[Startup] Calibrating audio listener...")
+            listener.calibrate_ambient_noise()
+            if USE_POCKET_TTS and _JARVIS_TTS_AVAILABLE:
+                # Pay model/CUDA/voice-state startup cost once.
+                # Failure is non-fatal: speak() retains Edge-TTS -> SAPI fallback.
+                jarvis_tts.start_engine()
+
+        executor.init(speak_fn=speak, ask_fn=planner.ask)
+        _lifecycle.register("RUNTIME_SSE", start_visual_bridge, runtime_visuals.stop_bridge, priority=0)
+        _lifecycle.register("VOICE_RESOURCES", start_voice, _stop_voice_resources, priority=10)
+        _lifecycle.register("OBSERVER", observer.start_observers, observer.stop_observers, priority=20)
+        _lifecycle.register(
+            "TASKS", lambda: tasks.init(speak_fn=speak, action_fn=lambda action: executor.execute(action)),
+            tasks.stop_tasks, priority=30,
+        )
+        if _TASK_QUEUE_AVAILABLE:
+            _lifecycle.register("TASK_QUEUE", _start_task_queue, _stop_task_queue,
+                                priority=40, stop_timeout=12.0)
+        _lifecycle.register("PROACTIVE_LOOP", _start_proactive_loop, _stop_proactive_loop, priority=50)
+        _lifecycle.register("FACE_RECOGNITION", _init_face_recognition, _stop_face_watcher, priority=60)
+        _lifecycle.register(
+            "PROACTIVE_SCHEDULER",
+            lambda: proactive_scheduler.start(speak_fn=speak, active_getter=lambda: ACTIVE),
+            proactive_scheduler.stop_scheduler, priority=70,
+        )
+        _lifecycle.register("EVOLVER", _start_evolver, _stop_evolver, priority=80)
+        _lifecycle.setup_signal_handlers()
+
+        if not _lifecycle.start_all():
+            _lifecycle.restore_signal_handlers()
+            _startup_done = False
+            return False
+
+    speak("Runtime started. Subsystem availability depends on current checks.")
+    memory.log_activity("startup", "Jarvis runtime started; subsystem status is evidence-based")
+    memory.update_daily_stats("sessions")
 
     _run_boot_syntax_scan()
     _run_self_awareness_scan()
+    return True
 
 
 def _handle_follow_up(command):
@@ -945,13 +1098,13 @@ def _handle_follow_up(command):
 
 
 if __name__ == "__main__":
-    startup()
-
     try:
+        if not startup():
+            raise RuntimeError("JARVIS startup failed; see lifecycle diagnostics above")
         consecutive_empty = 0
         MAX_EMPTY_BEFORE_SLEEP = 5
 
-        while True:
+        while not (_lifecycle and _lifecycle.is_shutting_down()):
             runtime_visuals.set_base_state("idle" if ACTIVE else "dormant")
             if not ACTIVE:
                 consecutive_empty = 0
@@ -1057,8 +1210,10 @@ if __name__ == "__main__":
 
             try:
                 print(f"[DEBUG][planner] input: {command}")
+                brain.reset_last_provider()
                 action, spoken_response, _model_type = planner.ask(command)
-                runtime_visuals.update(provider_model=_model_type)
+                runtime_visuals.update(provider_model=brain.get_last_provider_model())
+                _publish_vision_status()
                 log_event("planner_output", {"action": action, "response": spoken_response})
                 print(f"[DEBUG][planner] output: action={action}, response={spoken_response}")
 
@@ -1088,12 +1243,11 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         pass
     finally:
-        if _TASK_QUEUE_AVAILABLE:
-            try:
-                asyncio.run(shutdown_task_queue(timeout=10.0))
-                print("[Shutdown] Task queue stopped")
-            except Exception as exc:
-                print(f"[DEBUG][shutdown] task queue shutdown error: {exc}")
         save_session()
         runtime_visuals.set_base_state("dormant")
-        runtime_visuals.stop_bridge()
+        if _lifecycle:
+            _lifecycle.shutdown("Runtime exit")
+            _lifecycle.restore_signal_handlers()
+        _startup_done = False
+        if _runtime_instance_guard is not None:
+            _runtime_instance_guard.release()

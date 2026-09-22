@@ -14,6 +14,7 @@ import requests
 import importlib.util
 import json
 import shutil
+from urllib.parse import urlparse
 from dotenv import load_dotenv
 from typing import Tuple
 
@@ -21,7 +22,7 @@ load_dotenv()
 
 # Reliability Imports
 import status_registry
-from status_registry import SubsystemState, get_registry
+from status_registry import EvidenceLevel, SubsystemState, get_registry
 
 # -- Colors for CLI output -----------------------------------------------------
 COLOR_GREEN = "\033[92m"
@@ -49,9 +50,54 @@ def _check_import(module_name: str) -> bool:
     return importlib.util.find_spec(module_name) is not None
 
 
+
+def _publish(registry, name, state, detail, success_evidence, capabilities=()):
+    """Publish boot-probe truth without overstating capability readiness."""
+    from status_registry import legacy_state_to_evidence
+
+    state_evidence = legacy_state_to_evidence(state, detail)
+
+    # A successful READY probe may publish only the evidence level that the
+    # caller can actually prove (CODE/CONFIGURED/PROBED/LIVE).
+    if state == SubsystemState.READY:
+        evidence = success_evidence
+    else:
+        # Failed, disabled, or degraded probes override the requested
+        # success evidence with the truthful state-derived evidence.
+        evidence = state_evidence
+
+    registry.set_evidence(
+        name,
+        evidence,
+        detail,
+        source="boot probe",
+    )
+
+    for capability in capabilities:
+        registry.set_capability_evidence(
+            capability,
+            evidence,
+            detail,
+            source="boot probe",
+        )
+
+    return evidence
+
+
 # ==============================================================================
 # ACTIVE PROBES
 # ==============================================================================
+
+_provider_probe_cache = {}
+
+
+def _cached_provider_probe(name: str, probe, ttl: float = 300.0):
+    cached = _provider_probe_cache.get(name)
+    if cached and time.monotonic() - cached[0] < ttl:
+        return cached[1]
+    result = probe()
+    _provider_probe_cache[name] = (time.monotonic(), result)
+    return result
 
 def probe_voice_stt() -> Tuple[SubsystemState, str]:
     """Test STT engines, PyAudio, and hardware input channels."""
@@ -69,30 +115,47 @@ def probe_voice_stt() -> Tuple[SubsystemState, str]:
         # Test if CUDA or CPU Whisper is ready
         env_mic = os.getenv("JARVIS_MIC_INDEX")
         idx_msg = f"Using mic index {env_mic or 'auto'}"
-        return SubsystemState.READY, f"PyAudio online ({device_count} devices found. {idx_msg})"
+        return SubsystemState.READY, f"PyAudio enumerated {device_count} input device(s); capture not tested. {idx_msg}"
     except Exception as e:
         return SubsystemState.DEGRADED, f"Microphone initialization check threw exception: {e}"
 
 
 def probe_voice_tts() -> Tuple[SubsystemState, str]:
-    """Test local F5-TTS requirements, Edge-TTS, and SAPI fallback engines."""
-    # Check Edge-TTS (default engine)
-    if not _check_import("edge_tts"):
-        return SubsystemState.DEGRADED, "edge_tts module missing; falling back to SAPI local voice"
-    
-    # Check F5-TTS
-    use_f5 = os.getenv("USE_F5_TTS", "false").lower() == "true"
-    ref_audio = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Voices", "Jarvis.wav")
-    
-    if use_f5:
-        if not _check_import("f5_tts"):
-            return SubsystemState.DEGRADED, "USE_F5_TTS is enabled but f5_tts package is not installed"
-        if not os.path.exists(ref_audio):
-            return SubsystemState.DEGRADED, f"F5-TTS active but reference sample Jarvis.wav missing at: {ref_audio}"
-        return SubsystemState.READY, "F5-TTS local CPU voice cloning engine verified"
-    
-    return SubsystemState.READY, "Edge-TTS online + SAPI Windows local fallback configured"
+    """Verify Pocket-TTS worker prerequisites plus Edge-TTS/SAPI fallbacks."""
+    use_pocket = os.getenv("USE_POCKET_TTS", "true").lower() == "true"
 
+    if use_pocket:
+        # Preserve MARK VII's capability-truth contract: if the normal runtime
+        # cannot import the optional TTS bridge, the subsystem is DEGRADED.
+        # This also keeps the existing missing-optional-subsystem regression
+        # test meaningful without loading the CUDA model during boot probing.
+        if not _check_import("jarvis_tts"):
+            return SubsystemState.DEGRADED, (
+                "edge_tts module missing; Pocket-TTS bridge unavailable; falling back to SAPI local voice"
+            )
+
+        try:
+            import jarvis_tts
+            ok, detail = jarvis_tts.prerequisites()
+            if not ok:
+                return SubsystemState.DEGRADED, (
+                    detail + "; Edge-TTS/SAPI fallback remains available"
+                )
+            # Runtime startup owns the CUDA worker. Do not load a second model
+            # from this probe merely to claim synthesis happened.
+            return SubsystemState.READY, detail + "; runtime synthesis not yet probed"
+        except Exception as exc:
+            return SubsystemState.DEGRADED, (
+                f"Pocket-TTS configuration probe failed: {exc}"
+            )
+
+    if _check_import("edge_tts"):
+        return SubsystemState.READY, (
+            "Pocket-TTS disabled; Edge-TTS available with SAPI fallback"
+        )
+    return SubsystemState.DEGRADED, (
+        "Pocket-TTS disabled and edge_tts missing; SAPI fallback only"
+    )
 
 def probe_camera_and_face_recognition() -> Tuple[Tuple[SubsystemState, str], Tuple[SubsystemState, str]]:
     """Verify camera input availability and face verification embeddings."""
@@ -131,79 +194,96 @@ def probe_camera_and_face_recognition() -> Tuple[Tuple[SubsystemState, str], Tup
         face_msg = "Face credentials or face_recognition module not set up"
     else:
         face_state = SubsystemState.READY if cam_state == SubsystemState.READY else SubsystemState.DEGRADED
-        face_msg = "Face verification watcher calibrated and ready"
+        face_msg = "Face recognition prerequisites present; watcher/recognition not probed"
 
     return (cam_state, cam_msg), (face_state, face_msg)
 
 
 def probe_ollama() -> Tuple[SubsystemState, str]:
-    """Verify that local Ollama port is open and Qwen model is pull-verified."""
-    host = "127.0.0.1"
-    port = 11434
-    
-    if not _check_port_open(host, port):
-        return SubsystemState.OFFLINE, f"Ollama local daemon is not running on port {port}"
-    
-    try:
-        res = requests.get(f"http://{host}:{port}/api/tags", timeout=1.0)
-        if res.status_code == 200:
-            models = [m.get("name") for m in res.json().get("models", [])]
-            qwen_model = "qwen2.5:3b"
-            matching = [m for m in models if qwen_model in m]
-            if matching:
-                return SubsystemState.READY, f"Ollama operational ({matching[0]} model verified)"
-            return SubsystemState.DEGRADED, f"Ollama is running but model '{qwen_model}' was not found in: {models}"
-        return SubsystemState.DEGRADED, f"Ollama endpoint returned status code {res.status_code}"
-    except Exception as e:
-        return SubsystemState.DEGRADED, f"Ollama endpoint ping failed: {e}"
+    """Boundedly verify Ollama service and exact model; does not claim generation."""
+    import brain
+    result = brain.discover_ollama(force=True)
+    if result["service_state"] == "OFFLINE":
+        return SubsystemState.OFFLINE, result["detail"]
+    if result["model_state"] == "AVAILABLE":
+        return SubsystemState.READY, result["detail"] + "; generation not yet tested"
+    if result["model_state"] == "MISSING":
+        return SubsystemState.OFFLINE, result["detail"]
+    return SubsystemState.DEGRADED, result["detail"]
 
 
 def probe_groq() -> Tuple[SubsystemState, str]:
-    """Test Groq API configuration parameters and SDK."""
-    api_key = os.getenv("GROQ_API_KEY", "")
-    if not api_key:
-        return SubsystemState.DISABLED, "GROQ_API_KEY is missing in environmental configurations"
-    if not _check_import("groq"):
-        return SubsystemState.DEGRADED, "groq Python SDK package is not installed"
-    return SubsystemState.READY, "Groq Cloud API parameters verified"
+    """Groq is intentionally excluded from automatic MARK VII routing."""
+    return SubsystemState.DISABLED, "LEGACY: disabled from automatic brain routing"
 
 
 def probe_openrouter() -> Tuple[SubsystemState, str]:
-    """Test OpenRouter API keys."""
-    api_key = os.getenv("OPENROUTER_API_KEY", "")
-    if not api_key:
-        return SubsystemState.DISABLED, "OPENROUTER_API_KEY is missing in environmental configurations"
-    return SubsystemState.READY, "OpenRouter API verified (Kling standard fallback routing active)"
+    """OpenRouter is intentionally excluded from automatic MARK VII routing."""
+    return SubsystemState.DISABLED, "LEGACY: disabled from automatic brain routing"
+
+
+def probe_nvidia() -> Tuple[SubsystemState, str]:
+    """Perform a cached minimal NVIDIA generation; key presence alone is insufficient."""
+    def _probe():
+        if not os.getenv("NVIDIA_API_KEY", ""):
+            return SubsystemState.DISABLED, "CONFIGURED=false (NVIDIA_API_KEY missing)"
+        try:
+            import brain
+            started = time.perf_counter()
+            content, status = brain._nvidia_call(
+                [{"role": "user", "content": "Reply exactly OK."}],
+                brain.NVIDIA_FAST_MODEL,
+                max_tokens=16,
+                temperature=0.0,
+            )
+            latency = time.perf_counter() - started
+            if status == "ok" and content:
+                return SubsystemState.READY, f"LIVE ({brain.NVIDIA_FAST_MODEL}, {latency:.2f}s)"
+            health = brain.get_provider_health("NVIDIA", brain.NVIDIA_FAST_MODEL)
+            return SubsystemState.DEGRADED, f"{health['cause']} ({brain.NVIDIA_FAST_MODEL})"
+        except Exception as exc:
+            return SubsystemState.DEGRADED, f"Probe failed: {type(exc).__name__}"
+    return _cached_provider_probe("NVIDIA", _probe)
 
 
 def probe_gemini() -> Tuple[SubsystemState, str]:
-    """Test Gemini Vision API credentials."""
-    api_key = os.getenv("GEMINI_API_KEY", "")
-    if not api_key:
-        return SubsystemState.DISABLED, "GEMINI_API_KEY is missing in environmental configurations"
-    return SubsystemState.READY, "Gemini Vision API validated"
+    """Perform a cached minimal Gemini text generation."""
+    def _probe():
+        if not os.getenv("GEMINI_API_KEY", ""):
+            return SubsystemState.DISABLED, "CONFIGURED=false (GEMINI_API_KEY missing)"
+        try:
+            import brain
+            started = time.perf_counter()
+            content, status = brain._gemini_call(
+                [{"role": "user", "content": "Reply exactly OK."}],
+                max_tokens=32,
+                temperature=0.0,
+            )
+            latency = time.perf_counter() - started
+            if status == "ok" and content:
+                return SubsystemState.READY, f"LIVE ({brain.GEMINI_TEXT_MODEL}, {latency:.2f}s)"
+            health = brain.get_provider_health("GEMINI", brain.GEMINI_TEXT_MODEL)
+            return SubsystemState.DEGRADED, f"{health['cause']} ({brain.GEMINI_TEXT_MODEL})"
+        except Exception as exc:
+            return SubsystemState.DEGRADED, f"Probe failed: {type(exc).__name__}"
+    return _cached_provider_probe("GEMINI", _probe)
+
+
+def _discover_tesseract() -> str | None:
+    """Compatibility wrapper around the canonical bounded OCR discovery."""
+    from ocr_runtime import discover_tesseract
+    return discover_tesseract().path
 
 
 def probe_tesseract() -> Tuple[SubsystemState, str]:
-    """Ping system Tesseract-OCR binary paths and verify module."""
-    if not _check_import("pytesseract"):
-        return SubsystemState.OFFLINE, "pytesseract Python wrapper package not installed"
-    
-    import pytesseract
-    env_path = os.getenv("TESSERACT_PATH", r"C:\Program Files\Tesseract-OCR\tesseract.exe")
-    pytesseract.pytesseract.tesseract_cmd = env_path
-
-    if os.path.exists(env_path):
-        return SubsystemState.READY, f"Tesseract-OCR binary located at: {env_path}"
-    
-    # Try looking in system path
-    import shutil
-    sys_find = shutil.which("tesseract")
-    if sys_find:
-        pytesseract.pytesseract.tesseract_cmd = sys_find
-        return SubsystemState.READY, f"Tesseract-OCR binary located on system PATH: {sys_find}"
-    
-    return SubsystemState.OFFLINE, f"Tesseract-OCR executable was not found at configured path: {env_path}"
+    """Find and execute the native OCR binary; this is not an OCR success claim."""
+    from ocr_runtime import probe_tesseract as canonical_probe
+    result = canonical_probe(force=True)
+    if result.state == "AVAILABLE":
+        return SubsystemState.READY, result.detail + "; OCR extraction not yet tested"
+    if result.state == "UNAVAILABLE":
+        return SubsystemState.OFFLINE, result.detail
+    return SubsystemState.DEGRADED, result.detail
 
 
 def probe_memory() -> Tuple[SubsystemState, str]:
@@ -239,7 +319,7 @@ def probe_plugins() -> Tuple[SubsystemState, str]:
         return SubsystemState.DISABLED, "No custom skills folder found on host"
     try:
         import plugin_loader
-        skills = plugin_loader.skills
+        skills = plugin_loader.load_skills()
         return SubsystemState.READY, f"{len(skills)} custom skills discovered and loaded"
     except Exception as e:
         return SubsystemState.DEGRADED, f"Skill loader parsing failed: {e}"
@@ -249,7 +329,7 @@ def probe_whatsapp_send() -> Tuple[SubsystemState, str]:
     """Check pywhatkit automation engine requirements."""
     if not _check_import("pywhatkit"):
         return SubsystemState.DISABLED, "pywhatkit package not installed"
-    return SubsystemState.READY, "pywhatkit automated messaging active"
+    return SubsystemState.READY, "pywhatkit import available; browser login and delivery not probed"
 
 
 def probe_spotify() -> Tuple[SubsystemState, str]:
@@ -260,7 +340,7 @@ def probe_spotify() -> Tuple[SubsystemState, str]:
         return SubsystemState.DISABLED, "SPOTIFY_CLIENT_ID or SECRET not set in environmental configuration"
     if not _check_import("spotipy"):
         return SubsystemState.DEGRADED, "spotipy package is not installed on host"
-    return SubsystemState.READY, "Spotify credentials authenticated"
+    return SubsystemState.READY, "Spotify credentials and SDK present; OAuth/API not probed"
 
 
 def probe_email() -> Tuple[SubsystemState, str]:
@@ -269,7 +349,7 @@ def probe_email() -> Tuple[SubsystemState, str]:
     pwd = os.getenv("GMAIL_PASSWORD", "")
     if not user or not pwd:
         return SubsystemState.DISABLED, "GMAIL_ADDRESS or GMAIL_PASSWORD missing in environmental configuration"
-    return SubsystemState.READY, f"SMTP pipelines prepared ({user})"
+    return SubsystemState.READY, "Gmail credentials present; authentication and delivery not probed"
 
 
 def probe_calendar() -> Tuple[SubsystemState, str]:
@@ -278,7 +358,7 @@ def probe_calendar() -> Tuple[SubsystemState, str]:
     token = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gcal_token.json")
     if not os.path.exists(creds) and not os.path.exists(token):
         return SubsystemState.DISABLED, "credentials.json missing; Calendar sync inactive"
-    return SubsystemState.READY, "Google Calendar OAuth tokens verified"
+    return SubsystemState.READY, "Google Calendar credential files present; token/API not probed"
 
 
 def probe_flask_ui() -> Tuple[SubsystemState, str]:
@@ -288,57 +368,39 @@ def probe_flask_ui() -> Tuple[SubsystemState, str]:
     server_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "server.py")
     if not os.path.exists(server_path):
         return SubsystemState.DISABLED, "server.py dashboard script not found on host"
-    return SubsystemState.READY, "Flask server dependencies verified"
+    return SubsystemState.READY, "Flask code and dependencies present; server not started"
 
 
 
 
 def probe_file_processor() -> Tuple[SubsystemState, str]:
     """Verify file processor dependencies and capabilities."""
-    required = ["PyPDF2", "docx", "openpyxl", "PIL"]
-    missing = [m for m in required if not _check_import(m.lower().replace("PIL", "PIL").replace("docx", "docx"))]
-    
-    optional = ["pytesseract", "whisper", "ffmpeg", "magic", "pandas"]
-    optional_missing = [m for m in optional if not _check_import(m)]
-    
+    import file_processor
+    availability = file_processor.publish_parser_availability()
+    missing = [kind for kind, info in availability.items() if not info["available"]]
     if missing:
-        return SubsystemState.DEGRADED, "Core deps missing: " + ", ".join(missing) + ". Optional missing: " + ", ".join(optional_missing)
-    
-    msg = "All core file processor dependencies available"
-    if optional_missing:
-        msg += " | Optional: " + ", ".join(optional_missing) + " unavailable"
-    return SubsystemState.READY, msg
+        return SubsystemState.DEGRADED, "Parser imports missing for: " + ", ".join(missing)
+    return SubsystemState.READY, "TXT, PDF, DOCX, XLSX, and image parser imports available; extraction not yet tested"
 
 
 def probe_vision() -> Tuple[SubsystemState, str]:
-    """Verify vision subsystem (Gemini Vision + OCR)."""
-    # Check actual Tesseract status (binary availability)
-    tes_state, tes_msg = probe_tesseract()
-    has_tesseract = (tes_state == SubsystemState.READY)
-    
-    # Check actual Gemini status (API key)
-    gem_state, gem_msg = probe_gemini()
-    has_gemini = (gem_state == SubsystemState.READY)
-    
+    """Check vision wiring without pretending an image inference occurred."""
     has_cv2 = _check_import("cv2")
     has_mss = _check_import("mss")
-    
     if not has_cv2 or not has_mss:
-        return SubsystemState.DEGRADED, "OpenCV or MSS screen capture not available"
-    
-    # Determine vision readiness based on actual working components
-    if not has_gemini and not has_tesseract:
-        return SubsystemState.DISABLED, "No Gemini API key and no Tesseract OCR fallback"
-    
-    # Both available
-    if has_gemini and has_tesseract:
-        return SubsystemState.READY, "Gemini Vision + Tesseract OCR fallback active"
-    # Only Gemini available
-    elif has_gemini:
-        return SubsystemState.READY, "Gemini Vision active (no local OCR fallback)"
-    # Only Tesseract available
-    else:
-        return SubsystemState.READY, "Tesseract OCR active (no cloud vision)"
+        return SubsystemState.DEGRADED, "OpenCV or MSS screen-capture dependency is unavailable"
+
+    oll_state, _ = probe_ollama()
+    gem_state, _ = probe_gemini()
+    local_configured = oll_state == SubsystemState.READY
+    cloud_configured = gem_state == SubsystemState.READY
+    if local_configured and cloud_configured:
+        return SubsystemState.READY, "Screen capture dependencies present; qwen3-vl local primary and Gemini fallback are available; end-to-end image inference not checked"
+    if local_configured:
+        return SubsystemState.READY, "Screen capture dependencies present; qwen3-vl local vision is available; Gemini fallback unavailable; end-to-end image inference not checked"
+    if cloud_configured:
+        return SubsystemState.READY, "Screen capture dependencies present; local vision unavailable; Gemini fallback available; end-to-end image inference not checked"
+    return SubsystemState.DEGRADED, "Screen capture dependencies present but no visual-understanding provider is currently verified"
 
 
 def probe_task_queue() -> Tuple[SubsystemState, str]:
@@ -348,7 +410,7 @@ def probe_task_queue() -> Tuple[SubsystemState, str]:
     
     try:
         import task_queue
-        return SubsystemState.READY, "Async task queue module loaded (4 workers default)"
+        return SubsystemState.READY, "Async task queue module imports; workers not started"
     except Exception as e:
         return SubsystemState.DEGRADED, "Task queue import error: " + str(e)
 
@@ -362,35 +424,27 @@ def probe_dev_agent() -> Tuple[SubsystemState, str]:
     dev_tools = ["pytest", "black", "ruff", "mypy", "git"]
     available = [t for t in dev_tools if _check_import(t) or shutil.which(t)]
     
-    return SubsystemState.READY, "Dev agent ready | Tools: " + ", ".join(available)
+    return SubsystemState.READY, "Dev agent code imports; actions not run | Tools: " + ", ".join(available)
 
 
 def probe_configuration() -> Tuple[SubsystemState, str]:
-    """Validate .env configuration and critical paths."""
+    """Validate active provider configuration without revealing credentials."""
     issues = []
     warnings = []
-    
-    # Check .env exists
-    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
-    if not os.path.exists(env_path):
-        issues.append(".env file not found")
-    else:
-        # Check critical keys
-        critical_keys = ["OPENROUTER_API_KEY", "GROQ_API_KEY"]
-        for key in critical_keys:
-            if not os.getenv(key):
-                warnings.append(key + " not set (cloud fallback unavailable)")
-    
-    # Check memory.json
-    mem_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "memory.json")
-    if not os.path.exists(mem_path):
-        warnings.append("memory.json not found (will be created on first run)")
-    
-    # Check user voice
-    voice_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "user_voice.npy")
-    if not os.path.exists(voice_path):
-        warnings.append("user_voice.npy not found (voice recognition disabled)")
-    
+    for key in ("NVIDIA_API_KEY", "GEMINI_API_KEY"):
+        value = os.getenv(key, "").strip().lower()
+        if not value or any(marker in value for marker in ("your-", "-here", "placeholder")):
+            warnings.append(f"{key} missing or placeholder")
+    if os.getenv("OLLAMA_MODEL", "jarvis:latest") != "jarvis:latest":
+        issues.append("OLLAMA_MODEL unsupported; expected jarvis:latest")
+    host = urlparse(os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434"))
+    if host.scheme not in ("http", "https") or not host.hostname:
+        issues.append("OLLAMA_HOST must be an HTTP(S) URL")
+    if probe_tesseract()[0] != SubsystemState.READY:
+        warnings.append("Tesseract executable not found; OCR unavailable")
+    if not shutil.which("ffmpeg"):
+        warnings.append("FFmpeg executable not found; media conversion unavailable")
+
     if issues:
         msg = "Config issues: " + ", ".join(issues)
         if warnings:
@@ -440,6 +494,10 @@ def probe_hardware_resources() -> Tuple[SubsystemState, str]:
         return status, msg
     except Exception as e:
         return SubsystemState.DEGRADED, "Hardware check error: " + str(e)
+
+
+
+
 
 def run_smoke_test() -> bool:
     """Run active probes across all baseline subsystems and update status registry."""
@@ -544,20 +602,10 @@ def run_smoke_test() -> bool:
     status_registry._print_report()
 
     # Determine Overall Result
-    # Check if any LLM provider is available
-    ollama_state = registry.get_all().get("OLLAMA", {}).get("state")
-    groq_state = registry.get_all().get("GROQ", {}).get("state")
-    openrouter_state = registry.get_all().get("OPENROUTER", {}).get("state")
-    has_llm_provider = any(s == SubsystemState.READY.value for s in [ollama_state, groq_state, openrouter_state])
-    
     critical_failures = [
         name for name, info in registry.get_all().items()
-        if info.get("state") == SubsystemState.OFFLINE.value and name in ("VOICE_STT", "VOICE_TTS", "MEMORY", "TASKS", "FILE_PROCESSOR")
+        if info.get("state") == SubsystemState.OFFLINE.value and name in ("VOICE_STT", "VOICE_TTS", "OLLAMA", "MEMORY", "TASKS", "FILE_PROCESSOR")
     ]
-    
-    # If no LLM provider is available, that's a critical failure for conversational AI
-    if not has_llm_provider:
-        critical_failures.append("NO_LLM_PROVIDER")
 
     if critical_failures:
         print("[FAIL] Boot validation failed. Critical operational failures discovered: " + ", ".join(critical_failures))

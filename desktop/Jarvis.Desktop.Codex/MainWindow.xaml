@@ -88,12 +88,11 @@
                                     <TextBlock Style="{StaticResource Micro}" Text="SYSTEM IDENTITY"/>
                                     <TextBlock Style="{StaticResource HudValue}" Text="MARK VII" Margin="0,5,0,0" FontSize="20"/>
                                     <Border Height="1" Width="148" HorizontalAlignment="Left" Background="#376B8994" Margin="0,8"/>
-                                    <TextBlock x:Name="SystemStatus" Style="{StaticResource Micro}" Text="●  SYSTEM NOMINAL" Foreground="#7095D3DF"/>
+                                    <TextBlock x:Name="SystemStatus" Style="{StaticResource Micro}" Text="●  RUNTIME UNKNOWN" Foreground="#7095D3DF"/>
                                 </StackPanel>
                                 <StackPanel x:Name="LocalCorePanel" Canvas.Left="37" Canvas.Top="260" Width="160">
                                     <TextBlock Style="{StaticResource Micro}" Text="LOCAL CORE"/>
-                                    <Grid Margin="0,8,0,0"><Border Height="2" Background="#172D444D"/><Border x:Name="CoreLoadBar" Height="2" Width="99" HorizontalAlignment="Left" Background="#6BCFEA"/></Grid>
-                                    <TextBlock Style="{StaticResource HudValue}" Text="STABLE  /  07 ms" Margin="0,7,0,0" FontSize="10"/>
+                                    <TextBlock Style="{StaticResource HudValue}" Text="LOAD / UNKNOWN" Margin="0,7,0,0" FontSize="10"/>
                                 </StackPanel>
                                 <StackPanel x:Name="VoiceLinkPanel" Canvas.Left="48" Canvas.Top="492" Width="155">
                                     <TextBlock Style="{StaticResource Micro}" Text="VOICE LINK"/>
@@ -103,12 +102,12 @@
                                     </StackPanel>
                                 </StackPanel>
                                 <StackPanel x:Name="CognitivePanel" Canvas.Left="963" Canvas.Top="74" Width="155">
-                                    <TextBlock Style="{StaticResource Micro}" Text="COGNITIVE ARRAY" HorizontalAlignment="Right"/><TextBlock x:Name="CognitiveStatus" Style="{StaticResource HudValue}" Text="ONLINE" HorizontalAlignment="Right" Margin="0,5,0,0"/><Border Height="1" Background="#315C7782" Margin="0,8,0,0"/>
+                                    <TextBlock Style="{StaticResource Micro}" Text="COGNITIVE ARRAY" HorizontalAlignment="Right"/><TextBlock x:Name="CognitiveStatus" Style="{StaticResource HudValue}" Text="UNKNOWN" HorizontalAlignment="Right" Margin="0,5,0,0"/><Border Height="1" Background="#315C7782" Margin="0,8,0,0"/>
                                 </StackPanel>
                                 <StackPanel x:Name="TelemetryPanel" Canvas.Left="985" Canvas.Top="236" Width="128">
-                                    <TextBlock Style="{StaticResource Micro}" Text="MEMORY" HorizontalAlignment="Right"/><TextBlock x:Name="MemoryValue" Style="{StaticResource HudValue}" Text="68.0%" HorizontalAlignment="Right" Margin="0,5,0,14"/>
-                                    <TextBlock Style="{StaticResource Micro}" Text="VISION" HorizontalAlignment="Right"/><TextBlock x:Name="VisionValue" Style="{StaticResource HudValue}" Text="PASSIVE" HorizontalAlignment="Right" Margin="0,5,0,14"/>
-                                    <TextBlock Style="{StaticResource Micro}" Text="TASK QUEUE" HorizontalAlignment="Right"/><TextBlock x:Name="TaskQueueValue" Style="{StaticResource HudValue}" Text="00" HorizontalAlignment="Right" Margin="0,5,0,0"/>
+                                    <TextBlock Style="{StaticResource Micro}" Text="MEMORY" HorizontalAlignment="Right"/><TextBlock x:Name="MemoryValue" Style="{StaticResource HudValue}" Text="UNKNOWN" HorizontalAlignment="Right" Margin="0,5,0,14"/>
+                                    <TextBlock Style="{StaticResource Micro}" Text="VISION" HorizontalAlignment="Right"/><TextBlock x:Name="VisionValue" Style="{StaticResource HudValue}" Text="UNKNOWN" HorizontalAlignment="Right" Margin="0,5,0,14"/>
+                                    <TextBlock Style="{StaticResource Micro}" Text="ACTIVE ACTIONS" HorizontalAlignment="Right"/><TextBlock x:Name="TaskQueueValue" Style="{StaticResource HudValue}" Text="00" HorizontalAlignment="Right" Margin="0,5,0,0"/>
                                 </StackPanel>
 
                                 <Grid x:Name="AnalysisPanel" Canvas.Left="836" Canvas.Top="405" Width="278" Height="164" Opacity="0" RenderTransformOrigin=".5,.5">
@@ -116,10 +115,10 @@
                                     <Border BorderBrush="#4A9A7C36" BorderThickness="1,0,0,1" Background="#09000000" Padding="15,10">
                                         <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
                                             <TextBlock x:Name="AnalysisHeader" Text="SYSTEM ANALYSIS  /  PROCESS MEMORY" FontSize="8" Foreground="#D3B36E"/>
-                                            <StackPanel x:Name="AnalysisValues" Grid.Row="1" Orientation="Horizontal" Margin="0,10,0,9"><TextBlock Text="CPU  23%" FontSize="11" Foreground="#E5EDF0" Margin="0,0,28,0"/><TextBlock Text="MEMORY  68%" FontSize="11" Foreground="#F0C66C"/></StackPanel>
+                                            <StackPanel x:Name="AnalysisValues" Grid.Row="1" Orientation="Horizontal" Margin="0,10,0,9"><TextBlock Text="CPU  UNKNOWN" FontSize="11" Foreground="#E5EDF0" Margin="0,0,28,0"/><TextBlock Text="MEMORY  UNKNOWN" FontSize="11" Foreground="#F0C66C"/></StackPanel>
                                             <Grid x:Name="AnalysisProcesses" Grid.Row="2"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                                                <StackPanel><TextBlock Text="Chrome" Foreground="#829BA3" FontSize="10" Margin="0,2"/><TextBlock Text="Ollama" Foreground="#829BA3" FontSize="10" Margin="0,2"/><TextBlock Text="VS Code" Foreground="#829BA3" FontSize="10" Margin="0,2"/></StackPanel>
-                                                <StackPanel Grid.Column="1"><TextBlock Text="3.4 GB" Foreground="#E0EBEE" FontSize="10" Margin="0,2"/><TextBlock Text="1.8 GB" Foreground="#E0EBEE" FontSize="10" Margin="0,2"/><TextBlock Text="1.3 GB" Foreground="#E0EBEE" FontSize="10" Margin="0,2"/></StackPanel>
+                                                <StackPanel><TextBlock Text="PROCESS DATA UNAVAILABLE" Foreground="#829BA3" FontSize="10" Margin="0,2"/></StackPanel>
+                                                <StackPanel Grid.Column="1"/>
                                             </Grid>
                                         </Grid>
                                     </Border>
@@ -128,12 +127,12 @@
                                 <StackPanel x:Name="ConversationPanel" Canvas.Left="294" Canvas.Top="486" Width="568" Opacity=".4">
                                     <Border BorderBrush="#244A5B66" BorderThickness="0,1,0,0" Padding="0,12,0,0"><StackPanel>
                                         <StackPanel x:Name="UserExchange">
-                                            <TextBlock Style="{StaticResource Micro}" Text="YOU  /  20:07:14" Foreground="#506E7982"/>
-                                            <TextBlock x:Name="UserTranscript" Text="Check what’s using my memory." FontFamily="Segoe UI Light" FontSize="13" Foreground="#7E9AA4AB" Margin="0,4,0,13"/>
+                                            <TextBlock Style="{StaticResource Micro}" Text="YOU" Foreground="#506E7982"/>
+                                            <TextBlock x:Name="UserTranscript" Text="" FontFamily="Segoe UI Light" FontSize="13" Foreground="#7E9AA4AB" Margin="0,4,0,13"/>
                                         </StackPanel>
                                         <StackPanel x:Name="JarvisExchange">
                                             <TextBlock Style="{StaticResource Micro}" Text="JARVIS  /  LOCAL RESPONSE" Foreground="#72BFD3DD"/>
-                                            <TextBlock x:Name="JarvisResponse" Text="Chrome is taking most of it. Nothing concerning." FontFamily="Segoe UI Light" FontSize="15" Foreground="#DBF3F8FA" Margin="0,4,0,0"/>
+                                            <TextBlock x:Name="JarvisResponse" Text="" FontFamily="Segoe UI Light" FontSize="15" Foreground="#DBF3F8FA" Margin="0,4,0,0"/>
                                         </StackPanel>
                                     </StackPanel></Border>
                                 </StackPanel>

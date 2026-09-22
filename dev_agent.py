@@ -180,15 +180,6 @@ class DevAgent:
                         "methods": [n.name for n in node.body if isinstance(n, ast.FunctionDef)],
                         "bases": [getattr(b, 'id', str(b)) for b in node.bases],
                     })
-                elif isinstance(node, ast.FunctionDef):
-                    # Only top-level functions
-                    if isinstance(node.parent if hasattr(node, 'parent') else None, ast.Module):
-                        functions.append({
-                            "name": node.name,
-                            "line": node.lineno,
-                            "args": [a.arg for a in node.args.args],
-                            "returns": getattr(node.returns, 'id', None) if node.returns else None,
-                        })
                 elif isinstance(node, (ast.Import, ast.ImportFrom)):
                     if isinstance(node, ast.Import):
                         for alias in node.names:
@@ -198,6 +189,15 @@ class DevAgent:
                         for alias in node.names:
                             imports.append(f"{module}.{alias.name}" if module else alias.name)
             
+            for node in tree.body:
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    functions.append({
+                        "name": node.name,
+                        "line": node.lineno,
+                        "args": [a.arg for a in node.args.args],
+                        "returns": getattr(node.returns, 'id', None) if node.returns else None,
+                    })
+
             return {
                 "classes": classes,
                 "functions": functions,

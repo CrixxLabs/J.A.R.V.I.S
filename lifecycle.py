@@ -8,47 +8,60 @@ Provides:
 - Status registry integration
 """
 
-import sys
 import signal
 import threading
-import atexit
 import time
 from typing import Callable, List, Optional
 from contextlib import contextmanager
 
 import status_registry
-from status_registry import SubsystemState, get_registry
+from status_registry import EvidenceLevel, get_registry
 
 
 class LifecycleManager:
     """Manages the complete JARVIS lifecycle."""
 
-    def __init__(self):
+    def __init__(self, *, component_stop_timeout: float = 5.0,
+                 total_shutdown_timeout: float = 30.0):
         self._shutdown_event = threading.Event()
+        self._shutdown_complete = threading.Event()
         self._startup_complete = False
         self._shutdown_in_progress = False
         self._components: List[dict] = []  # {name, start_fn, stop_fn, priority}
-        self._lock = threading.Lock()
-        self._original_sigint = None
-        self._original_sigterm = None
+        self._lock = threading.RLock()
+        self._component_stop_timeout = max(0.01, float(component_stop_timeout))
+        self._total_shutdown_timeout = max(0.01, float(total_shutdown_timeout))
+        self._original_handlers = {}
 
-    def register(self, name: str, start_fn: Callable, stop_fn: Callable, priority: int = 50):
+    def register(self, name: str, start_fn: Callable, stop_fn: Callable,
+                 priority: int = 50, *, owned: bool = True,
+                 already_started: bool = False, stop_timeout: Optional[float] = None):
         """Register a component with start/stop functions.
 
         Lower priority = started earlier, stopped later.
         """
         with self._lock:
+            if any(component["name"] == name for component in self._components):
+                raise ValueError(f"Lifecycle component already registered: {name}")
             self._components.append({
                 "name": name,
                 "start_fn": start_fn,
                 "stop_fn": stop_fn,
-                "priority": priority
+                "priority": priority,
+                "owned": bool(owned),
+                "started": bool(already_started),
+                "stop_timeout": self._component_stop_timeout if stop_timeout is None else max(0.01, float(stop_timeout)),
             })
             # Keep sorted by priority
             self._components.sort(key=lambda c: c["priority"])
 
     def start_all(self) -> bool:
         """Start all registered components in priority order."""
+        with self._lock:
+            if self._startup_complete:
+                return True
+            if self._shutdown_event.is_set():
+                return False
         registry = get_registry()
         print("[Lifecycle] Starting all components...")
 
@@ -56,47 +69,95 @@ class LifecycleManager:
             if self._shutdown_event.is_set():
                 break
             try:
+                if comp["started"]:
+                    continue
                 print(f"[Lifecycle] Starting {comp['name']}...")
-                registry.set_status(comp["name"].upper(), SubsystemState.READY, "Starting...")
                 comp["start_fn"]()
-                registry.set_status(comp["name"].upper(), SubsystemState.READY, "Running")
+                comp["started"] = True
                 print(f"[Lifecycle] OK {comp['name']} started")
             except Exception as exc:
                 print(f"[Lifecycle] FAIL {comp['name']} failed to start: {exc}")
-                registry.set_status(comp["name"].upper(), SubsystemState.OFFLINE, str(exc))
+                registry.set_evidence("LIFECYCLE", EvidenceLevel.BROKEN,
+                                      f"Startup failure in {comp['name']}: {exc}",
+                                      source="lifecycle startup")
+                self.shutdown(f"Startup failure in {comp['name']}")
                 return False
 
         self._startup_complete = True
-        registry.set_status("LIFECYCLE", SubsystemState.READY, "All components started")
+        registry.set_evidence("LIFECYCLE", EvidenceLevel.PROBED, "All owned components started",
+                              source="lifecycle")
         print("[Lifecycle] All components started successfully")
         return True
 
-    def shutdown(self, reason: str = "Requested"):
-        """Shutdown all components in reverse priority order."""
-        if self._shutdown_in_progress:
-            return
-        self._shutdown_in_progress = True
+    def _stop_component(self, comp: dict, timeout: float) -> tuple[bool, Optional[BaseException]]:
+        error = []
+
+        def invoke():
+            try:
+                comp["stop_fn"]()
+            except BaseException as exc:  # cleanup must report and continue
+                error.append(exc)
+
+        worker = threading.Thread(target=invoke, name=f"stop-{comp['name']}", daemon=True)
+        worker.start()
+        worker.join(timeout=max(0.0, timeout))
+        return not worker.is_alive(), error[0] if error else None
+
+    def shutdown(self, reason: str = "Requested") -> bool:
+        """Stop owned, started components in reverse order within a fixed deadline."""
+        with self._lock:
+            if self._shutdown_complete.is_set():
+                return True
+            if self._shutdown_in_progress:
+                waiter = True
+            else:
+                self._shutdown_in_progress = True
+                self._shutdown_event.set()
+                waiter = False
+
+        if waiter:
+            return self._shutdown_complete.wait(self._total_shutdown_timeout)
 
         print(f"[Lifecycle] Shutdown initiated: {reason}")
-        self._shutdown_event.set()
-
         registry = get_registry()
-        registry.set_status("LIFECYCLE", SubsystemState.DEGRADED, f"Shutting down: {reason}")
+        registry.set_evidence("LIFECYCLE", EvidenceLevel.PROBED, f"Shutdown requested: {reason}",
+                              source="lifecycle")
+        deadline = time.monotonic() + self._total_shutdown_timeout
+        clean = True
 
-        # Stop in reverse priority order
         for comp in reversed(self._components):
+            if not comp["started"] or not comp["owned"]:
+                continue
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                clean = False
+                print(f"[Lifecycle] TIMEOUT before stopping {comp['name']}")
+                continue
             try:
                 print(f"[Lifecycle] Stopping {comp['name']}...")
-                registry.set_status(comp["name"].upper(), SubsystemState.DEGRADED, "Stopping...")
-                comp["stop_fn"]()
-                registry.set_status(comp["name"].upper(), SubsystemState.DISABLED, "Stopped")
-                print(f"[Lifecycle] OK {comp['name']} stopped")
-            except Exception as exc:
-                print(f"[Lifecycle] FAIL {comp['name']} failed to stop cleanly: {exc}")
-                registry.set_status(comp["name"].upper(), SubsystemState.OFFLINE, f"Stop failed: {exc}")
+                finished, error = self._stop_component(
+                    comp, min(comp["stop_timeout"], remaining)
+                )
+                comp["started"] = False
+                if not finished:
+                    clean = False
+                    print(f"[Lifecycle] TIMEOUT stopping {comp['name']}")
+                elif error is not None:
+                    clean = False
+                    print(f"[Lifecycle] FAIL {comp['name']} failed to stop cleanly: {error}")
+                else:
+                    print(f"[Lifecycle] OK {comp['name']} stopped")
+            except BaseException as exc:
+                clean = False
+                print(f"[Lifecycle] FAIL {comp['name']} cleanup bookkeeping failed: {exc}")
 
-        registry.set_status("LIFECYCLE", SubsystemState.DISABLED, "Shutdown complete")
+        self._startup_complete = False
+        registry.set_evidence("LIFECYCLE", EvidenceLevel.UNKNOWN,
+                              "Shutdown complete" if clean else "Shutdown complete with cleanup errors",
+                              source="lifecycle")
+        self._shutdown_complete.set()
         print("[Lifecycle] Shutdown complete")
+        return clean
 
     def wait_for_shutdown(self, timeout: Optional[float] = None):
         """Block until shutdown is signaled."""
@@ -108,24 +169,40 @@ class LifecycleManager:
     def is_started(self) -> bool:
         return self._startup_complete
 
+    def is_shutdown_complete(self) -> bool:
+        return self._shutdown_complete.is_set()
+
+    def component_snapshot(self) -> List[dict]:
+        with self._lock:
+            return [{key: value for key, value in component.items()
+                     if key not in ("start_fn", "stop_fn")}
+                    for component in self._components]
+
     def setup_signal_handlers(self):
         """Install signal handlers for graceful shutdown."""
+        if threading.current_thread() is not threading.main_thread():
+            return
+
         def _signal_handler(signum, frame):
-            sig_name = "SIGINT" if signum == signal.SIGINT else "SIGTERM"
+            sig_name = signal.Signals(signum).name
             print(f"[Lifecycle] Received {sig_name}")
             self.shutdown(f"Signal {sig_name}")
-            # Give time for graceful shutdown, then force exit
-            threading.Timer(10.0, lambda: sys.exit(1)).start()
+            raise KeyboardInterrupt
 
-        self._original_sigint = signal.signal(signal.SIGINT, _signal_handler)
-        self._original_sigterm = signal.signal(signal.SIGTERM, _signal_handler)
+        signals = [signal.SIGINT, signal.SIGTERM]
+        if hasattr(signal, "SIGBREAK"):
+            signals.append(signal.SIGBREAK)
+        for signum in signals:
+            if signum not in self._original_handlers:
+                self._original_handlers[signum] = signal.signal(signum, _signal_handler)
 
     def restore_signal_handlers(self):
         """Restore original signal handlers."""
-        if self._original_sigint:
-            signal.signal(signal.SIGINT, self._original_sigint)
-        if self._original_sigterm:
-            signal.signal(signal.SIGTERM, self._original_sigterm)
+        if threading.current_thread() is not threading.main_thread():
+            return
+        for signum, handler in self._original_handlers.items():
+            signal.signal(signum, handler)
+        self._original_handlers.clear()
 
 
 # Global lifecycle manager instance
@@ -137,7 +214,7 @@ def get_lifecycle() -> LifecycleManager:
     """Get the global lifecycle manager."""
     global _lifecycle
     with _lifecycle_lock:
-        if _lifecycle is None:
+        if _lifecycle is None or _lifecycle.is_shutdown_complete():
             _lifecycle = LifecycleManager()
         return _lifecycle
 

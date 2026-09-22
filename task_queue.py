@@ -21,7 +21,7 @@ from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor
 
 import status_registry
-from status_registry import SubsystemState, get_registry
+from status_registry import EvidenceLevel, SubsystemState, get_registry
 
 logger = logging.getLogger(__name__)
 
@@ -118,7 +118,8 @@ class TaskQueue:
             return True
         
         registry = get_registry()
-        registry.set_status("TASK_QUEUE", SubsystemState.READY, "Starting...")
+        registry.set_evidence("TASK_QUEUE", EvidenceLevel.CODE, "Starting worker pool",
+                              source="task queue lifecycle")
         
         self._running = True
         self._shutdown_event.clear()
@@ -133,7 +134,12 @@ class TaskQueue:
         stats_task = asyncio.create_task(self._stats_loop())
         self._workers.append(stats_task)
         
-        registry.set_status("TASK_QUEUE", SubsystemState.READY, f"Running with {self.max_workers} workers")
+        registry.set_evidence("TASK_QUEUE", EvidenceLevel.PROBED,
+                              f"Worker pool started with {self.max_workers} workers",
+                              source="task queue lifecycle")
+        registry.set_capability_evidence("TASK_QUEUE", EvidenceLevel.PROBED,
+                                         f"Worker pool started with {self.max_workers} workers",
+                                         source="task queue lifecycle")
         logger.info(f"TaskQueue started with {self.max_workers} workers")
         return True
     
@@ -146,7 +152,8 @@ class TaskQueue:
         self._shutdown_event.set()
         
         registry = get_registry()
-        registry.set_status("TASK_QUEUE", SubsystemState.DEGRADED, "Shutting down...")
+        registry.set_evidence("TASK_QUEUE", EvidenceLevel.PROBED, "Worker pool is shutting down",
+                              source="task queue lifecycle")
         
         # Cancel all pending tasks
         await self.cancel_all()
@@ -162,9 +169,14 @@ class TaskQueue:
             for w in self._workers:
                 if not w.done():
                     w.cancel()
-        
+            await asyncio.gather(*self._workers, return_exceptions=True)
+
         self._running = False
-        registry.set_status("TASK_QUEUE", SubsystemState.DISABLED, "Stopped")
+        self._workers.clear()
+        registry.set_evidence("TASK_QUEUE", EvidenceLevel.UNKNOWN, "Worker pool stopped",
+                              source="task queue lifecycle")
+        registry.set_capability_evidence("TASK_QUEUE", EvidenceLevel.UNKNOWN,
+                                         "Worker pool stopped", source="task queue lifecycle")
         logger.info("TaskQueue shutdown complete")
         return True
     
@@ -366,6 +378,11 @@ class TaskQueue:
                 task.progress = 1.0
                 async with self._lock:
                     self._stats["completed"] += 1
+                registry = get_registry()
+                registry.set_evidence("TASK_QUEUE", EvidenceLevel.LIVE,
+                                      "Worker completed a queued task", source="task completion")
+                registry.set_capability_evidence("TASK_QUEUE", EvidenceLevel.LIVE,
+                                                 "Worker completed a queued task", source="task completion")
                 logger.debug(f"Task {task.task_id} completed")
                 return
                 
@@ -396,16 +413,19 @@ class TaskQueue:
     async def _stats_loop(self) -> None:
         """Periodic stats reporting."""
         while not self._shutdown_event.is_set():
-            await asyncio.sleep(30)
+            try:
+                await asyncio.wait_for(self._shutdown_event.wait(), timeout=30.0)
+            except asyncio.TimeoutError:
+                pass
             if not self._shutdown_event.is_set():
                 registry = get_registry()
                 pending = sum(1 for t in self._tasks.values() if t.status in (TaskStatus.PENDING, TaskStatus.QUEUED))
                 running = sum(1 for t in self._tasks.values() if t.status == TaskStatus.RUNNING)
-                registry.set_status(
-                    "TASK_QUEUE",
-                    SubsystemState.READY,
-                    f"Workers: {self.max_workers}, Pending: {pending}, Running: {running}"
-                )
+                evidence = EvidenceLevel.LIVE if self._stats["completed"] else EvidenceLevel.PROBED
+                detail = f"Workers: {self.max_workers}, Pending: {pending}, Running: {running}, Completed: {self._stats['completed']}"
+                registry.set_evidence("TASK_QUEUE", evidence, detail, source="task queue stats")
+                registry.set_capability_evidence("TASK_QUEUE", evidence, detail,
+                                                 source="task queue stats")
     
     def get_stats(self) -> Dict[str, Any]:
         """Get queue statistics."""
@@ -418,10 +438,19 @@ class TaskQueue:
             "queue_size": self._queue.qsize(),
         }
 
+    def list_recent(self, limit: int = 20) -> List[Dict[str, Any]]:
+        """Return public task progress without exposing task results or metadata."""
+        recent = sorted(list(self._tasks.values()), key=lambda task: task.created_at, reverse=True)
+        return [{"id": task.task_id, "name": task.name, "status": task.status.value,
+                 "progress": round(max(0.0, min(1.0, task.progress)) * 100, 1)}
+                for task in recent[:max(0, min(limit, 100))]]
+
 
 # Global task queue instance
 _task_queue: Optional[TaskQueue] = None
 _task_queue_lock = threading.Lock()
+_task_queue_loop: Optional[asyncio.AbstractEventLoop] = None
+_task_queue_thread: Optional[threading.Thread] = None
 
 
 def get_task_queue() -> TaskQueue:
@@ -436,24 +465,105 @@ def get_task_queue() -> TaskQueue:
 async def init_task_queue(
     max_workers: int = 4,
     max_queue_size: int = 1000,
+    use_dedicated_thread: bool = False,
 ) -> TaskQueue:
-    """Initialize and start the global task queue."""
-    global _task_queue
+    """Initialize one global queue, optionally on a persistent owner loop/thread."""
+    global _task_queue, _task_queue_loop, _task_queue_thread
+    await shutdown_task_queue()
+
+    if not use_dedicated_thread:
+        queue = TaskQueue(max_workers=max_workers, max_queue_size=max_queue_size)
+        await queue.start()
+        with _task_queue_lock:
+            _task_queue = queue
+        return queue
+
+    ready = threading.Event()
+    loop_holder: Dict[str, asyncio.AbstractEventLoop] = {}
+
+    def _loop_main() -> None:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop_holder["loop"] = loop
+        ready.set()
+        try:
+            loop.run_forever()
+        finally:
+            pending = asyncio.all_tasks(loop)
+            for pending_task in pending:
+                pending_task.cancel()
+            if pending:
+                loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
+            loop.close()
+
+    thread = threading.Thread(target=_loop_main, name="jarvis-task-queue", daemon=True)
+    thread.start()
+    if not ready.wait(timeout=5.0):
+        raise RuntimeError("Task queue event loop failed to start")
+    loop = loop_holder["loop"]
+
+    async def _create_and_start() -> TaskQueue:
+        queue = TaskQueue(max_workers=max_workers, max_queue_size=max_queue_size)
+        await queue.start()
+        return queue
+
+    future = asyncio.run_coroutine_threadsafe(_create_and_start(), loop)
+    try:
+        queue = await asyncio.wrap_future(future)
+    except Exception:
+        loop.call_soon_threadsafe(loop.stop)
+        await asyncio.to_thread(thread.join, 5.0)
+        raise
     with _task_queue_lock:
-        if _task_queue is not None:
-            await _task_queue.shutdown()
-        _task_queue = TaskQueue(max_workers=max_workers, max_queue_size=max_queue_size)
-        await _task_queue.start()
-        return _task_queue
+        _task_queue = queue
+        _task_queue_loop = loop
+        _task_queue_thread = thread
+    return queue
 
 
 async def shutdown_task_queue(timeout: float = 30.0) -> None:
     """Shutdown the global task queue."""
-    global _task_queue
+    global _task_queue, _task_queue_loop, _task_queue_thread
     with _task_queue_lock:
-        if _task_queue is not None:
-            await _task_queue.shutdown(timeout=timeout)
-            _task_queue = None
+        queue = _task_queue
+        loop = _task_queue_loop
+        thread = _task_queue_thread
+        _task_queue = None
+        _task_queue_loop = None
+        _task_queue_thread = None
+    if queue is None:
+        return
+    if loop is not None and loop.is_running():
+        current = asyncio.get_running_loop()
+        if current is loop:
+            try:
+                await queue.shutdown(timeout=timeout)
+            finally:
+                loop.call_soon(loop.stop)
+        else:
+            try:
+                future = asyncio.run_coroutine_threadsafe(queue.shutdown(timeout=timeout), loop)
+                await asyncio.wrap_future(future)
+            finally:
+                loop.call_soon_threadsafe(loop.stop)
+                if thread is not None and thread is not threading.current_thread():
+                    await asyncio.to_thread(thread.join, min(timeout + 2.0, 32.0))
+    else:
+        await queue.shutdown(timeout=timeout)
+
+
+async def _on_owner_loop(awaitable):
+    """Await queue work on its persistent owner loop when one is configured."""
+    with _task_queue_lock:
+        loop = _task_queue_loop
+    if loop is not None and loop.is_running():
+        try:
+            current = asyncio.get_running_loop()
+        except RuntimeError:
+            current = None
+        if current is not loop:
+            return await asyncio.wrap_future(asyncio.run_coroutine_threadsafe(awaitable, loop))
+    return await awaitable
 
 
 # Convenience functions
@@ -465,22 +575,22 @@ async def submit_task(
 ) -> str:
     """Submit a task to the global queue."""
     queue = get_task_queue()
-    return await queue.submit(coro_factory, name, priority, **kwargs)
+    return await _on_owner_loop(queue.submit(coro_factory, name, priority, **kwargs))
 
 
 async def wait_for_task(task_id: str, timeout: Optional[float] = None) -> Any:
     """Wait for a task by ID."""
     queue = get_task_queue()
-    return await queue.wait_for_task(task_id, timeout)
+    return await _on_owner_loop(queue.wait_for_task(task_id, timeout))
 
 
 async def cancel_task(task_id: str) -> bool:
     """Cancel a task by ID."""
     queue = get_task_queue()
-    return await queue.cancel(task_id)
+    return await _on_owner_loop(queue.cancel(task_id))
 
 
 async def get_task_status(task_id: str) -> Optional[Dict[str, Any]]:
     """Get task status."""
     queue = get_task_queue()
-    return await queue.get_status(task_id)
+    return await _on_owner_loop(queue.get_status(task_id))

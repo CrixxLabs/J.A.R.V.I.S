@@ -1,0 +1,9 @@
+# Install only when the related MARK VII integration is enabled.
+spotipy>=2.26,<3
+google-api-python-client>=2,<3
+google-auth-oauthlib>=1,<2
+resemblyzer>=0.1.4,<1
+openai-whisper>=20250625
+face-recognition>=1.3,<2
+GPUtil>=1.4,<2
+pandas>=2,<4\n\n# Compatibility: current face/pygame stack still imports pkg_resources.\nsetuptools>=70,<81\n

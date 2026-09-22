@@ -55,7 +55,7 @@ def check_syntax():
         # Skip virtual-env / cache folders
         dirs[:] = [
             d for d in dirs
-            if d not in ("__pycache__", ".git", "venv", ".venv", "env", "node_modules")
+            if d not in ("__pycache__", ".git", "venv", ".venv", "env", "node_modules", "bin", "obj", "build", "dist")
             and not d.startswith(".")
         ]
         for fname in files:

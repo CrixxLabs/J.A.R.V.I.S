@@ -243,12 +243,27 @@ class TestTaskQueueIntegration:
     async def test_reinit_after_shutdown(self, global_queue):
         """Test re-initializing queue after shutdown."""
         await shutdown_task_queue()
-        
+
         new_queue = await init_task_queue(max_workers=1)
         assert new_queue is not None
         assert new_queue._running is True
-        
+
         await shutdown_task_queue()
+
+    @pytest.mark.asyncio
+    async def test_dedicated_thread_start_submit_and_shutdown(self):
+        await shutdown_task_queue()
+        queue = await init_task_queue(max_workers=4, use_dedicated_thread=True)
+        assert queue._running is True
+        assert queue.max_workers == 4
+
+        async def work():
+            return "dedicated"
+
+        task_id = await submit_task(work, name="dedicated_test")
+        assert await wait_for_task(task_id, timeout=2.0) == "dedicated"
+        await shutdown_task_queue(timeout=2.0)
+        assert queue._running is False
 
 
 if __name__ == "__main__":

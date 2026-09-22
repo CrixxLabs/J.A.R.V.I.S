@@ -9,17 +9,18 @@
 # Defaults to http://localhost:5000
 
 import os
+import atexit
 import threading
 import time
 import uuid
 import asyncio
 import mimetypes
+import ipaddress
 from datetime import datetime
 from functools import wraps
 from pathlib import Path
 from werkzeug.utils import secure_filename
 
-import pyttsx3
 import speech_recognition as sr
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
@@ -36,22 +37,33 @@ BIND_HOST = os.getenv("JARVIS_BIND_HOST", "127.0.0.1")
 REQUIRE_AUTH = os.getenv("JARVIS_REQUIRE_AUTH", "false").lower() == "true"
 API_KEY = os.getenv("JARVIS_API_KEY", "")  # Optional API key for privileged actions
 
-engine = pyttsx3.init()
 recognizer = sr.Recognizer()
+_tts_engine = None
+_tts_lock = threading.Lock()
 
 def speak(text: str):
+    """Optional browser-backend TTS, initialized lazily so server import is side-effect free."""
+    global _tts_engine
+    if os.getenv("JARVIS_BROWSER_TTS", "false").lower() != "true":
+        return
     try:
-        engine.say(text)
-        engine.runAndWait()
-    except Exception:
-        pass
+        with _tts_lock:
+            if _tts_engine is None:
+                import pyttsx3
+                _tts_engine = pyttsx3.init()
+            _tts_engine.say(text)
+            _tts_engine.runAndWait()
+    except Exception as exc:
+        print(f"[server] browser TTS unavailable: {type(exc).__name__}")
 
 def _require_auth(f):
     """Decorator to require API key for privileged endpoints."""
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not REQUIRE_AUTH or not API_KEY:
+        if not REQUIRE_AUTH:
             return f(*args, **kwargs)
+        if not API_KEY:
+            return jsonify({"error": "Server authentication is enabled but JARVIS_API_KEY is not configured"}), 503
         provided = request.headers.get("X-API-Key") or request.args.get("api_key")
         if provided != API_KEY:
             return jsonify({"error": "Unauthorized"}), 401
@@ -61,9 +73,9 @@ def _require_auth(f):
 # File upload configuration
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads")
 MAX_FILE_SIZE = 100 * 1024 * 1024  # 100MB
-ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.doc', '.txt', '.md', '.py', '.js', '.ts', '.jsx', '.tsx',
+ALLOWED_EXTENSIONS = {'.pdf', '.docx', '.txt', '.md', '.py', '.js', '.ts', '.jsx', '.tsx',
                       '.html', '.css', '.json', '.xml', '.yaml', '.yml', '.csv', '.tsv',
-                      '.xlsx', '.xls', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp',
+                      '.xlsx', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp',
                       '.mp3', '.wav', '.ogg', '.flac', '.m4a', '.mp4', '.mov', '.avi',
                       '.mkv', '.webm', '.zip', '.tar', '.gz', '.bz2', '.xz', '.7z', '.rar'}
 
@@ -86,6 +98,16 @@ def _load_jarvis():
             pass
 
         executor.init(speak_fn=_noop_speak, ask_fn=planner.ask)
+        from task_queue import init_task_queue, shutdown_task_queue
+        asyncio.run(init_task_queue(use_dedicated_thread=True))
+
+        def _stop_browser_queue():
+            try:
+                asyncio.run(shutdown_task_queue(timeout=5.0))
+            except Exception as exc:
+                print(f"[server] task queue shutdown warning: {type(exc).__name__}")
+
+        atexit.register(_stop_browser_queue)
         _planner   = planner
         _executor  = executor
         _jarvisify = jarvisify_response
@@ -106,11 +128,12 @@ app = Flask(
     static_folder=os.path.join(BASE_DIR, "ui"),
     static_url_path=""
 )
+app.config["MAX_CONTENT_LENGTH"] = MAX_FILE_SIZE
 CORS(app, origins=ALLOWED_ORIGINS, supports_credentials=False)
 
 # In-memory chat log (resets on server restart)
 _chat_log: list[dict] = []
-_status = {"state": "idle", "updated": time.time()}
+_status = {"state": "idle", "updated": time.time(), "provider": None}
 last_message = {"text": "", "role": ""}
 
 
@@ -133,11 +156,13 @@ def api_status():
         "state":   _status["state"],
         "modules": "loaded" if _planner else "unavailable",
         "error":   _import_err,
+        "provider": _status.get("provider"),
         "time":    datetime.now().strftime("%H:%M:%S"),
     })
 
 
 @app.route("/api/chat", methods=["POST"])
+@_require_auth
 def api_chat():
     """
     POST {"message": "..."}
@@ -162,7 +187,12 @@ def api_chat():
             action     = None
             model_type = "fast"
         else:
+            # A deterministic action must not inherit the provider displayed
+            # for an earlier conversational turn.
+            import brain
+            brain.reset_last_provider()
             action, reply, model_type = _planner.ask(user_msg)
+            _status["provider"] = brain.get_last_provider_model()
 
             # If there's a real action, execute it
             if action and _executor:
@@ -192,6 +222,7 @@ def api_chat():
         "response":   reply or "",
         "action":     action,
         "model_type": model_type,
+        "provider":   _status.get("provider"),
         "timestamp":  timestamp,
     })
 
@@ -285,8 +316,7 @@ def api_upload():
             "original_name": file.filename,
             "saved_name": safe_filename,
             "size": file_size,
-            "mime_type": mime_type or "application/octet-stream",
-            "path": filepath
+            "mime_type": mime_type or "application/octet-stream"
         })
     
     return jsonify({"files": uploaded, "count": len(uploaded)})
@@ -415,7 +445,7 @@ def api_list_tasks():
         from task_queue import get_task_queue
         queue = get_task_queue()
         stats = queue.get_stats()
-        return jsonify(stats)
+        return jsonify({**stats, "tasks": queue.list_recent()})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
@@ -461,7 +491,7 @@ def api_subsystems():
     try:
         from status_registry import get_registry
         registry = get_registry()
-        all_status = registry.get_all()
+        all_status = registry.get_all_external()
         return jsonify(all_status)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -513,6 +543,16 @@ def api_process_file_sync():
 # ── Run ───────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     port = int(os.getenv("JARVIS_PORT", 5000))
+    try:
+        bind_ip = ipaddress.ip_address(BIND_HOST)
+        local_only = bind_ip.is_loopback
+    except ValueError:
+        local_only = BIND_HOST.lower() == "localhost"
+    if not local_only and (not REQUIRE_AUTH or not API_KEY):
+        raise SystemExit(
+            "Refusing non-loopback browser bind without JARVIS_REQUIRE_AUTH=true "
+            "and a non-empty JARVIS_API_KEY"
+        )
     print(f"[server] Starting Jarvis UI at http://{BIND_HOST}:{port}")
     print(f"[server] CORS origins: {ALLOWED_ORIGINS}")
     if REQUIRE_AUTH:

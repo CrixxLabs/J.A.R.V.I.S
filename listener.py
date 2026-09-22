@@ -37,8 +37,10 @@ PHRASE_TIME_LIMIT = 20
 
 # ── Interrupt detection thresholds ────────────────────────────────────────────
 INTERRUPT_ENERGY_MULTIPLIER = 3.0    # Higher bar so speech playback doesn't self-trigger
-INTERRUPT_MIN_DURATION = 0.25        # Must sustain for 0.25s to count as real speech
+INTERRUPT_MIN_DURATION = float(os.getenv("JARVIS_INTERRUPT_MIN_DURATION", "0.35"))
 INTERRUPT_CLAP_THRESHOLD_MULT = 5.0  # Even higher for clap detection during speech
+INTERRUPT_ENERGY_FLOOR = float(os.getenv("JARVIS_INTERRUPT_ENERGY_FLOOR", "500"))
+INTERRUPT_START_GRACE = float(os.getenv("JARVIS_INTERRUPT_START_GRACE", "0.35"))
 
 # ── Fallback energy if calibration fails ─────────────────────────────────────
 FALLBACK_ENERGY = 300
@@ -449,6 +451,18 @@ def detect_double_clap():
 # INTERRUPT DETECTION (Layer 5)
 # ══════════════════════════════════════════════════════════════════════════════
 
+def _interrupt_voice_threshold(ambient_energy: float | None = None) -> float:
+    """Compute a conservative interruption threshold during TTS playback."""
+    ambient = ambient_energy if ambient_energy is not None else _ambient_energy
+    try:
+        ambient = float(ambient)
+    except (TypeError, ValueError):
+        ambient = FALLBACK_ENERGY
+    if not np.isfinite(ambient) or ambient <= 0:
+        ambient = FALLBACK_ENERGY
+    return max(INTERRUPT_ENERGY_FLOOR, ambient * INTERRUPT_ENERGY_MULTIPLIER)
+
+
 def _interrupt_watcher():
     """
     Runs in background thread while Jarvis is speaking.
@@ -464,8 +478,10 @@ def _interrupt_watcher():
 
     safe_ambient = _ambient_energy if _ambient_energy > 0 else FALLBACK_ENERGY
 
-    # Higher thresholds during speech playback to avoid self-triggering
-    voice_threshold = safe_ambient * INTERRUPT_ENERGY_MULTIPLIER
+    # Conservative threshold while TTS is playing: calibration can occasionally
+    # report tiny values (e.g. ambient=1), which previously caused energy=21 to
+    # interrupt speech. Never let the speech-interrupt threshold fall below floor.
+    voice_threshold = _interrupt_voice_threshold(safe_ambient)
     clap_threshold  = max(CLAP_ENERGY_THRESHOLD, safe_ambient * INTERRUPT_CLAP_THRESHOLD_MULT)
 
     p = None
@@ -483,6 +499,7 @@ def _interrupt_watcher():
 
         voice_start_time = 0
         clap_times = deque(maxlen=2)
+        watcher_started = time.time()
         last_clap_time = 0
 
         while _interrupt_running:
@@ -507,6 +524,9 @@ def _interrupt_watcher():
                                 clap_times.append(current_time)
 
                 # ── Sustained voice interrupt detection ────────────────────
+                if (current_time - watcher_started) < INTERRUPT_START_GRACE:
+                    voice_start_time = 0
+                    continue
                 if energy > voice_threshold:
                     if voice_start_time == 0:
                         voice_start_time = current_time

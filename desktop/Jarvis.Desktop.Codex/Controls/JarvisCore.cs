@@ -16,6 +16,7 @@ public sealed class JarvisCore : FrameworkElement
     private Profile _from = Profile.For(JarvisState.Idle), _to = Profile.For(JarvisState.Idle);
     private double _transitionStart, _lastFrame, _lastInvalidate, _input, _speech;
     private double? _inputOverride, _speechOverride;
+    public bool DemoMode { get; set; }
     private double _thinkingIntensity = 1, _executionIntensity = 1, _alertSeverity = 1, _moodTension;
     private bool _subscribed;
 
@@ -72,8 +73,8 @@ public sealed class JarvisCore : FrameworkElement
         if (now - _lastInvalidate < interval) return;
         var dt = Math.Clamp(now - _lastFrame, 0, .05);
         _lastFrame = _lastInvalidate = now;
-        var inputTarget = _inputOverride ?? SimulatedInput(now);
-        var speechTarget = _speechOverride ?? SimulatedSpeech(now);
+        var inputTarget = _inputOverride ?? (DemoMode ? SimulatedInput(now) : 0);
+        var speechTarget = _speechOverride ?? (DemoMode ? SimulatedSpeech(now) : 0);
         _input = Follow(_input, inputTarget, dt, inputTarget > _input ? 14 : 6);
         _speech = Follow(_speech, speechTarget, dt, speechTarget > _speech ? 18 : 8);
         InvalidateVisual();

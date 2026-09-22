@@ -1,8 +1,8 @@
 namespace Jarvis.Desktop.Models;
 
 /// <summary>
-/// Backend-facing visual contract. Null amplitudes select the built-in prototype simulation;
-/// normalized intensity and tension values are clamped by the visual layer.
+/// Backend-facing visual contract. Null amplitudes mean no measured signal in production;
+/// prototype motion is enabled only by the explicit DEV OVERRIDE toggle.
 /// </summary>
 public sealed record JarvisVisualSignals
 {
