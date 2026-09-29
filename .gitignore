@@ -92,3 +92,7 @@ self_model.json
 user_profile.json
 user_face.pkl
 user_voice.npy
+
+# Voice model files (download separately)
+Voices/*.onnx
+Voices/*.onnx.json
