@@ -450,7 +450,9 @@ def _build_system_prompt(
             "Never use markdown code fences. "
             "Never invent schemas like {'type': ...} or {'name': ...}. "
             "An action request is only a request to the executor: never claim it succeeded, "
-            "completed, opened, played, sent, changed, or was observed until runtime/tool evidence confirms it."
+            "completed, opened, played, sent, changed, generated, saved, or was observed until runtime/tool evidence confirms it. "
+            "Never invent filenames, screenshots, generated-media paths, browser tabs, opened windows, or tool results. "
+            "If no tool/action was executed, do not describe a tool action as if it happened."
         )
     else:
         system += (

@@ -236,8 +236,8 @@ CAPABILITY_DEFINITIONS = {
     "RUNTIME_SSE": _cap("Runtime SSE bridge", "ui", ["runtime_visuals.py", "jarvis.py"], dependencies=["RUNTIME_SSE"]),
     "WPF_UI": _cap("Native WPF UI", "ui", ["desktop/Jarvis.Desktop.Codex"], dependencies=["WPF_UI"], optional_dependencies=["cap:RUNTIME_SSE"]),
     "BROWSER_UI": _cap("Browser UI", "ui", ["server.py", "ui/index.html"], dependencies=["BROWSER_UI"]),
-    "IMAGE_GENERATION": _cap("Image generation", "generation", ["executor.py"], actions=["generate_image"]),
-    "VIDEO_GENERATION": _cap("Video generation", "generation", ["executor.py"], actions=["generate_video"], dependencies=["OPENROUTER"]),
+    "IMAGE_GENERATION": _cap("NVIDIA Creative Studio image generation", "generation", ["creative_studio/studio.py", "creative_agent.py", "executor.py"], actions=["generate_image", "cancel_generation"]),
+    "VIDEO_GENERATION": _cap("NVIDIA Creative Studio image-to-video generation", "generation", ["creative_studio/studio.py", "creative_agent.py", "executor.py"], actions=["animate_latest_image"]),
     "CREDENTIAL_VAULT": _cap("Credential vault", "security", ["credential_vault.py", "executor.py"], actions=["save_login", "list_logins", "delete_login"]),
     "APP_INSTALLATION": _cap("App installation and login", "system", ["app_installer.py", "login_orchestrator.py"], actions=["install_app", "install_and_login", "open_and_login"]),
 }

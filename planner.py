@@ -236,15 +236,37 @@ def is_capability_question(text: str) -> bool:
     return any(q in lowered for q in CAPABILITY_QUESTIONS)
 
 
+def _creative_capability_response() -> str:
+    """Report Creative Studio from canonical runtime evidence, never from a hardcoded claim."""
+    try:
+        registry = status_registry.get_registry()
+        image = registry.get_capability("IMAGE_GENERATION") or {}
+        video = registry.get_capability("VIDEO_GENERATION") or {}
+        image_ev = image.get("evidence", "UNKNOWN")
+        video_ev = video.get("evidence", "UNKNOWN")
+        image_state = {"LIVE": "live and verified", "PROBED": "probed", "CONFIGURED": "configured",
+                       "CODE": "implemented but not live-verified", "BROKEN": "currently failing",
+                       "BLOCKED": "currently blocked", "DISABLED": "disabled"}.get(image_ev, "not currently verified")
+        video_state = {"LIVE": "live and verified", "PROBED": "probed", "CONFIGURED": "configured",
+                       "CODE": "implemented but not live-verified", "BROKEN": "currently failing",
+                       "BLOCKED": "currently blocked", "DISABLED": "disabled"}.get(video_ev, "not currently verified")
+        return (f"Image generation is {image_state}. Image-to-video is {video_state}. "
+                "Text-to-video and arbitrary image editing are not enabled. "
+                "I only claim a generation result after the runtime actually produces the file.")
+    except Exception as exc:
+        print(f"[Planner] creative capability status unavailable: {type(exc).__name__}")
+        return ("I can generate images through Creative Studio, but I won't claim live availability "
+                "until the runtime verifies it. Image-to-video is not yet live-verified.")
+
 def get_capability_response() -> str:
     """Generate dynamic list of actually operational and available capabilities."""
     model = self_model.get_model()
     available = [c["name"] for c in model.get_available_capabilities()]
     unavailable = [c["name"] for c in model.get_unavailable_capabilities()]
-    
     response = "I am operational. Here is what I can do right now: " + ", ".join(available[:8]) + "."
     if unavailable:
         response += " Currently offline or unavailable features: " + ", ".join(unavailable[:4]) + "."
+    response += " " + _creative_capability_response()
     return response
 
 
@@ -452,7 +474,17 @@ def _is_direct_generation_request(text: str, media: str) -> bool:
         return False
     noun = r"(?:video|clip)" if media == "video" else r"(?:image|picture|photo)"
     command = rf"^(?:please\s+)?(?:create|generate|make|draw)\s+(?:me\s+)?(?:an?\s+|the\s+)?{noun}\b"
-    return bool(re.search(command, low))
+    if re.search(command, low):
+        return True
+
+    # Voice follow-up: Whisper can drop the leading verb after JARVIS just
+    # discussed generation, e.g. "an image of a black and gold arc reactor".
+    # Accept only creation-shaped fragments, not questions/opinions.
+    if media == "image" and re.match(r"^(?:an?\s+)?(?:image|picture|photo)\s+of\s+\S+", low):
+        return True
+    if media == "video" and re.match(r"^(?:a\s+)?(?:video|clip)\s+of\s+\S+", low):
+        return True
+    return False
 
 
 def _deterministic_profile_intent(text: str) -> tuple[dict | None, str] | None:
@@ -697,6 +729,29 @@ def ask(user_input: str, image_b64=None, extra_context: str = "") -> tuple:
     clear_pending_followup()
 
     model_type = "chat"
+    lowered_input = (user_input or "").lower().strip()
+
+    # Tiny conversational acknowledgements must never reach the action-capable
+    # LLM path. They carry no actionable intent and previously could cause the
+    # model to invent an action/file/open operation from stale context.
+    _FILLER_RESPONSES = {
+        "oh": "Yeah.", "oh okay": "Yeah.", "okay": "Okay.", "ok": "Okay.",
+        "alright": "Alright.", "all right": "Alright.", "hmm": "Mm-hm.",
+        "hmmm": "Mm-hm.", "yeah": "Yeah.", "yep": "Yep.", "yup": "Yep.",
+        "thanks": "You're welcome.", "thank you": "You're welcome.",
+    }
+    if lowered_input in _FILLER_RESPONSES:
+        return None, _FILLER_RESPONSES[lowered_input], "fast"
+
+    # Creative capability questions must be answered from runtime evidence,
+    # before the general self-model/LLM path gets a chance to improvise.
+    creative_capability_question = (
+        ("image" in lowered_input or "picture" in lowered_input or "photo" in lowered_input or "video" in lowered_input)
+        and any(v in lowered_input for v in ("can you", "are you able", "what can", "what kind", "which", "do you", "are you capable"))
+        and any(v in lowered_input for v in ("generate", "create", "make", "produce", "edit", "animate"))
+    )
+    if creative_capability_question:
+        return None, _creative_capability_response(), "fast"
 
     sentiment       = core.analyze_sentiment(user_input or "")
     conversation_manager.update_sentiment(sentiment)
@@ -721,7 +776,48 @@ def ask(user_input: str, image_b64=None, extra_context: str = "") -> tuple:
             print(f"[Planner] image_b64 processing failed: {exc}")
             return None, "Could not process the image.", "fast"
 
-    lowered_input = (user_input or "").lower().strip()
+    # Creative Studio agent controls. Keep capability questions conversational and
+    # only execute explicit creation/show commands.
+    creative_terms = ("image generation", "generate images", "generate image", "make images",
+                      "video generation", "generate videos", "generate video", "creative studio")
+    capability_prefixes = ("can you", "are you able", "do you", "what can you", "what are you able")
+    if any(term in lowered_input for term in creative_terms) and (
+            lowered_input.endswith("?") or lowered_input.startswith(capability_prefixes)):
+        return None, (
+            "Yes. My NVIDIA Creative Studio image generation is live and verified. "
+            "I can generate images in the background while we keep talking. I can also turn an image "
+            "into a video through the NVIDIA provider, but that video path still needs its live verification. "
+            "Text-to-video and arbitrary image editing are not enabled yet, so I won't pretend they are."
+        ), "fast"
+
+    if any(x in lowered_input for x in ("show me the generated", "open the generated", "open that image",
+                                         "open the image", "show me the image", "show me that", "open it")):
+        return {"action": "open_latest_generated"}, "Opening it.", "action"
+
+    if any(x in lowered_input for x in ("open generated folder", "open the generated folder",
+                                         "where did you save it", "where is the generated")):
+        return {"action": "open_generated_folder"}, "Opening the generated media folder.", "action"
+
+    if any(x in lowered_input for x in (
+            "is it done", "did it finish", "has it finished", "is it finished",
+            "has the image finished", "has the video finished", "is the image finished", "is the video finished",
+            "generation status", "what's the generation status", "what is the generation status",
+            "are you done generating", "are you still generating", "still generating",
+            "any update on the generation", "any update on the image", "any update on the video",
+            "the image ready", "is the image ready", "is the image done", "image ready",
+            "is the video ready", "is the video done", "video ready", "image already",
+            "did you finish the image", "did you finish the video",
+            "how's the image", "hows the image", "how is the image",
+            "how's the video", "hows the video", "how is the video")):
+        return {"action": "creative_status"}, "", "action"
+
+    if any(x in lowered_input for x in ("cancel that generation", "cancel the generation", "stop generating",
+                                         "cancel image generation", "cancel video generation")):
+        return {"action": "cancel_generation"}, "I'll abandon the active generation job.", "action"
+
+    if any(x in lowered_input for x in ("animate the image", "animate that image", "turn that image into a video",
+                                         "turn the image into a video", "make that image a video")):
+        return {"action": "animate_latest_image", "auto_open": ("show me" in lowered_input or "open" in lowered_input)},                "I'll animate the latest image.", "action"
 
     try:
         correction = personality.capture_explicit_feedback(
@@ -749,7 +845,7 @@ def ask(user_input: str, image_b64=None, extra_context: str = "") -> tuple:
         return action, msg, "action"
 
     if _is_direct_generation_request(user_input, "image"):
-        action = {"action": "generate_image", "prompt": user_input}
+        action = {"action": "generate_image", "prompt": user_input, "auto_open": any(x in lowered_input for x in ("and show me", "then show me", "and open it", "then open it"))}
         action, msg = _validate_and_route_action(action, "Generating image.")
         return action, msg, "action"
 
@@ -857,8 +953,23 @@ def ask(user_input: str, image_b64=None, extra_context: str = "") -> tuple:
         except Exception:
             self_model_str = ""
 
+        try:
+            import creative_agent
+            creative_truth = creative_agent.latest_status()
+            creative_context = (
+                "Creative Studio truth: never invent generated files, screenshots, videos, or opening actions. "
+                f"Current job state={creative_truth.get('active')}; latest real asset={creative_truth.get('latest_asset') or 'none'}. "
+                "Only claim an asset exists when this runtime state contains a real path."
+            )
+        except Exception:
+            creative_context = (
+                "Creative Studio truth: never claim to have generated, saved, or opened an asset unless an actual "
+                "runtime action produced it. Do not invent file paths."
+            )
+
         system_context = (
             f"Known context: {context_hint}\n{facts}\nMemory: {mem_summary or 'none'}\n"
+            f"{creative_context}\n"
             f"Self Capability State: {self_model_str}\n\n"
             f"{conversation_context}"
             + (f"\n{extra_context}" if extra_context else "")

@@ -164,8 +164,9 @@ AVAILABLE_ACTIONS = {
         "track what apps Arju uses", "log daily activity"
     ],
     "generation": [
-        "image generation status (currently unavailable)",
-        "experimental video generation status"
+        "generate images in the background and report when ready",
+        "animate the latest generated image when the video provider is verified",
+        "report truthful Creative Studio capability and job status"
     ],
     "obligations": [
         "add assignment / exam / deadline obligation",
@@ -193,7 +194,7 @@ AVAILABLE_ACTIONS_LIST = [
     "open_app", "close_app", "join_meeting", "system_control", "play_music",
     "send_message", "read_screen", "web_search",
     "type_text", "media", "scroll", "generate_image",
-    "generate_video", "click", "screenshot_describe",
+    "generate_video", "animate_latest_image", "open_latest_generated", "open_generated_folder", "creative_status", "cancel_generation", "click", "screenshot_describe",
     "system_info", "system_status", "datetime", "summarize_url", "remember", "recall",
     "weather", "news", "set_reminder", "send_whatsapp", "send_email",
     "lock_pc", "shutdown_pc", "restart_pc", "morning_briefing",
@@ -964,8 +965,15 @@ IMAGE_GEN_API_KEY = ""
 VIDEO_GEN_API_KEY = ""
 
 
-def generate_image(prompt: str, style: str = "realistic") -> str:
-    return "Image generation is not configured yet."
+def generate_image(prompt: str, style: str = "realistic", auto_open: bool = False) -> str:
+    """Queue NVIDIA image generation without blocking the conversation loop."""
+    try:
+        import creative_agent
+        job = creative_agent.submit_image(prompt, notify=_speak_fn, auto_open=auto_open)
+        return f"On it. I'm generating that in the background. You can keep talking to me while I work. [job {job.id}]"
+    except Exception as exc:
+        print(f"[DEBUG][executor] creative image queue failed: {exc}")
+        return "I couldn't start the image generation job."
 
 
 # ── Video output folder ────────────────────────────────────────────────────────
@@ -1013,165 +1021,9 @@ def _clean_video_prompt(raw_prompt: str) -> str:
 
 
 def generate_video(prompt: str, duration: int = 5) -> str:
-    """Experimental video generation; disabled unless explicitly enabled."""
-    if os.getenv("JARVIS_ENABLE_EXPERIMENTAL_VIDEO_GENERATION", "false").lower() != "true":
-        return "Video generation is experimental and disabled in this MARK VII release."
-    if not API_KEY:
-        return "OpenRouter API key is missing. Add OPENROUTER_API_KEY to your .env file."
-
-    clean_prompt = _clean_video_prompt(prompt)
-    if not clean_prompt:
-        return "I need a description for the video. Try: generate a video of a sunset."
-
-    duration = max(5, min(int(duration), 10))
-
-    print(f"[DEBUG][executor] generate_video prompt='{clean_prompt}' duration={duration}s")
-
-    os.makedirs(_VIDEO_OUTPUT_DIR, exist_ok=True)
-
-    headers = {
-        "Authorization": f"Bearer {API_KEY}",
-        "Content-Type":  "application/json",
-    }
-
-    payload = {
-        "model": "kwaivgi/kling-v3.0-std",
-        "messages": [
-            {
-                "role":    "user",
-                "content": clean_prompt,
-            }
-        ],
-        "duration":         duration,
-        "aspect_ratio":     "16:9",
-        "cfg_scale":        0.5,
-    }
-
-    if _speak_fn:
-        _speak_fn("On it. Video generation can take up to a minute, hang tight.")
-
-    try:
-        resp = requests.post(
-            url="https://openrouter.ai/api/v1/chat/completions",
-            headers=headers,
-            json=payload,
-            timeout=120,
-        )
-    except requests.exceptions.Timeout:
-        print("[DEBUG][executor] generate_video timed out")
-        return (
-            "The video request timed out. The model might be busy — "
-            "try again in a moment."
-        )
-    except requests.exceptions.RequestException as exc:
-        print(f"[DEBUG][executor] generate_video network error: {exc}")
-        return "Couldn't reach the video generation service. Check your connection."
-
-    try:
-        data = resp.json()
-    except ValueError:
-        print(f"[DEBUG][executor] generate_video bad JSON, status={resp.status_code}")
-        return "Got an unexpected response from the video service."
-
-    print(f"[DEBUG][executor] generate_video raw response: {json.dumps(data)[:400]}")
-
-    status_code = resp.status_code
-    if status_code == 429:
-        return (
-            "The video model is rate-limited right now. "
-            "Try again in a minute or two."
-        )
-    if status_code == 202:
-        return (
-            "The video is queued and being generated. "
-            "This model sometimes takes longer — I'll let you know when it's ready."
-        )
-    if status_code not in (200, 201):
-        err_msg = data.get("error", {}).get("message", "") if isinstance(data, dict) else ""
-        print(f"[DEBUG][executor] generate_video API error {status_code}: {err_msg}")
-        return (
-            f"Video generation failed (status {status_code}). "
-            + (err_msg[:120] if err_msg else "The model returned an error.")
-        )
-
-    video_url  = None
-    video_b64  = None
-
-    choices = data.get("choices", [])
-    if choices and isinstance(choices, list):
-        first   = choices[0] if isinstance(choices[0], dict) else {}
-        message = first.get("message", {})
-        content = message.get("content", "")
-
-        if isinstance(content, list):
-            for block in content:
-                if not isinstance(block, dict):
-                    continue
-                btype = block.get("type", "")
-                if btype == "video_url":
-                    video_url = (block.get("video_url") or {}).get("url", "")
-                    break
-                if btype == "text":
-                    text_val = block.get("text", "")
-                    url_match = re.search(r"https?://\S+\.mp4\S*", text_val)
-                    if url_match:
-                        video_url = url_match.group(0)
-                        break
-        elif isinstance(content, str):
-            url_match = re.search(r"https?://\S+\.mp4\S*", content)
-            if url_match:
-                video_url = url_match.group(0)
-
-    if not video_url:
-        video_url = data.get("video_url") or data.get("url") or ""
-
-    if not video_url and not video_b64:
-        print(f"[DEBUG][executor] generate_video no media found in: {json.dumps(data)[:600]}")
-        return (
-            "The video model responded but I couldn't find the video in its reply. "
-            "It may still be processing — try asking again in a moment."
-        )
-
-    timestamp  = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    filename   = f"video_{timestamp}.mp4"
-    save_path  = os.path.join(_VIDEO_OUTPUT_DIR, filename)
-
-    try:
-        if video_url:
-            print(f"[DEBUG][executor] generate_video downloading from {video_url[:80]}")
-            video_resp = requests.get(video_url, timeout=60, stream=True)
-            video_resp.raise_for_status()
-            with open(save_path, "wb") as f:
-                for chunk in video_resp.iter_content(chunk_size=8192):
-                    if chunk:
-                        f.write(chunk)
-        elif video_b64:
-            import base64
-            with open(save_path, "wb") as f:
-                f.write(base64.b64decode(video_b64))
-
-        log_activity("generate_video", clean_prompt[:80])
-        print(f"[DEBUG][executor] generate_video saved to {save_path}")
-
-        try:
-            os.startfile(save_path)
-        except Exception as open_exc:
-            print(f"[DEBUG][executor] generate_video couldn't auto-open: {open_exc}")
-
-        return (
-            f"Done. Your video has been saved to generated_media/videos/{filename} "
-            f"and opened for you."
-        )
-
-    except requests.exceptions.RequestException as dl_exc:
-        print(f"[DEBUG][executor] generate_video download error: {dl_exc}")
-        return (
-            "The video was generated but I couldn't download it. "
-            f"Try grabbing it manually: {video_url}"
-        )
-    except Exception as save_exc:
-        print(f"[DEBUG][executor] generate_video save error: {save_exc}")
-        return "The video was generated but something went wrong while saving it."
+    """Legacy compatibility shim. Text-to-video is not enabled in MARK VII."""
+    return ("Text-to-video is not enabled in MARK VII. "
+            "Use image-to-video with a generated or selected image after that provider is live-verified.")
 
 
 # ── Obligation action handlers (Layer 1) ──────────────────────────────────────
@@ -2125,14 +1977,44 @@ def execute(action, speak_fn=None):
         if act == "exit":
             return _stable_success("")
         if act == "generate_image":
-            return _stable_failure(generate_image(
-                action.get("prompt", ""), action.get("style", "realistic")
+            return _stable_success(generate_image(
+                action.get("prompt", ""), action.get("style", "realistic"),
+                bool(action.get("auto_open", False))
             ))
         if act == "generate_video":
-            msg = generate_video(action.get("prompt", ""), int(action.get("duration", 5)))
-            if os.getenv("JARVIS_ENABLE_EXPERIMENTAL_VIDEO_GENERATION", "false").lower() != "true":
-                return _stable_failure(msg)
-            return _stable_from_text(msg, ("failed", "timed out", "couldn't", "missing", "unexpected", "rate-limited"))
+            # Text-to-video is not yet live-verified. Never silently route to the legacy OpenRouter path.
+            return _stable_failure("I can generate images now, and I can animate an image through Creative Studio. Text-to-video isn't live-verified yet.")
+        if act == "animate_latest_image":
+            try:
+                import creative_agent
+                job = creative_agent.submit_animate(
+                    action.get("image_path"), notify=_speak_fn, auto_open=bool(action.get("auto_open", False))
+                )
+                if not job:
+                    return _stable_failure("I don't have an image to animate yet. Generate or select an image first.")
+                return _stable_success(f"On it. I'm animating the image in the background. You can keep talking to me. [job {job.id}]")
+            except Exception as exc:
+                print(f"[DEBUG][executor] creative video queue failed: {exc}")
+                return _stable_failure("I couldn't start the video generation job.")
+        if act == "open_latest_generated":
+            import creative_agent
+            return _stable_success("Opening it.") if creative_agent.open_asset() else _stable_failure("I don't have a generated file to open yet.")
+        if act == "open_generated_folder":
+            import creative_agent
+            return _stable_success("Opening the generated media folder.") if creative_agent.open_folder() else _stable_failure("I couldn't open the generated media folder.")
+        if act == "cancel_generation":
+            import creative_agent
+            return _stable_success("I've abandoned the active generation job.") if creative_agent.cancel(action.get("job_id")) else _stable_failure("There isn't an active generation job to cancel.")
+        if act == "creative_status":
+            import creative_agent
+            info = creative_agent.latest_status()
+            if info.get("active"):
+                active = info.get("active_jobs") or []
+                kinds = ", ".join(sorted({str(j.get("kind", "generation")) for j in active}))
+                return _stable_success(f"I'm still working on {kinds or 'a generation'} in the background.")
+            if info.get("latest_asset") and os.path.isfile(info["latest_asset"]):
+                return _stable_success(f"The latest generated file is {info['latest_asset']}")
+            return _stable_success("There isn't an active generation job, and I don't have a verified generated asset right now.")
 
         # ── Obligation actions ────────────────────────────────────────────────
         if act == "add_obligation":
@@ -2302,7 +2184,7 @@ def execute_with_retry(action, speak_fn=None, max_retries=1):
         "install_app", "install_and_login", "open_and_login",
         "save_login", "list_logins", "delete_login",
         "self_scan", "self_capabilities", "self_changes",
-        "generate_video", "generate_image",
+        "generate_video", "generate_image", "cancel_generation",
         "process_file", "list_uploaded_files",
         "capture_webcam", "capture_screen_region",
         "analyze_image_file", "read_image_text", "vision_status",
