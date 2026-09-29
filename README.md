@@ -36,7 +36,7 @@ python .\MARK_VII_RELEASE_ACCEPTANCE.py
 python .\launch_mark_vii.py --no-build
 ```
 
-The acceptance runner executes the maintained test suite and verifies the actual local hybrid-brain route, local Qwen vision route, and voice-interrupt safety floor.
+The acceptance runner executes the maintained test suite and verifies the actual local hybrid-brain route, local Ollama `jarvis:latest` vision route, and voice-interrupt safety floor.
 
 ## Major capabilities
 

@@ -20,14 +20,21 @@ from status_registry import SubsystemState, get_registry
 
 BASE_DIR = Path(__file__).resolve().parent
 
-POCKET_PYTHON = Path(os.getenv(
-    "JARVIS_POCKET_TTS_PYTHON",
-    r"C:\Users\sonur\JarvisTTS\.venv\Scripts\python.exe",
-))
-POCKET_VOICE = Path(os.getenv(
-    "JARVIS_POCKET_TTS_VOICE",
-    r"C:\Users\sonur\JarvisVoice\jarvis.safetensors",
-))
+_pocket_python = os.getenv("JARVIS_POCKET_TTS_PYTHON")
+POCKET_PYTHON = Path(_pocket_python) if _pocket_python else None
+if POCKET_PYTHON is None:
+    raise EnvironmentError(
+        "JARVIS_POCKET_TTS_PYTHON environment variable must be set. "
+        "See MARK_VII_SETUP.md for configuration."
+    )
+
+_pocket_voice = os.getenv("JARVIS_POCKET_TTS_VOICE")
+POCKET_VOICE = Path(_pocket_voice) if _pocket_voice else None
+if POCKET_VOICE is None:
+    raise EnvironmentError(
+        "JARVIS_POCKET_TTS_VOICE environment variable must be set. "
+        "See MARK_VII_SETUP.md for configuration."
+    )
 POCKET_DEVICE = os.getenv("JARVIS_POCKET_TTS_DEVICE", "cuda").strip() or "cuda"
 POCKET_HOST = "127.0.0.1"
 POCKET_PORT = int(os.getenv("JARVIS_POCKET_TTS_PORT", "18777"))

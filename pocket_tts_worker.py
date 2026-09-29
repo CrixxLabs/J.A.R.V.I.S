@@ -1,5 +1,5 @@
 # pocket_tts_worker.py — Dedicated persistent Pocket-TTS CUDA worker for JARVIS
-# Run ONLY with C:\Users\sonur\JarvisTTS\.venv\Scripts\python.exe
+# Run with the Python interpreter specified in JARVIS_POCKET_TTS_PYTHON environment variable.
 
 from __future__ import annotations
 
@@ -18,10 +18,13 @@ from pocket_tts import TTSModel
 
 HOST = os.getenv("JARVIS_POCKET_TTS_HOST", "127.0.0.1")
 PORT = int(os.getenv("JARVIS_POCKET_TTS_PORT", "18777"))
-VOICE = Path(os.getenv(
-    "JARVIS_POCKET_TTS_VOICE",
-    r"C:\Users\sonur\JarvisVoice\jarvis.safetensors",
-))
+_voice_path = os.getenv("JARVIS_POCKET_TTS_VOICE")
+VOICE = Path(_voice_path) if _voice_path else None
+if VOICE is None:
+    raise EnvironmentError(
+        "JARVIS_POCKET_TTS_VOICE environment variable must be set. "
+        "See MARK_VII_SETUP.md for configuration."
+    )
 DEVICE = os.getenv("JARVIS_POCKET_TTS_DEVICE", "cuda")
 
 _shutdown = threading.Event()
