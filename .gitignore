@@ -96,3 +96,6 @@ user_voice.npy
 # Voice model files (download separately)
 Voices/*.onnx
 Voices/*.onnx.json
+
+# Never commit real credentials
+.env
