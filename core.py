@@ -7,6 +7,8 @@
 import datetime
 import re
 
+SYSTEM_VERSION = "J.A.R.V.I.S — MARK VIII"
+
 # ── spaCy NLP layer (loaded once, optional — fails gracefully if not installed) ─
 _nlp = None
 _NLP_READY = False

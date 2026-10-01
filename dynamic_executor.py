@@ -14,6 +14,7 @@ from typing import Optional
 
 import brain
 import error_handler
+import preflight_simulator
 from status_registry import EvidenceLevel, SubsystemState, get_registry
 
 
@@ -36,7 +37,8 @@ class DynamicExecutionResult:
 
 def execute_python_code(code: str, timeout: float = DEFAULT_TIMEOUT,
                        working_dir: Optional[str] = None,
-                       enable_retry: bool = True) -> DynamicExecutionResult:
+                       enable_retry: bool = True,
+                       simulate_preflight: bool = False) -> DynamicExecutionResult:
     """Execute arbitrary Python code in an isolated subprocess sandbox.
 
     Args:
@@ -44,6 +46,7 @@ def execute_python_code(code: str, timeout: float = DEFAULT_TIMEOUT,
         timeout: Maximum execution time in seconds (default 30s)
         working_dir: Isolated working directory (defaults to temp directory)
         enable_retry: Enable self-healing retry loop (default True)
+        simulate_preflight: Perform counterfactual pre-flight simulation before committing
 
     Returns:
         DynamicExecutionResult with execution outcome and diagnostics
@@ -58,6 +61,20 @@ def execute_python_code(code: str, timeout: float = DEFAULT_TIMEOUT,
         return DynamicExecutionResult(
             success=False, error="Code payload is empty or whitespace-only"
         )
+
+    # Optional Pre-Flight Counterfactual Simulation gate
+    if simulate_preflight:
+        sim_passed, sim_res = preflight_simulator.preflight_check(code, is_python=True, timeout=min(timeout, 15.0))
+        if not sim_passed:
+            print(f"[DynamicExecutor] Pre-flight simulation gate rejected execution: {sim_res.error or sim_res.stderr}")
+            if not enable_retry:
+                return DynamicExecutionResult(
+                    success=False,
+                    stdout=sim_res.stdout,
+                    stderr=sim_res.stderr or sim_res.error or "Simulation failed",
+                    exit_code=sim_res.exit_code,
+                    error=f"Preflight simulation check failed: {sim_res.error or sim_res.stderr}"
+                )
 
     # Create isolated temporary working directory
     if working_dir is None:

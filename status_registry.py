@@ -1,6 +1,6 @@
 """Canonical capability truth and backward-compatible runtime status registry.
 
-This is the single authority for what MARK VII can currently claim. It keeps
+This is the single authority for what J.A.R.V.I.S. — MARK VIII can currently claim. It keeps
 the old ``SubsystemState``/``state`` API while new decisions use explicit
 evidence levels and current-session ownership.
 """
@@ -245,6 +245,10 @@ CAPABILITY_DEFINITIONS = {
     "COGNITIVE_GRAPH": _cap("Episodic and semantic knowledge graph", "memory", ["cognitive_graph.py"], actions=["add_triple", "query_triples", "get_entity_relations", "find_connections"]),
     "MEMORY_CONSOLIDATOR": _cap("Sleep cycle memory consolidation", "memory", ["memory_consolidator.py"], actions=["consolidate_recent_memory", "run_sleep_cycle"], dependencies=["cap:COGNITIVE_GRAPH"]),
     "PROACTIVE_DAEMON": _cap("Context-aware proactive interruption engine", "system", ["proactive_daemon.py"], dependencies=["PROACTIVE_SCHEDULER"]),
+    "DELIBERATION_ENGINE": _cap("Adversarial multi-persona deliberation engine", "reasoning", ["deliberation.py"], actions=["deliberate", "propose_plan", "critique_plan", "synthesize_decision"]),
+    "PREFLIGHT_SIMULATOR": _cap("Counterfactual pre-flight sandbox simulator", "system", ["preflight_simulator.py"], actions=["simulate_execution", "dry_run_code"], dependencies=["cap:DYNAMIC_EXECUTOR"]),
+    "EPISTEMIC_EVALUATOR": _cap("Epistemic uncertainty calibration", "reasoning", ["epistemic_evaluator.py"], actions=["evaluate_uncertainty", "sample_variations"]),
+    "CURIOSITY_DAEMON": _cap("Autonomous curiosity and diagnostic synthesis", "system", ["curiosity_daemon.py"], dependencies=["cap:COGNITIVE_GRAPH"]),
 }
 
 

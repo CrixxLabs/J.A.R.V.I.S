@@ -140,6 +140,20 @@ print("Fixed version")
         assert result.error is not None
         assert "timeout" in result.error.lower()
 
+    def test_simulate_preflight_passed(self):
+        """Test dynamic execution with pre-flight simulation enabled for valid code."""
+        code = "val = 40 + 2\nprint(f'Ans: {val}')"
+        result = dynamic_executor.execute_python_code(code, enable_retry=False, simulate_preflight=True)
+        assert result.success is True
+        assert "Ans: 42" in result.stdout
+
+    def test_simulate_preflight_rejected(self):
+        """Test dynamic execution rejects code failing preflight simulation."""
+        code = "raise ValueError('Preflight intentional crash')"
+        result = dynamic_executor.execute_python_code(code, enable_retry=False, simulate_preflight=True)
+        assert result.success is False
+        assert "Preflight" in str(result.error) or "crash" in str(result.error)
+
     def test_result_structure(self):
         """Test DynamicExecutionResult structure."""
         result = dynamic_executor.DynamicExecutionResult(

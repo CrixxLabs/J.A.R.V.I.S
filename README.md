@@ -1,21 +1,21 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/MARK_VII-Operational-00d4aa?style=for-the-badge&labelColor=0d1117" alt="MARK VII Status" />
+  <img src="https://img.shields.io/badge/MARK_VIII-Operational-00d4aa?style=for-the-badge&labelColor=0d1117" alt="MARK VIII Status" />
   <img src="https://img.shields.io/badge/Python-3.11+-3776ab?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/.NET-8.0-512bd4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET" />
   <img src="https://img.shields.io/badge/Platform-Windows-0078d4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows" />
-  <img src="https://img.shields.io/badge/Tests-223_passing-2ea043?style=for-the-badge" alt="Tests" />
-  <img src="https://img.shields.io/badge/License-Proprietary-f85149?style=for-the-badge" alt="License" />
+  <img src="https://img.shields.io/badge/Tests-357_passing-2ea043?style=for-the-badge" alt="Tests" />
+  <img src="https://img.shields.io/badge/Architecture-Deliberative_Cognitive-blueviolet?style=for-the-badge" alt="Architecture" />
 </p>
 
-<h1 align="center">J.A.R.V.I.S — MARK VII</h1>
+<h1 align="center">J.A.R.V.I.S — MARK VIII</h1>
 
 <p align="center">
-  <strong>An autonomous, local-first Windows AI assistant that listens, reasons, plans, executes deterministic actions, and verifies outcomes — engineered for real work, not demonstrations.</strong>
+  <strong>An introspective, deliberative autonomous cognitive architecture with pre-flight counterfactual simulation, adversarial multi-persona deliberation, and epistemic uncertainty calibration — engineered for safety, precision, and mission-critical execution.</strong>
 </p>
 
 <p align="center">
-  Hybrid Multi-Model Brain · Planner → Executor → Observer Loop · CUDA Pocket-TTS Voice · Resemblyzer Speaker ID<br/>
-  Multimodal Vision + Tesseract OCR · 50+ Deterministic System Actions · Native WPF Holographic HUD + Web UI
+  Adversarial Deliberation Engine · Pre-Flight Counterfactual Sandbox · Epistemic Entropy Calibration<br/>
+  Autonomous Curiosity Daemon · Episodic Cognitive Graph · Canary Self-Healing CI/CD · 50+ Deterministic System Actions · Native WPF Holographic HUD
 </p>
 
 ---
@@ -23,95 +23,119 @@
 ## 📸 Runtime HUD & Interface
 
 <p align="center">
-  <img src="docs/Screenshots/speak.png" alt="JARVIS MARK VII Native HUD - Speaking State" width="90%" />
+  <img src="docs/Screenshots/speak.png" alt="JARVIS Native HUD - Speaking State" width="90%" />
   <br/>
   <em><strong>Figure 1: Native WPF Desktop Client in Live Speaking State</strong> — Real-time telemetry showing active cognitive routing to <code>OLLAMA: JARVIS:LATEST</code>, memory footprint tracking (92.6%), screen capture vision verification, and streaming vocal output channel.</em>
 </p>
 
 <p align="center">
-  <img src="docs/Screenshots/Screenshot%202026-10-01%20202125.png" alt="JARVIS MARK VII Native HUD - Thinking State" width="90%" />
+  <img src="docs/Screenshots/Screenshot%202026-10-01%20202125.png" alt="JARVIS Native HUD - Thinking State" width="90%" />
   <br/>
   <em><strong>Figure 2: Cognitive Synthesis & Routing</strong> — Multi-model brain evaluating query complexity, routing intent between local and cloud reasoning tiers, and updating active cognitive array status in real time.</em>
 </p>
 
 <p align="center">
-  <img src="docs/Screenshots/sleep.png" alt="JARVIS MARK VII Native HUD - Dormant State" width="90%" />
+  <img src="docs/Screenshots/sleep.png" alt="JARVIS Native HUD - Dormant State" width="90%" />
   <br/>
   <em><strong>Figure 3: Quiescent Low-Power State</strong> — HUD idling in low-power dormant mode with acoustic double-clap wake detection armed and background system resource monitoring active.</em>
 </p>
 
 ---
 
-## 🏗️ Architecture: Closed-Loop Agent
+## 🏛️ MARK VIII Core Cognitive Upgrades
 
-JARVIS is built as a **deterministic, closed-loop agent**. Unlike basic conversational chatbots, every request undergoes intent decomposition, capability catalog validation, bounded tool execution, and post-action sensory observation with automatic replanning.
+J.A.R.V.I.S. MARK VIII transitions the system from a reactive closed-loop agent into an introspective, deliberative cognitive architecture:
 
 ```
                                   ┌────────────────────────┐
-                                  │      USER INPUT        │
+                                  │      USER INTENT       │
                                   │  Voice · Web · Desktop │
                                   └───────────┬────────────┘
                                               │
                                               ▼
  ┌────────────────────────────────────────────────────────────────────────────────────────┐
- │                              ① PLANNER (planner.py)                                    │
+ │                    ① ADVERSARIAL DELIBERATION ENGINE (deliberation.py)                 │
  │                                                                                        │
- │   • Intent Classification: [fast | chat | action | reasoning | capability]             │
- │   • Capability Catalog Check (self_model.py): can_do(action) + fallback resolution     │
- │   • Self-Awareness & Diagnostic Query Interception                                     │
- │   • Routes to: Local Rule Handler  OR  Brain Router (LLM)                              │
- │   • Emits: (action_dict | None, spoken_response_str, model_type_str)                   │
- └────────────────────────────────────────────┬───────────────────────────────────────────┘
-                                              │
-                       ┌──────────────────────┴──────────────────────┐
-                       │                                             │
-                       ▼                                             ▼
-             ┌───────────────────┐                         ┌───────────────────┐
-             │ Direct Voice/Text │                         │    ② EXECUTOR     │
-             │     Response      │                         │   (executor.py)   │
-             └───────────────────┘                         └─────────┬─────────┘
-                                                                     │
-                                              ┌──────────────────────┴────────────────────┐
-                                              │ 50+ Deterministic Action Handlers:        │
-                                              │ • Application & Window Automation (PyAuto)│
-                                              │ • Winget Installer & Credential Vault     │
-                                              │ • File Processor (PDF/DOCX/XLSX/OCR/Media)│
-                                              │ • Vision Analysis & Screen Inspection     │
-                                              │ • Obligation Engine & Task Scheduler      │
-                                              │ • Spotify, Google Calendar, Gmail, News   │
-                                              │ • Creative Studio (NVIDIA NIM Generation) │
-                                              └──────────────────────┬────────────────────┘
-                                                                     │
-                                                                     ▼
- ┌────────────────────────────────────────────────────────────────────────────────────────┐
- │                              ③ OBSERVER (observer.py)                                  │
- │                                                                                        │
- │   • Active Window & Focus Tracker (Win32 API process-to-application mapping)           │
- │   • Screen Delta Hashing (MSS screenshot diff engine)                                  │
- │   • Hardware Telemetry Watcher (psutil CPU, RAM, Battery %, Charging state)            │
- │   • Execution Outcome Verification                                                     │
- └────────────────────────────────────────────┬───────────────────────────────────────────┘
-                                              │
-                             ┌────────────────┴────────────────┐
-                             │                                 │
-                     [Outcome Verified]                [Action Failed]
-                             │                                 │
-                             ▼                                 ▼
-                     ┌───────────────┐                 ┌───────────────┐
-                     │ Status Update │                 │ ④ REPLANNER   │
-                     │  & Final Voice│                 │ (planner.py)  │
-                     │   Synthesis   │                 └───────┬───────┘
-                     └───────────────┘                         │
-                                                               └──▶ Fallback / Alternative Action
+ │   ┌───────────────────────┐   ┌──────────────────────────┐   ┌─────────────────────┐   │
+ │   │   ARCHITECT PERSONA   │──▶│    RED-TEAM SCEPTIC      │──▶│    JUDGE ARBITER    │   │
+ │   │ Formulates structured │   │ Adversarially audits for │   │ Evaluates critiques │   │
+ │   │ multi-step execution  │   │ destructive commands,    │   │ modifies plans with │   │
+ │   │ candidate proposals   │   │ path traversal & leaks   │   │ guardrails/rejects  │   │
+ │   └───────────────────────┘   └──────────────────────────┘   └──────────┬──────────┘   │
+ └─────────────────────────────────────────────────────────────────────────┼──────────────┘
+                                                                           │
+                                              ┌────────────────────────────┴──────────────┐
+                                              │ [APPROVED / GUARDED]                      │
+                                              ▼                                           ▼
+ ┌─────────────────────────────────────────────────────────┐                     ┌────────────────┐
+ │        ② COUNTERFACTUAL PRE-FLIGHT SIMULATOR            │                     │  [REJECTED]    │
+ │                (preflight_simulator.py)                 │                     │ Execution      │
+ │                                                         │                     │ Aborted Safely │
+ │   • Ephemeral Isolation Sandbox (tempfile.mkdtemp())    │                     └────────────────┘
+ │   • Shadow-Copies Target Read/Write Files               │
+ │   • Dry-Run Execution with Mocked Network/Filesystem    │
+ │   • Asserts Exit Code 0 & Verifies State Diff           │
+ └────────────────────────────┬────────────────────────────┘
+                              │
+                              ▼
+ ┌─────────────────────────────────────────────────────────┐
+ │          ③ DYNAMIC EXECUTOR (dynamic_executor.py)       │
+ │                     & EXECUTOR (executor.py)            │
+ │                                                         │
+ │   • Commits verified changes to live Windows system     │
+ │   • 50+ Deterministic System Handlers                   │
+ │   • Epistemic Uncertainty Calibration                   │
+ └────────────────────────────┬────────────────────────────┘
+                              │
+                              ▼
+ ┌─────────────────────────────────────────────────────────┐
+ │             ④ OBSERVER & COGNITIVE GRAPH                │
+ │       (observer.py & cognitive_graph.py)                │
+ │                                                         │
+ │   • Win32 focus tracking, screen hashing, hardware load │
+ │   • Persistent Relational Triples in SQLite WAL         │
+ │   • Autonomous Curiosity Daemon in Idle Periods         │
+ └─────────────────────────────────────────────────────────┘
 ```
+
+---
+
+### 1. ⚔️ Adversarial Deliberation Engine (`deliberation.py`)
+High-complexity, destructive, or ambiguous plans undergo a multi-persona adversarial audit before execution:
+1. **Architect Persona:** Proposes a structured multi-step execution strategy.
+2. **Red-Team Sceptic Persona:** Proactively probes for destructive filesystem operations (`rm -rf`, `del /f`, `format`), path traversals (`../../`), credential exposure (`.env`, `credentials.json`, `token.json`), and fork bombs.
+3. **Judge Arbiter:** Synthesizes critiques into three verdicts:
+   - **`APPROVED`**: Benign, low-risk requests execute directly.
+   - **`MODIFIED_WITH_GUARDRAILS`**: Injects sandboxing, file shadow backups, and 15s execution timeouts.
+   - **`REJECTED`**: Aborts critical hazards to preserve system integrity.
+
+### 2. 🧪 Counterfactual Pre-Flight Simulator (`preflight_simulator.py`)
+Before code or script commands mutate the live system:
+- Spins up an **ephemeral sandbox workspace** (`tempfile.mkdtemp()`).
+- Automatically detects referenced files and **shadow-copies** them into the container.
+- Dry-runs candidate code in the sandbox with offline network mocks.
+- Asserts exit code `0`, verifies expected state diffs (`files_created`, `files_modified`, `files_deleted`), and only commits to the real filesystem if simulation passes.
+
+### 3. 🎯 Epistemic Uncertainty Evaluator (`epistemic_evaluator.py`)
+- Computes cross-sample **semantic dispersion** and token disagreement entropy across output variations.
+- When uncertainty exceeds calibrated thresholds, automatically injects self-correcting verbal hedges (*"I have low certainty regarding this specific procedure, sir. Verifying against local records before proceeding."*).
+
+### 4. 🔍 Autonomous Curiosity Daemon (`curiosity_daemon.py`) & Knowledge Graph (`cognitive_graph.py`)
+- Activates in background when the system is **quiescent** (> 20 min idle, CPU < 25%).
+- Audits `status_registry.py` for unverified, broken, or degraded capability paths.
+- Executes safe non-destructive diagnostic checks.
+- Persists relational discoveries into the SQLite-backed **Episodic Cognitive Knowledge Graph** (`cognitive_graph.py`).
+
+### 5. 🐣 Canary Self-Healing Architecture (`evolver.py`)
+- Generates AI patches for runtime errors and isolates candidate fixes on ephemeral git canary branches.
+- Executes the full test suite (`run_canary_tests()`).
+- Automatically promotes and merges patches only if 100% of canary tests pass; rolls back cleanly otherwise.
 
 ---
 
 ## 🧠 Brain Router & Multi-Model Fallback
 
 All language and multimodal intelligence routes through `brain.py` — the system's single LLM gateway. The brain does not speak or print directly; it returns structured data through complexity-aware routing backed by a thread-safe circuit breaker (`provider_health.py`).
-
-### Routing Policy
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
@@ -132,21 +156,6 @@ All language and multimodal intelligence routes through `brain.py` — the syste
 │    Fallback 1: Google Gemini Vision                                                    │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
-
-### Provider Health & Circuit Breaker Cooldowns
-
-When a provider fails, `provider_health.py` transitions the provider-model pair into a cooldown state and diverts subsequent calls to the next tier in the chain:
-
-| Health State | Cooldown Duration | Trigger Condition |
-|---|---|---|
-| `LIVE` | — | Successful inference during the active runtime session |
-| `TIMEOUT` | **20 seconds** | Request exceeded connection/read deadline |
-| `RATE_LIMITED` | **60 seconds** | HTTP 429 Too Many Requests |
-| `SERVER_ERROR` | **30 seconds** | HTTP 500/502/503/504 internal server error |
-| `OFFLINE` | **15 seconds** | Connection refused / endpoint unreachable |
-| `BAD_REQUEST` | **30 minutes** | HTTP 400 invalid parameters or payload |
-| `AUTH_ERROR` | **1 hour** | HTTP 401/403 invalid or expired API key |
-| `MODEL_UNAVAILABLE` | **1 hour** | HTTP 404 target model not found on endpoint |
 
 ---
 
@@ -225,7 +234,11 @@ UNKNOWN ──▶ CODE ──▶ CONFIGURED ──▶ PROBED ──▶ LIVE
 | | `portal_scan` | Web portal crawler for pending assignments and tasks |
 | | `remember`, `recall` | Semantic episodic memory ledger (`memory.py`) |
 | | `profile_query`, `profile_remember`, `profile_forget` | User personality, habits, and preferences manager |
-| **Self-Awareness & Dev** | `run_diagnostic` | Subsystem integrity and hardware diagnostic sweep |
+| **Cognitive Architecture** | `deliberate`, `propose_plan`, `critique_plan` | 3-Persona adversarial deliberation engine (`deliberation.py`) |
+| | `simulate_execution`, `dry_run_code` | Counterfactual pre-flight sandbox simulator (`preflight_simulator.py`) |
+| | `evaluate_uncertainty`, `sample_variations` | Epistemic entropy calibration (`epistemic_evaluator.py`) |
+| | `query_knowledge`, `traverse_graph` | Episodic & semantic cognitive knowledge graph (`cognitive_graph.py`) |
+| | `run_diagnostic` | Subsystem integrity and hardware diagnostic sweep |
 | | `self_scan`, `self_capabilities`, `self_changes` | AST-based codebase introspection and change analyzer |
 | | `creative_status`, `generate_image`, `generate_video` | NVIDIA NIM-backed Creative Studio generative workflow |
 
@@ -261,7 +274,7 @@ python -m pip install -r requirements-optional.txt
 # Start Ollama service
 ollama serve
 
-# Pull the pinned MARK VII model
+# Pull the pinned MARK VIII model
 ollama pull jarvis:latest
 
 # Verify model availability
@@ -349,10 +362,10 @@ dotnet run --project desktop\Jarvis.Desktop.Codex\Jarvis.Desktop.csproj --config
 
 ## 🧪 Test Suite & Regression Verification
 
-JARVIS includes a test suite covering lifecycle, provider health, OCR reliability, executor safety, memory ledgers, and planner routing:
+JARVIS includes a comprehensive test suite covering deliberative reasoning, pre-flight simulation, epistemic calibration, canary self-healing, provider circuit breakers, and cognitive graph operations:
 
 ```powershell
-# Execute all 223 unit and regression tests
+# Execute all 357 unit, integration, and cognitive regression tests
 python -m pytest -q tests
 
 # Run codebase syntax and compile check
@@ -360,11 +373,12 @@ python -m compileall -q .
 ```
 
 ```
-........................................................................ [ 32%]
-........................................................................ [ 64%]
-........................................................................ [ 96%]
-.......                                                                  [100%]
-============================== 223 passed in 36.98s ===============================
+........................................................................ [ 20%]
+........................................................................ [ 40%]
+........................................................................ [ 60%]
+........................................................................ [ 80%]
+.....................................................................    [100%]
+============================== 357 passed in 65.14s ===============================
 ```
 
 ---
@@ -375,6 +389,17 @@ python -m compileall -q .
 J.A.R.V.I.S/
 ├── jarvis.py                  # Canonical runtime entry point & vocal loop owner
 ├── launch_mark_vii.py         # Ownership-aware WPF & Python lifecycle coordinator
+│
+├── deliberation.py            # Adversarial 3-persona deliberation engine
+├── preflight_simulator.py     # Counterfactual ephemeral sandbox simulator
+├── epistemic_evaluator.py     # Epistemic uncertainty & entropy calibrator
+├── curiosity_daemon.py        # Autonomous quiescent curiosity & diagnostic daemon
+├── cognitive_graph.py         # SQLite WAL relational knowledge graph
+├── memory_consolidator.py     # Sleep-cycle memory consolidation engine
+├── dynamic_executor.py        # Isolated dynamic REPL & preflight safety gate
+├── gui_agent.py               # Vision-to-action GUI automation fallback
+├── evolver.py                 # Canary branch self-healing architecture
+├── proactive_daemon.py        # Background telemetry watcher & alert engine
 │
 ├── brain.py                   # Multi-model LLM router & complexity dispatcher
 ├── provider_health.py         # Thread-safe circuit breaker & cooldown manager
@@ -397,44 +422,16 @@ J.A.R.V.I.S/
 ├── task_queue.py              # Thread-safe prioritized asynchronous task queue
 ├── tasks.py                   # Task ledger & reminder dispatcher
 ├── obligations.py             # Academic/professional obligation tracker
-├── proactive_scheduler.py     # Background proactive alert scheduler (Battery/CPU)
 ├── memory.py                  # Semantic episodic & preference memory storage
 ├── personality.py             # Behavioral configuration & response styling
-├── self_awareness.py          # Introspective codebase structure scanner
-├── evolver.py                 # Self-patching & proposed improvement engine
 │
 ├── server.py                  # Flask web backend with SSE bridge & upload handler
-├── creative_studio/           # Experimental NVIDIA NIM image & video synthesis
-├── skills/                    # Modular runtime-loaded skill plugins
-│   ├── pc_doctor.py
-│   └── project_dev_assistant.py
-│
-├── desktop/
-│   └── Jarvis.Desktop.Codex/  # Active .NET 8 WPF Desktop Client
-├── docs/
-│   └── Screenshots/           # Interface and HUD visual captures
-└── tests/                     # Comprehensive 223-test regression suite
+├── desktop/                   # Native C# / WPF Holographic HUD desktop client
+└── tests/                     # 357 unit and integration regression test suite
 ```
 
 ---
 
-## 🔒 Privacy, Isolation & Security
-
-- **Strict Local-First Routing:** All routine queries and vision frames process locally on Ollama before any external API is queried.
-- **Secure Key Storage:** App logins and integration secrets are isolated within the OS credential vault (`keyring`), never logged or serialized.
-- **Loopback Enforcement:** Desktop SSE bridge and Web backend bind to `127.0.0.1` by default; cross-origin requests require explicit authorization.
-- **Zero-Leak Policy:** Personal memory ledgers (`memory.json`), task databases (`tasks.json`), face embeddings (`user_face.pkl`), and `.env` credentials are excluded from version control.
-
----
-
-## 📜 License & Copyright
-
-Copyright © 2024 Arju Chamling ([CrixxLabs](https://github.com/CrixxLabs)). All rights reserved.
-
-This software and associated documentation files are proprietary and confidential. Unauthorized copying, distribution, or modification is strictly prohibited. See [LICENSE](LICENSE) for terms.
-
----
-
 <p align="center">
-  <strong>JARVIS MARK VII — Built for real work, not demos.</strong>
+  <strong>J.A.R.V.I.S. — MARK VIII</strong> · <em>Introspective Deliberative Intelligence</em>
 </p>
