@@ -19,11 +19,14 @@ from pocket_tts import TTSModel
 HOST = os.getenv("JARVIS_POCKET_TTS_HOST", "127.0.0.1")
 PORT = int(os.getenv("JARVIS_POCKET_TTS_PORT", "18777"))
 _voice_path = os.getenv("JARVIS_POCKET_TTS_VOICE")
-VOICE = Path(_voice_path) if _voice_path else None
-if VOICE is None:
+if not _voice_path:
+    # Hard fallback to the canonical Jarvis voice
+    _voice_path = str(Path(__file__).parent / "Voices" / "Jarvis.wav")
+VOICE = Path(_voice_path)
+if not VOICE.exists():
     raise EnvironmentError(
-        "JARVIS_POCKET_TTS_VOICE environment variable must be set. "
-        "See MARK_VII_SETUP.md for configuration."
+        f"JARVIS_POCKET_TTS_VOICE not found: {VOICE}. "
+        "Set JARVIS_POCKET_TTS_VOICE in .env or place Jarvis.wav in D:\\J.A.R.V.I.S\\Voices\\"
     )
 DEVICE = os.getenv("JARVIS_POCKET_TTS_DEVICE", "cuda")
 

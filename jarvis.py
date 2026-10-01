@@ -123,13 +123,14 @@ last_active = time.time()
 _pending_save_login = None
 
 
-def _ensure_mixer():
-    """Ensure pygame mixer is ready."""
+def _ensure_mixer(frequency: int = 44100):
+    """Ensure pygame mixer is ready at the requested sample rate."""
     if pygame is None:
         return False
     try:
-        if not pygame.mixer.get_init():
-            pygame.mixer.init()
+        init_state = pygame.mixer.get_init()
+        if not init_state:
+            pygame.mixer.init(frequency=frequency)
             return True
         return True
     except Exception as exc:

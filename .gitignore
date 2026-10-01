@@ -79,6 +79,7 @@ MARK_VII_RELEASE_AUDIT_*.zip
 calc.html
 temp.html
 temp.py
+claude.txt
 
 # Private runtime state
 user_voice_sample.wav

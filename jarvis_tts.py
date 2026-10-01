@@ -15,26 +15,22 @@ import time
 from pathlib import Path
 from typing import Callable, Optional
 
+from dotenv import load_dotenv
+
 import error_handler
 from status_registry import SubsystemState, get_registry
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
 
 _pocket_python = os.getenv("JARVIS_POCKET_TTS_PYTHON")
 POCKET_PYTHON = Path(_pocket_python) if _pocket_python else None
-if POCKET_PYTHON is None:
-    raise EnvironmentError(
-        "JARVIS_POCKET_TTS_PYTHON environment variable must be set. "
-        "See MARK_VII_SETUP.md for configuration."
-    )
 
 _pocket_voice = os.getenv("JARVIS_POCKET_TTS_VOICE")
+if not _pocket_voice:
+    _pocket_voice = str(BASE_DIR / "Voices" / "Jarvis.wav")
 POCKET_VOICE = Path(_pocket_voice) if _pocket_voice else None
-if POCKET_VOICE is None:
-    raise EnvironmentError(
-        "JARVIS_POCKET_TTS_VOICE environment variable must be set. "
-        "See MARK_VII_SETUP.md for configuration."
-    )
 POCKET_DEVICE = os.getenv("JARVIS_POCKET_TTS_DEVICE", "cuda").strip() or "cuda"
 POCKET_HOST = "127.0.0.1"
 POCKET_PORT = int(os.getenv("JARVIS_POCKET_TTS_PORT", "18777"))
@@ -80,6 +76,10 @@ def _probe_worker(timeout: float = 0.6) -> bool:
 
 
 def prerequisites() -> tuple[bool, str]:
+    if POCKET_PYTHON is None:
+        return False, "JARVIS_POCKET_TTS_PYTHON not set in .env — see MARK_VII_SETUP.md"
+    if POCKET_VOICE is None:
+        return False, "JARVIS_POCKET_TTS_VOICE not set in .env — see MARK_VII_SETUP.md"
     if not POCKET_PYTHON.exists():
         return False, f"Pocket-TTS Python missing: {POCKET_PYTHON}"
     if not POCKET_VOICE.exists():
@@ -246,11 +246,15 @@ def stream_speech(
             sample_rate = int(header["sample_rate"])
             channels = int(header.get("channels", 1))
 
+            # Use a reasonable blocksize to prevent buffer underruns on Windows audio drivers.
+            # 0 means "no buffering" which can cause fast playback/stuttering on some hardware.
+            chunk_size = 2048  # ~85ms at 24kHz, good balance between latency and stability
+
             with sd.RawOutputStream(
                 samplerate=sample_rate,
                 channels=channels,
                 dtype="float32",
-                blocksize=0,
+                blocksize=chunk_size,
                 latency="low",
             ) as output:
                 while True:
