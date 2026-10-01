@@ -244,6 +244,7 @@ CAPABILITY_DEFINITIONS = {
     "GUI_AGENT": _cap("Vision-guided GUI automation", "automation", ["gui_agent.py"], actions=["click_element", "type_into", "hover_element"], dependencies=["cap:VISION_ROUTER"], optional_dependencies=["UI_AUTOMATION"]),
     "COGNITIVE_GRAPH": _cap("Episodic and semantic knowledge graph", "memory", ["cognitive_graph.py"], actions=["add_triple", "query_triples", "get_entity_relations", "find_connections"]),
     "MEMORY_CONSOLIDATOR": _cap("Sleep cycle memory consolidation", "memory", ["memory_consolidator.py"], actions=["consolidate_recent_memory", "run_sleep_cycle"], dependencies=["cap:COGNITIVE_GRAPH"]),
+    "PROACTIVE_DAEMON": _cap("Context-aware proactive interruption engine", "system", ["proactive_daemon.py"], dependencies=["PROACTIVE_SCHEDULER"]),
 }
 
 
