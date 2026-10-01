@@ -93,6 +93,10 @@ self_model.json
 user_profile.json
 user_face.pkl
 user_voice.npy
+cognitive_graph.db
+cognitive_graph.db-wal
+cognitive_graph.db-shm
+evolver_backups/
 
 # Voice model files (download separately)
 Voices/*.onnx
