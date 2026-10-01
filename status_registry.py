@@ -249,6 +249,13 @@ CAPABILITY_DEFINITIONS = {
     "PREFLIGHT_SIMULATOR": _cap("Counterfactual pre-flight sandbox simulator", "system", ["preflight_simulator.py"], actions=["simulate_execution", "dry_run_code"], dependencies=["cap:DYNAMIC_EXECUTOR"]),
     "EPISTEMIC_EVALUATOR": _cap("Epistemic uncertainty calibration", "reasoning", ["epistemic_evaluator.py"], actions=["evaluate_uncertainty", "sample_variations"]),
     "CURIOSITY_DAEMON": _cap("Autonomous curiosity and diagnostic synthesis", "system", ["curiosity_daemon.py"], dependencies=["cap:COGNITIVE_GRAPH"]),
+    "SKILL_SYNTHESIZER": _cap("Autonomous procedural skill synthesis", "development", ["skill_synthesizer.py"], actions=["synthesize_and_execute_skill", "synthesize_skill"], dependencies=["cap:PREFLIGHT_SIMULATOR", "cap:DYNAMIC_EXECUTOR"]),
+    "SELF_INTROSPECTION": _cap("Codebase AST structural introspection", "reasoning", ["self_introspection.py"], actions=["get_codebase_context", "index_codebase"]),
+    "AUTOBIOGRAPHY": _cap("Autobiographical evolution and git memory", "memory", ["autobiography.py"], actions=["get_autobiographical_summary", "get_evolution_milestones"]),
+    "GOAL_MANAGER": _cap("Hierarchical long-horizon goal management", "planning", ["goal_manager.py"], actions=["create_goal", "decompose_goal", "update_milestone_status", "replan_goal"]),
+    "FOVEATED_VISION": _cap("Foveated saccadic visual grounding", "vision", ["foveated_vision.py"], actions=["saccadic_crop_and_ground", "foveated_locate_element"], dependencies=["cap:VISION_ROUTER"]),
+    "CAUSAL_ENGINE": _cap("Causal state transition modeling", "reasoning", ["causal_engine.py"], actions=["predict_state_transition", "verify_causal_transition"]),
+    "EXPERIENCE_DISTILLER": _cap("Experience distillation for offline fine-tuning", "learning", ["experience_distiller.py"], actions=["distill_execution_sample", "export_dataset"]),
 }
 
 

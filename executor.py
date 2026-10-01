@@ -2170,6 +2170,21 @@ def execute(action, speak_fn=None):
             if act == "dev_status":
                 return DEV_AGENT_ACTIONS["dev_status"](action)
 
+        # Autonomous Skill Synthesis (MARK VIII)
+        if act.startswith("custom_") or act.startswith("skill_") or action.get("synthesize_if_missing"):
+            try:
+                import skill_synthesizer
+                ok, msg = skill_synthesizer.synthesize_and_execute_skill(
+                    task_description=action.get("task", action.get("prompt", act)),
+                    params=action.get("params", action),
+                    skill_name=act if not act.startswith("custom_") else act[7:],
+                )
+                if ok:
+                    return _stable_success(msg)
+                return _stable_failure(msg)
+            except Exception as exc:
+                print(f"[DEBUG][executor] Skill synthesizer execution failed: {exc}")
+
         return _stable_failure("Unsupported action.")
     except Exception as exc:
         print(f"[DEBUG][executor] unhandled error for action {act}: {exc}")

@@ -3,19 +3,20 @@
   <img src="https://img.shields.io/badge/Python-3.11+-3776ab?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/.NET-8.0-512bd4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET" />
   <img src="https://img.shields.io/badge/Platform-Windows-0078d4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows" />
-  <img src="https://img.shields.io/badge/Tests-357_passing-2ea043?style=for-the-badge" alt="Tests" />
+  <img src="https://img.shields.io/badge/Tests-383_passing-2ea043?style=for-the-badge" alt="Tests" />
   <img src="https://img.shields.io/badge/Architecture-Deliberative_Cognitive-blueviolet?style=for-the-badge" alt="Architecture" />
 </p>
 
 <h1 align="center">J.A.R.V.I.S — MARK VIII</h1>
 
 <p align="center">
-  <strong>An introspective, deliberative autonomous cognitive architecture with pre-flight counterfactual simulation, adversarial multi-persona deliberation, and epistemic uncertainty calibration — engineered for safety, precision, and mission-critical execution.</strong>
+  <strong>An introspective, deliberative autonomous cognitive architecture with pre-flight counterfactual simulation, adversarial multi-persona deliberation, open-ended skill synthesis, AST codebase introspection, and causal state modeling — engineered for safety, precision, and mission-critical execution.</strong>
 </p>
 
 <p align="center">
   Adversarial Deliberation Engine · Pre-Flight Counterfactual Sandbox · Epistemic Entropy Calibration<br/>
-  Autonomous Curiosity Daemon · Episodic Cognitive Graph · Canary Self-Healing CI/CD · 50+ Deterministic System Actions · Native WPF Holographic HUD
+  Autonomous Skill Synthesizer (Voyager) · Codebase AST Introspection · Hierarchical Goal DAG · Foveated Saccadic Vision<br/>
+  Causal World State Predictor · Experience Distillation · Canary Self-Healing CI/CD · Native WPF Holographic HUD
 </p>
 
 ---
@@ -42,9 +43,9 @@
 
 ---
 
-## 🏛️ MARK VIII Core Cognitive Upgrades
+## 🏛️ MARK VIII Core Cognitive Architecture
 
-J.A.R.V.I.S. MARK VIII transitions the system from a reactive closed-loop agent into an introspective, deliberative cognitive architecture:
+J.A.R.V.I.S. MARK VIII transitions the system into an introspective, deliberative cognitive architecture:
 
 ```
                                   ┌────────────────────────┐
@@ -79,22 +80,24 @@ J.A.R.V.I.S. MARK VIII transitions the system from a reactive closed-loop agent 
                               │
                               ▼
  ┌─────────────────────────────────────────────────────────┐
- │          ③ DYNAMIC EXECUTOR (dynamic_executor.py)       │
- │                     & EXECUTOR (executor.py)            │
+ │       ③ AUTONOMOUS SKILL SYNTHESIS & EXECUTION          │
+ │         (skill_synthesizer.py & executor.py)            │
  │                                                         │
- │   • Commits verified changes to live Windows system     │
- │   • 50+ Deterministic System Handlers                   │
- │   • Epistemic Uncertainty Calibration                   │
+ │   • Voyager open-ended procedural code generation       │
+ │   • Self-healing preflight validation & auto-patching   │
+ │   • Dynamic hot-reloading into runtime skills registry  │
+ │   • Hierarchical Goal Management DAG (goal_manager.py)  │
  └────────────────────────────┬────────────────────────────┘
                               │
                               ▼
  ┌─────────────────────────────────────────────────────────┐
- │             ④ OBSERVER & COGNITIVE GRAPH                │
- │       (observer.py & cognitive_graph.py)                │
+ │         ④ CAUSAL GROUNDING & EXPERIENCE HARVEST         │
+ │     (causal_engine.py & experience_distiller.py)        │
  │                                                         │
- │   • Win32 focus tracking, screen hashing, hardware load │
- │   • Persistent Relational Triples in SQLite WAL         │
- │   • Autonomous Curiosity Daemon in Idle Periods         │
+ │   • Forward State Prediction (S_t ──▶ \hat{S}_{t+1})    │
+ │   • StateSurpriseException on Causal Divergence         │
+ │   • Foveated Saccadic Screen Grounding (High-DPI)       │
+ │   • Distilled ShareGPT/Alpaca offline training export   │
  └─────────────────────────────────────────────────────────┘
 ```
 
@@ -116,20 +119,30 @@ Before code or script commands mutate the live system:
 - Dry-runs candidate code in the sandbox with offline network mocks.
 - Asserts exit code `0`, verifies expected state diffs (`files_created`, `files_modified`, `files_deleted`), and only commits to the real filesystem if simulation passes.
 
-### 3. 🎯 Epistemic Uncertainty Evaluator (`epistemic_evaluator.py`)
-- Computes cross-sample **semantic dispersion** and token disagreement entropy across output variations.
-- When uncertainty exceeds calibrated thresholds, automatically injects self-correcting verbal hedges (*"I have low certainty regarding this specific procedure, sir. Verifying against local records before proceeding."*).
+### 3. 🛠️ Autonomous Skill Synthesizer (`skill_synthesizer.py` — Voyager Paradigm)
+J.A.R.V.I.S never refuses an unknown or custom task:
+- When an action is missing or `self_model.can_do()` fails, dynamically generates a self-contained Python module adhering to `def execute(params: dict) -> dict:`.
+- Dry-runs candidate code in `preflight_simulator.py`; if imports or syntax fail, auto-patches code via LLM feedback loops (up to 2 retries).
+- On verification, hot-reloads the module into `skills/custom_<skill_name>.py` and records evidence to `status_registry.py` and `cognitive_graph.py`.
 
-### 4. 🔍 Autonomous Curiosity Daemon (`curiosity_daemon.py`) & Knowledge Graph (`cognitive_graph.py`)
-- Activates in background when the system is **quiescent** (> 20 min idle, CPU < 25%).
-- Audits `status_registry.py` for unverified, broken, or degraded capability paths.
-- Executes safe non-destructive diagnostic checks.
-- Persists relational discoveries into the SQLite-backed **Episodic Cognitive Knowledge Graph** (`cognitive_graph.py`).
+### 4. 🧬 Codebase AST Introspection & Autobiographical Memory (`self_introspection.py` & `autobiography.py`)
+- **AST Introspection:** Parses all `.py` and `.cs` files in the repository using Python's `ast` module and C# regex parsers into `data/codebase_index.json`, providing line numbers, classes, methods, docstrings, and signatures for system prompt injection (`get_codebase_context`).
+- **Autobiographical Memory:** Extracts live git metrics, commit history, author lineage, and architecture milestones (Mark I through Mark VIII) for truthful self-identity grounding (`get_autobiographical_summary`).
 
-### 5. 🐣 Canary Self-Healing Architecture (`evolver.py`)
-- Generates AI patches for runtime errors and isolates candidate fixes on ephemeral git canary branches.
-- Executes the full test suite (`run_canary_tests()`).
-- Automatically promotes and merges patches only if 100% of canary tests pass; rolls back cleanly otherwise.
+### 5. 🎯 Hierarchical Goal Management (`goal_manager.py`)
+- Long-horizon meta-controller orchestrating complex objectives via Directed Acyclic Graphs (DAG).
+- Tracks milestone states (`PENDING`, `IN_PROGRESS`, `VERIFIED`, `FAILED`, `SKIPPED`) with atomic persistence in `data/persistent_goals.json`.
+- Implements localized replanning: when a milestone fails, resets and re-synthesizes the downstream subgraph while preserving verified upstream milestones.
+
+### 6. 👁️ Foveated Saccadic Vision Grounding (`foveated_vision.py`)
+- Resolves sub-pixel click coordinates on 4K / High-DPI screens without downsampling blur:
+  1. **Stage 1 (Peripheral Scan):** Global downsampled sweep for approximate candidate bounding box.
+  2. **Stage 2 (Saccadic Crop):** Lossless high-resolution 512x512 crop centered around the candidate region.
+  3. **Stage 3 (Foveal Grounding):** Sub-pixel coordinate extraction projected back to global screen coordinates.
+
+### 7. 🔮 Causal State Modeling & Experience Distillation (`causal_engine.py` & `experience_distiller.py`)
+- **Causal State Predictor:** Computes expected environmental state deltas $\hat{\Delta S}$ before action execution. Compares with actual post-action state $S_{t+1}$ and raises `StateSurpriseException` upon unexpected side effects.
+- **Experience Distiller:** Records verified execution traces and deliberations into `data/distilled_memories.jsonl` in dual Alpaca and ShareGPT format for offline model fine-tuning.
 
 ---
 
@@ -202,7 +215,7 @@ UNKNOWN ──▶ CODE ──▶ CONFIGURED ──▶ PROBED ──▶ LIVE
 
 ---
 
-## 📊 Comprehensive Feature Catalog (50+ Actions)
+## 📊 Comprehensive Feature Catalog (60+ Actions)
 
 | Category | Action Identifier | Description & Integration |
 |---|---|---|
@@ -219,6 +232,7 @@ UNKNOWN ──▶ CODE ──▶ CONFIGURED ──▶ PROBED ──▶ LIVE
 | | `run_sequence` | Multi-step chained action workflow executor |
 | **Multimodal & Vision** | `read_screen` | OCR text extraction via Tesseract 5.4+ engine |
 | | `screenshot_describe` | Multimodal visual reasoning over the active desktop frame |
+| | `saccadic_crop_and_ground`, `foveated_locate_element` | 3-stage foveated saccadic coordinate grounding (`foveated_vision.py`) |
 | **Universal File Processor** | `process_file` | Automated inspection, summarization, OCR, audio transcription, code review, and format conversion |
 | | `open_file`, `list_folder`, `search_file`, `rename_file` | Filesystem navigation and batch file manipulation |
 | **Web & Intelligence** | `web_search` | Real-time web querying via DuckDuckGo Search (`ddgs`) |
@@ -238,8 +252,12 @@ UNKNOWN ──▶ CODE ──▶ CONFIGURED ──▶ PROBED ──▶ LIVE
 | | `simulate_execution`, `dry_run_code` | Counterfactual pre-flight sandbox simulator (`preflight_simulator.py`) |
 | | `evaluate_uncertainty`, `sample_variations` | Epistemic entropy calibration (`epistemic_evaluator.py`) |
 | | `query_knowledge`, `traverse_graph` | Episodic & semantic cognitive knowledge graph (`cognitive_graph.py`) |
-| | `run_diagnostic` | Subsystem integrity and hardware diagnostic sweep |
-| | `self_scan`, `self_capabilities`, `self_changes` | AST-based codebase introspection and change analyzer |
+| | `synthesize_skill`, `synthesize_and_execute_skill` | Voyager autonomous procedural tool synthesizer (`skill_synthesizer.py`) |
+| | `get_codebase_context`, `index_codebase` | AST codebase structural introspection (`self_introspection.py`) |
+| | `get_autobiographical_summary`, `get_evolution_milestones` | Chronological evolutionary memory (`autobiography.py`) |
+| | `create_goal`, `decompose_goal`, `replan_goal` | Hierarchical goal DAG meta-controller (`goal_manager.py`) |
+| | `predict_state_transition`, `verify_causal_transition` | Causal world state prediction & surprise detection (`causal_engine.py`) |
+| | `distill_execution_sample`, `export_dataset` | Offline fine-tuning dataset distillation (`experience_distiller.py`) |
 | | `creative_status`, `generate_image`, `generate_video` | NVIDIA NIM-backed Creative Studio generative workflow |
 
 ---
@@ -362,10 +380,10 @@ dotnet run --project desktop\Jarvis.Desktop.Codex\Jarvis.Desktop.csproj --config
 
 ## 🧪 Test Suite & Regression Verification
 
-JARVIS includes a comprehensive test suite covering deliberative reasoning, pre-flight simulation, epistemic calibration, canary self-healing, provider circuit breakers, and cognitive graph operations:
+JARVIS includes an exhaustive test suite covering deliberative reasoning, pre-flight simulation, epistemic calibration, skill synthesis, AST introspection, goal management, foveated vision, causal modeling, canary self-healing, provider circuit breakers, and cognitive graph operations:
 
 ```powershell
-# Execute all 357 unit, integration, and cognitive regression tests
+# Execute all 383 unit, integration, and cognitive regression tests
 python -m pytest -q tests
 
 # Run codebase syntax and compile check
@@ -373,12 +391,13 @@ python -m compileall -q .
 ```
 
 ```
-........................................................................ [ 20%]
-........................................................................ [ 40%]
-........................................................................ [ 60%]
-........................................................................ [ 80%]
-.....................................................................    [100%]
-============================== 357 passed in 65.14s ===============================
+........................................................................ [ 18%]
+........................................................................ [ 37%]
+........................................................................ [ 56%]
+........................................................................ [ 75%]
+........................................................................ [ 93%]
+.......................                                                  [100%]
+============================== 383 passed in 71.54s ===============================
 ```
 
 ---
@@ -394,6 +413,14 @@ J.A.R.V.I.S/
 ├── preflight_simulator.py     # Counterfactual ephemeral sandbox simulator
 ├── epistemic_evaluator.py     # Epistemic uncertainty & entropy calibrator
 ├── curiosity_daemon.py        # Autonomous quiescent curiosity & diagnostic daemon
+├── skill_synthesizer.py       # Autonomous Voyager procedural skill synthesis
+├── self_introspection.py      # Codebase AST structural introspection & search
+├── autobiography.py           # Evolutionary milestones & git autobiographical memory
+├── goal_manager.py            # Hierarchical DAG goal meta-controller & replanner
+├── foveated_vision.py         # Foveated saccadic high-DPI coordinate grounding
+├── causal_engine.py           # Causal state predictor & surprise detection engine
+├── experience_distiller.py    # Offline fine-tuning dataset harvester (Alpaca/ShareGPT)
+│
 ├── cognitive_graph.py         # SQLite WAL relational knowledge graph
 ├── memory_consolidator.py     # Sleep-cycle memory consolidation engine
 ├── dynamic_executor.py        # Isolated dynamic REPL & preflight safety gate
@@ -408,7 +435,7 @@ J.A.R.V.I.S/
 ├── error_handler.py           # Centralized exception logging & graceful degradation
 │
 ├── planner.py                 # Intent classifier, capability check & action planner
-├── executor.py                # 50+ deterministic action execution handlers
+├── executor.py                # 60+ deterministic action execution handlers
 ├── observer.py                # Background window, screen diff & telemetry observer
 ├── core.py                    # NLP context tracking, spaCy pipeline & sentiment
 │
@@ -427,7 +454,7 @@ J.A.R.V.I.S/
 │
 ├── server.py                  # Flask web backend with SSE bridge & upload handler
 ├── desktop/                   # Native C# / WPF Holographic HUD desktop client
-└── tests/                     # 357 unit and integration regression test suite
+└── tests/                     # 383 unit and integration regression test suite
 ```
 
 ---

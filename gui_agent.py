@@ -89,6 +89,25 @@ def click_element(description: str, confidence_threshold: float = 0.7) -> bool:
         return False
 
     try:
+        # ── Primary: Foveated Saccadic Vision Grounding (MARK VIII) ──
+        try:
+            import foveated_vision
+            foveal_coords = foveated_vision.foveated_locate_element(description)
+            if foveal_coords:
+                x_pixel, y_pixel = foveal_coords
+                screen_width, screen_height = pyautogui.size()
+                if 0 <= x_pixel < screen_width and 0 <= y_pixel < screen_height:
+                    pyautogui.click(x_pixel, y_pixel)
+                    registry.set_capability_evidence(
+                        "GUI_AGENT", EvidenceLevel.LIVE,
+                        f"Clicked element at ({x_pixel}, {y_pixel}) [Foveated]",
+                        source="gui agent"
+                    )
+                    print(f"[GUIAgent] Clicked '{description}' via Foveated Saccade at ({x_pixel}, {y_pixel})")
+                    return True
+        except Exception as _fov_err:
+            print(f"[GUIAgent] Foveated grounding fallback: {_fov_err}")
+
         # Capture current screen
         screen_b64 = vision.screenshot_to_base64()
 
