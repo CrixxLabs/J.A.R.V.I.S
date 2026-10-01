@@ -11,9 +11,16 @@
 import os
 import json
 import shutil
+import subprocess
 import datetime
 import time
 import threading
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import brain
+import error_handler
+from status_registry import EvidenceLevel, SubsystemState, get_registry
 
 # Best-effort session logger import (don't crash if signature differs)
 try:
@@ -407,6 +414,221 @@ def stop_evolver():
     _evolver_stop.set()
     if _evolver_thread and _evolver_thread.is_alive():
         _evolver_thread.join(timeout=3.0)
+
+
+# ═════════════════════════════════════════════════════════════════════════════
+# Phase 4 — Canary Self-Healing Architecture
+# ═════════════════════════════════════════════════════════════════════════════
+
+def generate_ai_patch(file_content: str, error_msg: str, error_trace: str = "") -> Optional[str]:
+    """Ask brain.py LLM to generate a targeted minimal bugfix for a failing file.
+
+    Args:
+        file_content: Complete original file source code
+        error_msg: Runtime or test error message
+        error_trace: Traceback or test failure diagnostic
+
+    Returns:
+        Patched full file content, or None if generation failed
+    """
+    prompt = f"""You are the autonomous self-healing engine for J.A.R.V.I.S.
+A file produced an unhandled error or test failure.
+
+=== ERROR MESSAGE ===
+{error_msg}
+
+=== ERROR TRACE / TEST FAILURE ===
+{error_trace[:800]}
+
+=== ORIGINAL SOURCE CODE ===
+```python
+{file_content}
+```
+
+Task: Provide the corrected, complete Python file content that fixes the error.
+Do not introduce breaking changes or delete existing functionality.
+Return ONLY the complete Python source code enclosed in ```python ... ``` markdown blocks."""
+
+    try:
+        response = brain.ask_llm(prompt, model_type="fast", allow_actions=False)
+        if not response or not response.strip():
+            return None
+
+        # Extract python code block
+        if "```python" in response:
+            code = response.split("```python")[1].split("```")[0].strip()
+        elif "```" in response:
+            code = response.split("```")[1].split("```")[0].strip()
+        else:
+            code = response.strip()
+
+        return code if len(code) > 20 else None
+
+    except Exception as exc:
+        print(f"[Evolver][Canary] AI patch generation failed: {exc}")
+        return None
+
+
+def run_canary_tests(timeout: float = 90.0) -> Tuple[bool, str]:
+    """Execute the full test suite in an isolated subprocess.
+
+    Returns:
+        Tuple of (all_passed: bool, output: str)
+    """
+    try:
+        result = subprocess.run(
+            ["python", "-m", "pytest", "-q", "tests"],
+            cwd=BASE_DIR,
+            capture_output=True,
+            text=True,
+            timeout=timeout
+        )
+        passed = (result.returncode == 0)
+        output = result.stdout + "\n" + result.stderr
+        return passed, output
+    except subprocess.TimeoutExpired:
+        return False, f"Test execution exceeded {timeout}s timeout"
+    except Exception as exc:
+        return False, f"Test execution error: {exc}"
+
+
+def canary_self_heal(failing_file: str, error_msg: str,
+                     error_trace: str = "") -> Dict[str, Any]:
+    """Autonomous canary self-healing pipeline.
+
+    Workflow:
+      1. Detect current git branch.
+      2. Create an isolated canary git branch `canary/fix-<timestamp>`.
+      3. Generate patch via brain.py LLM.
+      4. Apply patch on canary branch.
+      5. Run test suite.
+      6. Invariant: Only merge/promote if 100% tests pass. Otherwise discard & rollback.
+
+    Args:
+        failing_file: Path to failing source file (absolute or relative to BASE_DIR)
+        error_msg: Error message to diagnose
+        error_trace: Full exception traceback or failure diagnostic
+
+    Returns:
+        Diagnostic summary of canary self-healing outcome
+    """
+    registry = get_registry()
+    target_path = Path(failing_file)
+    if not target_path.is_absolute():
+        target_path = Path(BASE_DIR) / target_path
+
+    if not target_path.exists():
+        msg = f"Target file not found for canary healing: {target_path}"
+        print(f"[Evolver][Canary] {msg}")
+        return {"success": False, "error": msg, "stage": "file_lookup"}
+
+    # 1. Get current branch
+    try:
+        branch_res = subprocess.run(
+            ["git", "branch", "--show-current"],
+            cwd=BASE_DIR, capture_output=True, text=True, check=True
+        )
+        original_branch = branch_res.stdout.strip()
+        if not original_branch:
+            original_branch = "master"
+    except Exception as exc:
+        msg = f"Failed to get current git branch: {exc}"
+        print(f"[Evolver][Canary] {msg}")
+        return {"success": False, "error": msg, "stage": "git_branch"}
+
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    canary_branch = f"canary/fix-{timestamp}"
+
+    # Read original file content
+    with open(target_path, "r", encoding="utf-8") as f:
+        original_content = f.read()
+
+    # 2. Generate AI patch
+    print(f"[Evolver][Canary] Generating fix for {target_path.name}...")
+    patched_content = generate_ai_patch(original_content, error_msg, error_trace)
+    if not patched_content:
+        registry.set_capability_evidence(
+            "EVOLVER", EvidenceLevel.BROKEN,
+            f"Failed to generate patch for {target_path.name}", source="canary self-healing"
+        )
+        return {"success": False, "error": "AI patch generation failed", "stage": "patch_gen"}
+
+    # 3. Create canary branch
+    try:
+        subprocess.run(
+            ["git", "checkout", "-b", canary_branch],
+            cwd=BASE_DIR, capture_output=True, text=True, check=True
+        )
+        print(f"[Evolver][Canary] Switched to canary branch: {canary_branch}")
+    except Exception as exc:
+        msg = f"Failed to create canary branch: {exc}"
+        print(f"[Evolver][Canary] {msg}")
+        return {"success": False, "error": msg, "stage": "create_branch"}
+
+    try:
+        # 4. Apply patch on canary branch
+        with open(target_path, "w", encoding="utf-8") as f:
+            f.write(patched_content)
+        print(f"[Evolver][Canary] Applied patch to {target_path.name}")
+
+        # 5. Run canary test verification
+        print("[Evolver][Canary] Running test suite on canary branch...")
+        tests_passed, test_output = run_canary_tests()
+
+        if tests_passed:
+            # 6a. Tests passed: commit and merge to original branch
+            print(f"[Evolver][Canary] Verification SUCCESS: All tests passed on {canary_branch}.")
+            subprocess.run(["git", "add", str(target_path)], cwd=BASE_DIR, check=True)
+            subprocess.run(
+                ["git", "commit", "-m", f"fix(canary): self-healed {target_path.name} ({error_msg[:40]})"],
+                cwd=BASE_DIR, check=True
+            )
+            subprocess.run(["git", "checkout", original_branch], cwd=BASE_DIR, check=True)
+            subprocess.run(["git", "merge", canary_branch], cwd=BASE_DIR, check=True)
+            subprocess.run(["git", "branch", "-d", canary_branch], cwd=BASE_DIR, check=True)
+
+            registry.set_capability_evidence(
+                "EVOLVER", EvidenceLevel.LIVE,
+                f"Canary self-healing succeeded and merged for {target_path.name}",
+                source="canary self-healing"
+            )
+            return {
+                "success": True,
+                "stage": "promoted",
+                "canary_branch": canary_branch,
+                "file": str(target_path),
+                "message": "Patch verified and promoted to parent branch"
+            }
+        else:
+            # 6b. Tests failed: rollback and discard canary branch
+            print(f"[Evolver][Canary] Verification FAILED on {canary_branch}. Discarding canary.")
+            # Discard changes on canary
+            subprocess.run(["git", "checkout", original_branch], cwd=BASE_DIR, check=True)
+            subprocess.run(["git", "branch", "-D", canary_branch], cwd=BASE_DIR, check=True)
+
+            registry.set_capability_evidence(
+                "EVOLVER", EvidenceLevel.BROKEN,
+                f"Canary verification failed for {target_path.name}; discarded",
+                source="canary self-healing"
+            )
+            return {
+                "success": False,
+                "stage": "rejected_rollback",
+                "canary_branch": canary_branch,
+                "file": str(target_path),
+                "test_output": test_output[:500],
+                "error": "Test verification failed on canary branch"
+            }
+
+    except Exception as exc:
+        # Guarantee rollback to original branch on unexpected errors
+        print(f"[Evolver][Canary] Unexpected error during canary healing: {exc}")
+        try:
+            subprocess.run(["git", "checkout", original_branch], cwd=BASE_DIR)
+            subprocess.run(["git", "branch", "-D", canary_branch], cwd=BASE_DIR)
+        except Exception:
+            pass
+        return {"success": False, "error": str(exc), "stage": "exception"}
 
 
 # ── Manual trigger ──
