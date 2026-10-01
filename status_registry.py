@@ -240,6 +240,10 @@ CAPABILITY_DEFINITIONS = {
     "VIDEO_GENERATION": _cap("NVIDIA Creative Studio image-to-video generation", "generation", ["creative_studio/studio.py", "creative_agent.py", "executor.py"], actions=["animate_latest_image"]),
     "CREDENTIAL_VAULT": _cap("Credential vault", "security", ["credential_vault.py", "executor.py"], actions=["save_login", "list_logins", "delete_login"]),
     "APP_INSTALLATION": _cap("App installation and login", "system", ["app_installer.py", "login_orchestrator.py"], actions=["install_app", "install_and_login", "open_and_login"]),
+    "DYNAMIC_EXECUTOR": _cap("Dynamic sandboxed code execution", "system", ["dynamic_executor.py"], actions=["execute_python_code", "execute_shell_command"]),
+    "GUI_AGENT": _cap("Vision-guided GUI automation", "automation", ["gui_agent.py"], actions=["click_element", "type_into", "hover_element"], dependencies=["cap:VISION_ROUTER"], optional_dependencies=["UI_AUTOMATION"]),
+    "COGNITIVE_GRAPH": _cap("Episodic and semantic knowledge graph", "memory", ["cognitive_graph.py"], actions=["add_triple", "query_triples", "get_entity_relations", "find_connections"]),
+    "MEMORY_CONSOLIDATOR": _cap("Sleep cycle memory consolidation", "memory", ["memory_consolidator.py"], actions=["consolidate_recent_memory", "run_sleep_cycle"], dependencies=["cap:COGNITIVE_GRAPH"]),
 }
 
 
