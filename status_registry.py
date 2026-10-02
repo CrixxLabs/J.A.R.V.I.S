@@ -74,6 +74,7 @@ KNOWN_SUBSYSTEMS = [
     "SMART_SPACE", "DEVICE_SWARM", "AUTONOMOUS_DAEMON",
     "OMNI_VISION", "ACADEMIC_SENTINEL", "DUPLEX_VOICE", "SUBAGENT_SWARM",
     "SOFTWARE_FORGE", "CONCURRENCY_ARBITER",
+    "CAPABILITY_GUARD", "SYMBOLIC_VERIFIER", "COMMITMENT_LEDGER", "COGNITIVE_OS",
 ]
 
 _TEST_ARTIFACT_NAMES = {"FAIL_COMP", "HIGH_PRIORITY", "LOW_PRIORITY", "TEST"}
@@ -281,6 +282,10 @@ CAPABILITY_DEFINITIONS = {
     "SUBAGENT_SWARM": _cap("Concurrent sub-agent asynchronous worker pool", "swarm", ["subagent_swarm.py"], actions=["spawn_subagent", "get_subagent_status", "cancel_subagent", "list_active_subagents"]),
     "SOFTWARE_FORGE": _cap("Autonomous multi-file software builder and preview forge", "development", ["software_forge.py"], actions=["forge_application", "get_forge_project", "preview_application", "package_distribution_zip"]),
     "CONCURRENCY_ARBITER": _cap("Multi-task concurrency and hardware resource arbiter", "system", ["concurrency_arbiter.py"], actions=["acquire_resource_lock", "release_resource_lock", "get_resource_allocation_state"]),
+    "CAPABILITY_GUARD": _cap("Capability security, consequence engine and taint tracker", "security", ["capability_guard.py"], actions=["quarantine_parse_untrusted", "check_execution_safety", "begin_saga", "record_saga_step", "commit_saga", "rollback_saga"]),
+    "SYMBOLIC_VERIFIER": _cap("Heterogeneous symbolic code and state verifier", "reasoning", ["symbolic_verifier.py"], actions=["verify_code_safety", "verify_postcondition", "verify_temporal_bounds", "detect_test_mutation"]),
+    "COMMITMENT_LEDGER": _cap("Executive commitment ledger and simple temporal network", "planning", ["commitment_ledger.py"], actions=["record_commitment", "update_commitment_status", "get_active_commitments", "calculate_temporal_slack", "evaluate_stn_consistency"]),
+    "COGNITIVE_OS": _cap("Cognitive OS scheduler and context virtualization", "system", ["cognitive_os.py"], actions=["acquire_gpu_lease", "release_gpu_lease", "swap_out_context", "swap_in_context", "get_scheduler_state"]),
 }
 
 

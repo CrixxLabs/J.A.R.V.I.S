@@ -3,7 +3,7 @@
   <img src="https://img.shields.io/badge/Python-3.11+-3776ab?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/.NET-8.0-512bd4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET" />
   <img src="https://img.shields.io/badge/Platform-Windows-0078d4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows" />
-  <img src="https://img.shields.io/badge/Tests-460_passing-2ea043?style=for-the-badge" alt="Tests" />
+  <img src="https://img.shields.io/badge/Tests-477_passing-2ea043?style=for-the-badge" alt="Tests" />
   <img src="https://img.shields.io/badge/Architecture-Autonomous_AGI_Substrate-blueviolet?style=for-the-badge" alt="Architecture" />
 </p>
 
@@ -189,6 +189,12 @@ MARK VIII establishes a 13-pillar substrate providing real-world external agency
 - **Module K — Concurrent Sub-Agent Swarm (`subagent_swarm.py`):** Asynchronous thread pool executor enabling parallel background worker dispatch without blocking the main conversation loop.
 - **Module L — Autonomous Software Forge (`software_forge.py`):** End-to-end multi-file software synthesis (HTML5, Modern CSS, ES6 JS, Python), syntax validation, live preview server orchestration, and standalone distribution zip packaging.
 - **Module M — Multi-Task Concurrency Arbiter (`concurrency_arbiter.py`):** Hardware resource governor enforcing a strict 5.0 GB VRAM ceiling on the RTX 3050 (6GB) with priority-tiered preemption (Tier 1 Voice/UI > Tier 2 Deliberation > Tier 3 Swarms).
+
+### Stage 4A: The Immune System & Cognitive OS
+- **Module R — Capability Security & Consequence Engine (`capability_guard.py`):** Dual-LLM quarantine parsing for untrusted inputs, provenance-preserving taint analysis (`TaintedString`) blocking parameterization of sensitive actions, and transactional Saga ledger with LIFO compensation rollbacks.
+- **Module O — Heterogeneous Symbolic Verifier (`symbolic_verifier.py`):** Deterministic AST postcondition validation (banned imports, infinite loops), state diff predicates (SHA-256 integrity), temporal interval collision detection, and mutation test tampering detection.
+- **Module P — Executive Commitment Ledger (`commitment_ledger.py`):** Durable SQLite WAL-mode event-sourced ledger for contractual user obligations with Simple Temporal Network (STN) temporal slack consistency solving.
+- **Module V — Cognitive OS Scheduler & Context Virtualization (`cognitive_os.py`):** Single GPU invariant via serialized VRAM leasing, Task Control Block (TCB) NVMe context swapping across HOT/WARM/COLD tiers, and 4-tier priority preemption (Tier 0 Voice > Tier 1 Interactive > Tier 2 Swarm > Tier 3 Quiescent).
 
 ---
 
