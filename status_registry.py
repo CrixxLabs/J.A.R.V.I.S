@@ -67,6 +67,9 @@ KNOWN_SUBSYSTEMS = [
     "TASK_QUEUE", "DEV_AGENT", "CONFIG", "HARDWARE", "OBSERVER",
     "PROACTIVE_SCHEDULER", "EVOLVER", "RUNTIME_SSE", "WPF_UI", "BROWSER_UI",
     "UI_AUTOMATION", "GLOBAL_WORKSPACE", "CURRICULUM_ENGINE", "SYNAPTIC_ADAPTER",
+    "COGNITIVE_GRAPH", "CAUSAL_ENGINE", "GOAL_MANAGER", "EXPERIENCE_DISTILLER",
+    "SELF_INTROSPECTION", "AUTOBIOGRAPHY", "EPISTEMIC_EVALUATOR", "DELIBERATION",
+    "PREFLIGHT_SIMULATOR", "SKILL_SYNTHESIZER", "FOVEATED_VISION", "CREATIVE_STUDIO",
 ]
 
 _TEST_ARTIFACT_NAMES = {"FAIL_COMP", "HIGH_PRIORITY", "LOW_PRIORITY", "TEST"}
@@ -238,6 +241,7 @@ CAPABILITY_DEFINITIONS = {
     "BROWSER_UI": _cap("Browser UI", "ui", ["server.py", "ui/index.html"], dependencies=["BROWSER_UI"]),
     "IMAGE_GENERATION": _cap("NVIDIA Creative Studio image generation", "generation", ["creative_studio/studio.py", "creative_agent.py", "executor.py"], actions=["generate_image", "cancel_generation"]),
     "VIDEO_GENERATION": _cap("NVIDIA Creative Studio image-to-video generation", "generation", ["creative_studio/studio.py", "creative_agent.py", "executor.py"], actions=["animate_latest_image"]),
+    "CREATIVE_STUDIO": _cap("Multimodal Creative Studio generation", "generation", ["creative_studio/studio.py", "creative_agent.py", "executor.py"], actions=["generate_image", "animate_latest_image", "cancel_generation"]),
     "CREDENTIAL_VAULT": _cap("Credential vault", "security", ["credential_vault.py", "executor.py"], actions=["save_login", "list_logins", "delete_login"]),
     "APP_INSTALLATION": _cap("App installation and login", "system", ["app_installer.py", "login_orchestrator.py"], actions=["install_app", "install_and_login", "open_and_login"]),
     "DYNAMIC_EXECUTOR": _cap("Dynamic sandboxed code execution", "system", ["dynamic_executor.py"], actions=["execute_python_code", "execute_shell_command"]),
@@ -245,6 +249,7 @@ CAPABILITY_DEFINITIONS = {
     "COGNITIVE_GRAPH": _cap("Episodic and semantic knowledge graph", "memory", ["cognitive_graph.py"], actions=["add_triple", "query_triples", "get_entity_relations", "find_connections"]),
     "MEMORY_CONSOLIDATOR": _cap("Sleep cycle memory consolidation", "memory", ["memory_consolidator.py"], actions=["consolidate_recent_memory", "run_sleep_cycle"], dependencies=["cap:COGNITIVE_GRAPH"]),
     "PROACTIVE_DAEMON": _cap("Context-aware proactive interruption engine", "system", ["proactive_daemon.py"], dependencies=["PROACTIVE_SCHEDULER"]),
+    "DELIBERATION": _cap("Adversarial multi-persona deliberation engine", "reasoning", ["deliberation.py"], actions=["deliberate", "propose_plan", "critique_plan", "synthesize_decision"]),
     "DELIBERATION_ENGINE": _cap("Adversarial multi-persona deliberation engine", "reasoning", ["deliberation.py"], actions=["deliberate", "propose_plan", "critique_plan", "synthesize_decision"]),
     "PREFLIGHT_SIMULATOR": _cap("Counterfactual pre-flight sandbox simulator", "system", ["preflight_simulator.py"], actions=["simulate_execution", "dry_run_code"], dependencies=["cap:DYNAMIC_EXECUTOR"]),
     "EPISTEMIC_EVALUATOR": _cap("Epistemic uncertainty calibration", "reasoning", ["epistemic_evaluator.py"], actions=["evaluate_uncertainty", "sample_variations"]),
@@ -256,6 +261,9 @@ CAPABILITY_DEFINITIONS = {
     "FOVEATED_VISION": _cap("Foveated saccadic visual grounding", "vision", ["foveated_vision.py"], actions=["saccadic_crop_and_ground", "foveated_locate_element"], dependencies=["cap:VISION_ROUTER"]),
     "CAUSAL_ENGINE": _cap("Causal state transition modeling", "reasoning", ["causal_engine.py"], actions=["predict_state_transition", "verify_causal_transition"]),
     "EXPERIENCE_DISTILLER": _cap("Experience distillation for offline fine-tuning", "learning", ["experience_distiller.py"], actions=["distill_execution_sample", "export_dataset"]),
+    "GLOBAL_WORKSPACE": _cap("Global Workspace Theory cognitive blackboard", "system", ["global_workspace.py"], actions=["publish_workspace_message", "get_current_workspace_state"]),
+    "CURRICULUM_ENGINE": _cap("Autonomous curriculum loop and Voyager skill acquisition", "learning", ["curriculum_engine.py"], actions=["propose_curriculum_task", "run_curriculum_experiment"], optional_dependencies=["cap:SKILL_SYNTHESIZER"]),
+    "SYNAPTIC_ADAPTER": _cap("Synaptic plasticity and overnight QLoRA fine-tuning", "learning", ["synaptic_adapter.py"], actions=["prepare_instruction_dataset", "schedule_overnight_training"]),
 }
 
 
