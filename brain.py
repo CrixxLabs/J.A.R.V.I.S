@@ -480,6 +480,63 @@ def _build_system_prompt(
     return system
 
 
+def _strip_scratchpad(text: str) -> str:
+    """Sanitize model output by removing thinking tags (<thought>, <think>) and CoT meta-talk."""
+    if not text:
+        return ""
+
+    cleaned = text
+
+    # 1. Strip explicit thinking / thought tags (case-insensitive, multiline)
+    cleaned = re.sub(r"<(thought|think)>[\s\S]*?</\1>", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"^<(thought|think)>[\s\S]*?(?=(?:\r?\n\r?\n)|$)", "", cleaned, flags=re.IGNORECASE)
+
+    # 2. Check for planning meta-talk / scratchpad lines before the actual conversational response
+    meta_prefixes = (
+        "we must",
+        "we need to",
+        "we can say",
+        "we should",
+        "must not claim",
+        "must not say",
+        "the user is asking",
+        "let me think",
+        "let's think",
+        "step by step:",
+        "my plan:",
+        "plan:",
+        "internal reasoning:",
+        "reasoning process:",
+    )
+
+    lines = cleaned.splitlines()
+    first_clean_idx = 0
+
+    while first_clean_idx < len(lines):
+        line = lines[first_clean_idx].strip()
+        if not line:
+            first_clean_idx += 1
+            continue
+
+        lowered_line = line.lower()
+        if any(lowered_line.startswith(prefix) for prefix in meta_prefixes) or (
+            ("we must" in lowered_line or "we can say" in lowered_line or "must not claim" in lowered_line)
+            and len(line.split()) < 30
+        ):
+            first_clean_idx += 1
+            continue
+        break
+
+    if 0 < first_clean_idx < len(lines):
+        cleaned = "\n".join(lines[first_clean_idx:])
+    elif first_clean_idx >= len(lines) and lines:
+        remaining = "\n".join(lines[first_clean_idx:])
+        if remaining.strip():
+            cleaned = remaining
+
+    return cleaned.strip()
+
+
 def _looks_like_reasoning(text: str) -> bool:
     lowered = (text or "").lower()
     return any(marker in lowered for marker in _REASONING_MARKERS)
@@ -1026,7 +1083,8 @@ def _finalize_result(
     original_messages: list | None = None,
     preferred_provider: str | None = None,
 ) -> str:
-    """Filter reasoning leaks and clean result."""
+    """Filter reasoning leaks, strip scratchpads, and clean result."""
+    result = _strip_scratchpad(result)
     if _looks_like_reasoning(result):
         print(f"[DEBUG][brain] reasoning leak detected, retrying clean")
         # Preserve the exact context/personality contract across the cleanup
@@ -1054,6 +1112,6 @@ def _finalize_result(
         if status != "ok":
             retry, status = _gemini_call(clean_messages, max_tokens=120)
         if status == "ok" and retry:
-            result = retry
+            result = _strip_scratchpad(retry)
 
-    return (result or "").strip() or "I couldn't figure that out."
+    return _strip_scratchpad(result) or "I couldn't figure that out."

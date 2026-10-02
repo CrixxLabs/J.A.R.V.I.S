@@ -1181,11 +1181,20 @@ def classify_intent(text: str) -> dict:
             app = entities["app"]
         return {"intent": "open_app", "params": {"app": app}, "entities": entities, "raw_text": resolved}
 
-    if any(w in lowered for w in ("close ", "kill ", "quit ", "exit ")) or lowered.startswith("close"):
-        app = _extract_app_name(resolved, "close|kill|quit|exit")
+    # Strict imperative matching for close_app: must be an explicit termination command
+    _close_cmd_match = re.match(
+        r"^(?:(?:hey\s+)?jarvis\s*,?\s*|please\s+|can\s+you\s+(?:please\s+)?|could\s+you\s+(?:please\s+)?|would\s+you\s+(?:please\s+)?)?"
+        r"(?:close|kill|quit|exit|terminate|shut\s+down|force\s+quit)\b(?:\s+(?:the\s+)?(?:app|application)?\s*(.+))?$",
+        lowered
+    )
+    if _close_cmd_match:
+        app = _extract_app_name(resolved, "close|kill|quit|exit|terminate|shut down|force quit")
         entities = _extract_entities(doc, resolved)
         if not app and entities.get("app"):
             app = entities["app"]
+        if not app and _close_cmd_match.group(1):
+            app = _close_cmd_match.group(1).strip()
+            app = re.sub(r"\b(app|application|please|jarvis)\b", "", app, flags=re.IGNORECASE).strip()
         return {"intent": "close_app", "params": {"app": app}, "entities": entities, "raw_text": resolved}
 
     if any(phrase in lowered for phrase in (
