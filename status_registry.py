@@ -70,6 +70,10 @@ KNOWN_SUBSYSTEMS = [
     "COGNITIVE_GRAPH", "CAUSAL_ENGINE", "GOAL_MANAGER", "EXPERIENCE_DISTILLER",
     "SELF_INTROSPECTION", "AUTOBIOGRAPHY", "EPISTEMIC_EVALUATOR", "DELIBERATION",
     "PREFLIGHT_SIMULATOR", "SKILL_SYNTHESIZER", "FOVEATED_VISION", "CREATIVE_STUDIO",
+    "WEB_SURROGATE", "INBOUND_TRIAGE", "TELEPHONY_AGENT", "WORK_DELEGATE",
+    "SMART_SPACE", "DEVICE_SWARM", "AUTONOMOUS_DAEMON",
+    "OMNI_VISION", "ACADEMIC_SENTINEL", "DUPLEX_VOICE", "SUBAGENT_SWARM",
+    "SOFTWARE_FORGE", "CONCURRENCY_ARBITER",
 ]
 
 _TEST_ARTIFACT_NAMES = {"FAIL_COMP", "HIGH_PRIORITY", "LOW_PRIORITY", "TEST"}
@@ -264,6 +268,19 @@ CAPABILITY_DEFINITIONS = {
     "GLOBAL_WORKSPACE": _cap("Global Workspace Theory cognitive blackboard", "system", ["global_workspace.py"], actions=["publish_workspace_message", "get_current_workspace_state"]),
     "CURRICULUM_ENGINE": _cap("Autonomous curriculum loop and Voyager skill acquisition", "learning", ["curriculum_engine.py"], actions=["propose_curriculum_task", "run_curriculum_experiment"], optional_dependencies=["cap:SKILL_SYNTHESIZER"]),
     "SYNAPTIC_ADAPTER": _cap("Synaptic plasticity and overnight QLoRA fine-tuning", "learning", ["synaptic_adapter.py"], actions=["prepare_instruction_dataset", "schedule_overnight_training"]),
+    "WEB_SURROGATE": _cap("Autonomous web surrogacy and booking", "automation", ["web_surrogate.py"], actions=["browse_and_act", "extract_page_content", "book_reservation"]),
+    "INBOUND_TRIAGE": _cap("Omnichannel inbound message triage", "communication", ["inbound_triage.py"], actions=["triage_inbound_message", "list_pending_drafts", "approve_draft", "get_morning_briefing_summary"]),
+    "TELEPHONY_AGENT": _cap("Autonomous telephony and voice alert bridge", "communication", ["telephony_agent.py"], actions=["make_outbound_alert_call", "get_call_history"]),
+    "WORK_DELEGATE": _cap("Delegated task delivery and HITL workflow", "planning", ["work_delegate.py"], actions=["create_delegated_task", "run_task_pipeline", "approve_delivery", "get_task_status"]),
+    "SMART_SPACE": _cap("Ambient IoT and physical space mesh", "iot", ["smart_space.py"], actions=["set_space_profile", "control_device", "run_power_watchdog"]),
+    "DEVICE_SWARM": _cap("Cross-device peripheral and mobile swarm mesh", "swarm", ["device_swarm.py"], actions=["register_device", "push_clipboard", "ingest_mobile_notification", "ping_device", "send_device_command"]),
+    "AUTONOMOUS_DAEMON": _cap("Autonomous headless daemon and continuous cron", "system", ["autonomous_daemon.py"], actions=["run_nightly_maintenance", "run_morning_preparation", "schedule_cron_cycle"]),
+    "OMNI_VISION": _cap("Native OS surface grounding and UI parsing", "vision", ["omni_vision.py"], actions=["locate_ui_element", "extract_screen_hierarchy", "click_element_by_semantic_target"]),
+    "ACADEMIC_SENTINEL": _cap("Proactive academic deadline and life sentinel", "planning", ["academic_sentinel.py"], actions=["ingest_academic_deadlines", "solve_temporal_constraints", "get_active_deadlines"]),
+    "DUPLEX_VOICE": _cap("Low-latency duplex conversational voice with interrupt", "voice", ["duplex_voice.py"], actions=["start_voice_stream", "handle_interrupt", "synthesize_speech_chunk"]),
+    "SUBAGENT_SWARM": _cap("Concurrent sub-agent asynchronous worker pool", "swarm", ["subagent_swarm.py"], actions=["spawn_subagent", "get_subagent_status", "cancel_subagent", "list_active_subagents"]),
+    "SOFTWARE_FORGE": _cap("Autonomous multi-file software builder and preview forge", "development", ["software_forge.py"], actions=["forge_application", "get_forge_project", "preview_application", "package_distribution_zip"]),
+    "CONCURRENCY_ARBITER": _cap("Multi-task concurrency and hardware resource arbiter", "system", ["concurrency_arbiter.py"], actions=["acquire_resource_lock", "release_resource_lock", "get_resource_allocation_state"]),
 }
 
 

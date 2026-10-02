@@ -287,6 +287,9 @@ def get_workspace() -> GlobalWorkspace:
     return _workspace
 
 
+get_global_workspace = get_workspace
+
+
 def publish(topic: str, payload: dict, source: str = "unknown", priority: int = PRIORITY_NORMAL) -> dict:
     """Publish a message to the global workspace."""
     return _workspace.publish(topic, payload, source=source, priority=priority)

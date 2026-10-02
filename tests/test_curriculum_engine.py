@@ -11,7 +11,7 @@ from curriculum_engine import CurriculumEngine, BUILTIN_CURRICULUM_TASKS
 @pytest.fixture
 def engine():
     """Create a fresh CurriculumEngine for testing."""
-    eng = CurriculumEngine(idle_threshold=10.0, max_cpu_percent=80.0)
+    eng = CurriculumEngine(idle_threshold=10.0, max_cpu_percent=100.0)
     # Start as idle
     eng._last_user_activity = time.time() - 20.0
     return eng

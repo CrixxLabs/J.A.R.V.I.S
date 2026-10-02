@@ -3,8 +3,8 @@
   <img src="https://img.shields.io/badge/Python-3.11+-3776ab?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/.NET-8.0-512bd4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET" />
   <img src="https://img.shields.io/badge/Platform-Windows-0078d4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows" />
-  <img src="https://img.shields.io/badge/Tests-383_passing-2ea043?style=for-the-badge" alt="Tests" />
-  <img src="https://img.shields.io/badge/Architecture-Deliberative_Cognitive-blueviolet?style=for-the-badge" alt="Architecture" />
+  <img src="https://img.shields.io/badge/Tests-460_passing-2ea043?style=for-the-badge" alt="Tests" />
+  <img src="https://img.shields.io/badge/Architecture-Autonomous_AGI_Substrate-blueviolet?style=for-the-badge" alt="Architecture" />
 </p>
 
 <h1 align="center">J.A.R.V.I.S — MARK VIII</h1>
@@ -146,6 +146,52 @@ J.A.R.V.I.S never refuses an unknown or custom task:
 
 ---
 
+## 🌐 Full-Spectrum Autonomous Agency Substrate (Modules A – M)
+
+MARK VIII establishes a 13-pillar substrate providing real-world external agency, cross-device swarm coordination, native OS surface control, and autonomous software generation:
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                             FULL-SPECTRUM AGI AGENCY SUBSTRATE                                   │
+├────────────────────────────────┬────────────────────────────────┬────────────────────────────────┤
+│   PHASE 1: EXTERNAL AGENCY     │  PHASE 2: UBIQUITOUS PRESENCE  │    PHASE 3: AGI FRONTIER       │
+├────────────────────────────────┼────────────────────────────────┼────────────────────────────────┤
+│ A. Web Surrogacy               │ E. Ambient IoT Mesh            │ H. Native OS Grounding         │
+│    (web_surrogate.py)          │    (smart_space.py)            │    (omni_vision.py)            │
+│ B. Omnichannel Inbound Triage  │ F. Device Swarm Mesh           │ I. Academic & Life Sentinel    │
+│    (inbound_triage.py)         │    (device_swarm.py)           │    (academic_sentinel.py)      │
+│ C. Telephony Voice Bridge      │ G. Autonomous Daemon Cron      │ J. Duplex Voice (<50ms Cutoff) │
+│    (telephony_agent.py)        │    (autonomous_daemon.py)      │    (duplex_voice.py)           │
+│ D. Delegated Task Delivery     │                                │ K. Concurrent Sub-Agent Swarm  │
+│    (work_delegate.py)          │                                │    (subagent_swarm.py)         │
+│                                │                                │ L. Autonomous Software Forge   │
+│                                │                                │    (software_forge.py)         │
+│                                │                                │ M. Concurrency Arbiter         │
+│                                │                                │    (concurrency_arbiter.py)    │
+└────────────────────────────────┴────────────────────────────────┴────────────────────────────────┘
+```
+
+### Phase 1: External Agency & Real-World Comms
+- **Module A — Autonomous Web Surrogacy (`web_surrogate.py`):** Headless browser automation, DOM semantic scraping, reservation/booking flow coordination, and pre-flight parameter verification.
+- **Module B — Omnichannel Inbound Triage (`inbound_triage.py`):** Ingestion connectors for Gmail and WhatsApp, 3-tier priority scoring (`CRITICAL`, `ROUTINE`, `SPAM`), persona-aligned candidate draft staging in `data/pending_drafts.json`, and morning briefing voice summarization.
+- **Module C — Autonomous Telephony Bridge (`telephony_agent.py`):** Outbound voice emergency and alert calling bridge with rate-limiting guardrails ($\le 3$ calls/hour) and persistent audit logging.
+- **Module D — Delegated Task Delivery (`work_delegate.py`):** Goal-linked assignment pipeline: Spec Parsing $\rightarrow$ Sandbox Draft $\rightarrow$ Unified Diff Preview $\rightarrow$ Interactive Revision $\rightarrow$ Delivery Packaging.
+
+### Phase 2: Ubiquitous Presence & Swarm
+- **Module E — Ambient IoT & Physical Space Mesh (`smart_space.py`):** Home Assistant ecosystem control, environmental presets (`focus`, `study`, `sleep`), and smart plug power watchdog enforcing 20%–80% battery charging bounds.
+- **Module F — Cross-Device Peripheral & Mobile Swarm (`device_swarm.py`):** Bi-directional cross-platform clipboard synchronization, remote phone notification relay into `global_workspace.py`, and device ping/command dispatch.
+- **Module G — Headless Daemon Runner & Continuous Cron (`autonomous_daemon.py`):** 03:00 AM deep maintenance (DB vacuum, cache prune, synaptic plasticity trigger) and 07:00 AM morning executive briefing artifact compilation.
+
+### Phase 3: AGI Frontier, Concurrency & Software Builder
+- **Module H — Native OS Surface Grounding (`omni_vision.py`):** Win32 UI Automation hierarchy extraction, coordinate normalization across high-DPI displays, and semantic element target clicking.
+- **Module I — Proactive Academic & Life Sentinel (`academic_sentinel.py`):** Academic deliverable tracking, temporal constraint satisfaction solving, deadline risk flagging (`CRITICAL_RISK`, `HIGH_RISK`, `ON_TRACK`), and focus study block scheduling.
+- **Module J — Low-Latency Duplex Conversational Voice (`duplex_voice.py`):** Real-time chunked audio streaming with sub-50ms instant playback cut-off upon user speech detection.
+- **Module K — Concurrent Sub-Agent Swarm (`subagent_swarm.py`):** Asynchronous thread pool executor enabling parallel background worker dispatch without blocking the main conversation loop.
+- **Module L — Autonomous Software Forge (`software_forge.py`):** End-to-end multi-file software synthesis (HTML5, Modern CSS, ES6 JS, Python), syntax validation, live preview server orchestration, and standalone distribution zip packaging.
+- **Module M — Multi-Task Concurrency Arbiter (`concurrency_arbiter.py`):** Hardware resource governor enforcing a strict 5.0 GB VRAM ceiling on the RTX 3050 (6GB) with priority-tiered preemption (Tier 1 Voice/UI > Tier 2 Deliberation > Tier 3 Swarms).
+
+---
+
 ## 🧠 Brain Router & Multi-Model Fallback
 
 All language and multimodal intelligence routes through `brain.py` — the system's single LLM gateway. The brain does not speak or print directly; it returns structured data through complexity-aware routing backed by a thread-safe circuit breaker (`provider_health.py`).
@@ -259,6 +305,19 @@ UNKNOWN ──▶ CODE ──▶ CONFIGURED ──▶ PROBED ──▶ LIVE
 | | `predict_state_transition`, `verify_causal_transition` | Causal world state prediction & surprise detection (`causal_engine.py`) |
 | | `distill_execution_sample`, `export_dataset` | Offline fine-tuning dataset distillation (`experience_distiller.py`) |
 | | `creative_status`, `generate_image`, `generate_video` | NVIDIA NIM-backed Creative Studio generative workflow |
+| **Autonomous Agency (A-M)** | `browse_and_act`, `extract_page_content`, `book_reservation` | Autonomous headless web surrogacy (`web_surrogate.py`) |
+| | `triage_inbound_message`, `list_pending_drafts`, `approve_draft` | Omnichannel email & messaging priority triage (`inbound_triage.py`) |
+| | `make_outbound_alert_call`, `get_call_history` | Autonomous telephony voice alert bridge (`telephony_agent.py`) |
+| | `create_delegated_task`, `run_task_pipeline`, `approve_delivery` | Delegated task delivery and HITL diff preview (`work_delegate.py`) |
+| | `set_space_profile`, `control_device`, `run_power_watchdog` | Ambient IoT and 20/80 battery power watchdog (`smart_space.py`) |
+| | `register_device`, `push_clipboard`, `ingest_mobile_notification`, `ping_device` | Multi-node peripheral and mobile swarm mesh (`device_swarm.py`) |
+| | `run_nightly_maintenance`, `run_morning_preparation`, `schedule_cron_cycle` | Headless 24/7 background maintenance cron (`autonomous_daemon.py`) |
+| | `locate_ui_element`, `extract_screen_hierarchy`, `click_element_by_semantic_target` | Native OS UIAutomation surface grounding (`omni_vision.py`) |
+| | `add_deadline_item`, `solve_temporal_constraints`, `get_active_deadlines` | Academic sentinel & temporal constraint solver (`academic_sentinel.py`) |
+| | `start_voice_stream`, `handle_interrupt`, `synthesize_speech_chunk` | Low-latency duplex voice with sub-50ms cut-off (`duplex_voice.py`) |
+| | `spawn_subagent`, `get_subagent_status`, `cancel_subagent`, `list_active_subagents` | Concurrent sub-agent asynchronous worker pool (`subagent_swarm.py`) |
+| | `forge_application`, `validate_project`, `package_distribution_zip` | Autonomous multi-file software forge (`software_forge.py`) |
+| | `acquire_resource_lock`, `release_resource_lock`, `get_resource_allocation_state` | Concurrency & 5.0GB VRAM resource arbiter (`concurrency_arbiter.py`) |
 
 ---
 
