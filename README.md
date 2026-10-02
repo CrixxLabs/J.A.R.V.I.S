@@ -3,7 +3,7 @@
   <img src="https://img.shields.io/badge/Python-3.11+-3776ab?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/.NET-8.0-512bd4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET" />
   <img src="https://img.shields.io/badge/Platform-Windows-0078d4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows" />
-  <img src="https://img.shields.io/badge/Tests-477_passing-2ea043?style=for-the-badge" alt="Tests" />
+  <img src="https://img.shields.io/badge/Tests-496_passing-2ea043?style=for-the-badge" alt="Tests" />
   <img src="https://img.shields.io/badge/Architecture-Autonomous_AGI_Substrate-blueviolet?style=for-the-badge" alt="Architecture" />
 </p>
 
@@ -323,7 +323,16 @@ UNKNOWN ──▶ CODE ──▶ CONFIGURED ──▶ PROBED ──▶ LIVE
 | | `start_voice_stream`, `handle_interrupt`, `synthesize_speech_chunk` | Low-latency duplex voice with sub-50ms cut-off (`duplex_voice.py`) |
 | | `spawn_subagent`, `get_subagent_status`, `cancel_subagent`, `list_active_subagents` | Concurrent sub-agent asynchronous worker pool (`subagent_swarm.py`) |
 | | `forge_application`, `validate_project`, `package_distribution_zip` | Autonomous multi-file software forge (`software_forge.py`) |
-| | `acquire_resource_lock`, `release_resource_lock`, `get_resource_allocation_state` | Concurrency & 5.0GB VRAM resource arbiter (`concurrency_arbiter.py`) |
+| **Immune OS & Cognitive Runtime (R, O, P, V)** | `quarantine_parse_untrusted`, `check_execution_safety`, `begin_saga` | Dual-LLM quarantine parser, taint tracker & transactional saga ledger (`capability_guard.py`) |
+| | `verify_code_safety`, `verify_postcondition`, `detect_test_mutation` | Heterogeneous AST symbolic postcondition & test mutation verifier (`symbolic_verifier.py`) |
+| | `record_commitment`, `calculate_temporal_slack`, `evaluate_stn_consistency` | Executive commitment ledger & simple temporal network solver (`commitment_ledger.py`) |
+| | `acquire_gpu_lease`, `release_gpu_lease`, `swap_out_context`, `swap_in_context` | Single-GPU lease coordinator & NVMe context virtualization scheduler (`cognitive_os.py`) |
+| **Epistemics & Intentionality (N, Q, S, T, U)** | `record_task_outcome`, `predict_competence`, `evaluate_autonomy_level` | Outcome-calibrated competence & risk-scaled autonomy governor (`metacognitive_governor.py`) |
+| | `record_belief`, `query_beliefs`, `resolve_contradiction`, `retract_belief` | Bitemporal belief graph & truth maintenance system (`bitemporal_memory.py`) |
+| | `estimate_user_state`, `should_interrupt`, `select_notification_channel` | Latent user state estimation & VOI attention arbiter (`attention_arbiter.py`) |
+| | `evaluate_active_inference`, `replay_counterfactual`, `dry_run_action` | Active-inference world model & counterfactual replay engine (`world_simulator.py`) |
+| | `filter_trajectories`, `evaluate_candidate_adaptation`, `promote_adaptation`, `rollback_adaptation` | Verified trajectory filter & regression-gated self-adaptation engine (`gated_adaptation.py`) |
+
 
 ---
 

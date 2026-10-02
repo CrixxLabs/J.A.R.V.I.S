@@ -75,6 +75,7 @@ KNOWN_SUBSYSTEMS = [
     "OMNI_VISION", "ACADEMIC_SENTINEL", "DUPLEX_VOICE", "SUBAGENT_SWARM",
     "SOFTWARE_FORGE", "CONCURRENCY_ARBITER",
     "CAPABILITY_GUARD", "SYMBOLIC_VERIFIER", "COMMITMENT_LEDGER", "COGNITIVE_OS",
+    "METACOGNITIVE_GOVERNOR", "BITEMPORAL_MEMORY", "ATTENTION_ARBITER", "WORLD_SIMULATOR", "GATED_ADAPTATION",
 ]
 
 _TEST_ARTIFACT_NAMES = {"FAIL_COMP", "HIGH_PRIORITY", "LOW_PRIORITY", "TEST"}
@@ -286,6 +287,11 @@ CAPABILITY_DEFINITIONS = {
     "SYMBOLIC_VERIFIER": _cap("Heterogeneous symbolic code and state verifier", "reasoning", ["symbolic_verifier.py"], actions=["verify_code_safety", "verify_postcondition", "verify_temporal_bounds", "detect_test_mutation"]),
     "COMMITMENT_LEDGER": _cap("Executive commitment ledger and simple temporal network", "planning", ["commitment_ledger.py"], actions=["record_commitment", "update_commitment_status", "get_active_commitments", "calculate_temporal_slack", "evaluate_stn_consistency"]),
     "COGNITIVE_OS": _cap("Cognitive OS scheduler and context virtualization", "system", ["cognitive_os.py"], actions=["acquire_gpu_lease", "release_gpu_lease", "swap_out_context", "swap_in_context", "get_scheduler_state"]),
+    "METACOGNITIVE_GOVERNOR": _cap("Outcome-calibrated competence and risk-scaled autonomy", "reasoning", ["metacognitive_governor.py"], actions=["record_task_outcome", "predict_competence", "evaluate_autonomy_level", "get_domain_metrics"]),
+    "BITEMPORAL_MEMORY": _cap("Bitemporal belief graph and truth maintenance", "memory", ["bitemporal_memory.py"], actions=["record_belief", "query_beliefs", "resolve_contradiction", "retract_belief", "get_contradictions"]),
+    "ATTENTION_ARBITER": _cap("Latent user state modeling and attention economics", "system", ["attention_arbiter.py"], actions=["estimate_user_state", "should_interrupt", "select_notification_channel", "queue_alert_for_digest", "flush_digest", "record_feedback"]),
+    "WORLD_SIMULATOR": _cap("Active-inference world model and counterfactual replay", "reasoning", ["world_simulator.py"], actions=["evaluate_active_inference", "record_event_trace", "replay_counterfactual", "dry_run_action"]),
+    "GATED_ADAPTATION": _cap("Verified trajectory filtering and regression-gated adaptation", "learning", ["gated_adaptation.py"], actions=["filter_trajectories", "evaluate_candidate_adaptation", "promote_adaptation", "rollback_adaptation", "get_active_adaptations"], dependencies=["cap:SYMBOLIC_VERIFIER"]),
 }
 
 
