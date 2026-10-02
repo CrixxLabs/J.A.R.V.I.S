@@ -24,6 +24,7 @@ import status_registry
 import runtime_visuals
 from status_registry import EvidenceLevel, SubsystemState, get_registry
 import error_handler
+import global_workspace
 
 # ── Shared state (read-only from outside) ──
 state = {
@@ -145,7 +146,12 @@ def _context_observer():
                 with _lock:
                     state["last_app_change"] = time.time()
                 print(f"[Observer] App: {app}")
-            
+
+            try:
+                global_workspace.hook_vision(active_app=app, active_title=title, screen_changed=state.get("screen_changed", False))
+            except Exception:
+                pass
+
             registry.set_evidence("OBSERVER", EvidenceLevel.LIVE, "Foreground context observation succeeded",
                                   source="observer loop")
             registry.set_capability_evidence("OBSERVER", EvidenceLevel.LIVE,
@@ -179,7 +185,13 @@ def _system_observer():
                     state["battery_percent"]  = bat.percent
                     state["battery_charging"] = bat.power_plugged
             runtime_visuals.update(memory_usage=ram.percent)
-            
+
+            try:
+                bat_pct = bat.percent if bat else -1.0
+                global_workspace.hook_telemetry(cpu_percent=cpu, ram_percent=ram.percent, battery_percent=bat_pct)
+            except Exception:
+                pass
+
             registry.set_evidence("OBSERVER", EvidenceLevel.LIVE, "System telemetry sample succeeded",
                                   source="observer loop")
             registry.set_capability_evidence("OBSERVER", EvidenceLevel.LIVE,
@@ -213,6 +225,14 @@ def _screen_observer():
                 state["last_screen_hash"]   = h
                 if changed:
                     state["screen_change_time"] = time.time()
+                    try:
+                        global_workspace.hook_vision(
+                            active_app=state.get("active_app", ""),
+                            active_title=state.get("active_title", ""),
+                            screen_changed=True,
+                        )
+                    except Exception:
+                        pass
             last_hash = h
             
             registry.set_evidence("VISION", EvidenceLevel.LIVE, "Observer captured screen pixels",

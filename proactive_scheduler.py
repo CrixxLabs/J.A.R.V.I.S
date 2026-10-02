@@ -14,6 +14,7 @@
 import threading
 import time
 import datetime
+import global_workspace
 
 # ── Configuration — edit these freely ─────────────────────────────────────────
 CHECKIN_TIMES = ["09:00", "21:00"]
@@ -206,13 +207,18 @@ def run_obligation_checkin(speak: bool = True, context_note: str = "") -> str:
             print("[proactive_scheduler] LLM returned empty — skipping.")
             return ""
 
+        if global_workspace.is_preempted():
+            print("[proactive_scheduler] Obligation reasoning checkin preempted by active sensory event.")
+            return ""
+
         print(f"[proactive_scheduler] Reasoning result: {result[:120]}...")
 
         with _lock:
             _last_checkin_time = datetime.datetime.now()
 
         if speak and _speak_fn:
-            _speak_fn(result)
+            if not global_workspace.is_preempted():
+                _speak_fn(result)
 
         return result
 

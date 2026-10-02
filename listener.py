@@ -19,6 +19,7 @@ from collections import deque
 import status_registry
 from status_registry import SubsystemState, get_registry
 import error_handler
+import global_workspace
 
 # ── Audio config ──────────────────────────────────────────────────────────────
 RATE = 16000
@@ -533,6 +534,10 @@ def _interrupt_watcher():
                     elif (current_time - voice_start_time) >= INTERRUPT_MIN_DURATION:
                         print(f"[Interrupt] OK Voice interrupt (energy: {energy:.0f})")
                         _interrupt_flag.set()
+                        try:
+                            global_workspace.hook_audio(energy=energy, speech_detected=True)
+                        except Exception:
+                            pass
                         break
                 else:
                     voice_start_time = 0
