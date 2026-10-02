@@ -370,7 +370,10 @@ def speak(text):
                 is_speaking = False
                 listener.stop_interrupt_watcher()
                 return
+            else:
+                print("[TTS][ERROR] Pocket-TTS stream_speech returned False; falling back to Edge-TTS")
         except Exception as exc:
+            print(f"[TTS][ERROR] Pocket-TTS streaming exception: {exc}; falling back to Edge-TTS")
             error_handler.log_and_demote(
                 "VOICE_TTS", exc, "Pocket-TTS streaming pipeline", SubsystemState.DEGRADED
             )
@@ -393,7 +396,7 @@ def speak(text):
         _play_audio_file(mp3_path)
 
     except Exception as exc:
-        print(f"[DEBUG][speak] edge_tts failed: {exc}")
+        print(f"[TTS][ERROR] Edge-TTS synthesis failed: {exc}; falling back to Windows SAPI")
         registry.set_status("VOICE_TTS", SubsystemState.DEGRADED, f"Edge-TTS failed: {exc}")
 
         # SAPI fallback
@@ -411,7 +414,7 @@ def speak(text):
                     break
             registry.set_status("VOICE_TTS", SubsystemState.DEGRADED, "SAPI fallback OK")
         except Exception as fallback_exc:
-            print(f"[DEBUG][speak] SAPI fallback failed: {fallback_exc}")
+            print(f"[TTS][ERROR] Windows SAPI fallback failed: {fallback_exc}; all TTS options exhausted")
             registry.set_status("VOICE_TTS", SubsystemState.OFFLINE, f"All TTS failed: {fallback_exc}")
         finally:
             is_speaking = False

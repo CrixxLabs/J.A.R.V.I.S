@@ -533,7 +533,10 @@ def _handle_local_intent(intent_data: dict) -> tuple | None:
         if app:
             core.update_context(last_app=app)
             return {"action": "close_app", "app": app}, f"Closing {app}."
-        return None, "Which app should I close?"
+        raw_text = (intent_data.get("raw_text") or "").strip()
+        if re.match(r"^(?:(?:hey\s+)?jarvis\s*,?\s*|please\s+|can\s+you\s+)?(?:close|kill|terminate|exit|quit)\b", raw_text, re.IGNORECASE):
+            return None, "Which app should I close?"
+        return None
 
     if intent == "check_whatsapp":
         return {"action": "whatsapp_read"}, "Checking WhatsApp."

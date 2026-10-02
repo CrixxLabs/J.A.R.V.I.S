@@ -42,6 +42,43 @@ _request_lock = threading.Lock()
 _ready = False
 
 
+def ensure_compatible_voice_wav(wav_path: Path, target_sr: int = 24000) -> Path:
+    """Inspect and auto-convert voice reference WAV to 24kHz 16-bit mono PCM."""
+    if not wav_path.exists():
+        raise FileNotFoundError(f"[TTS][ERROR] Voice WAV not found: {wav_path}")
+    try:
+        import soundfile as sf
+        import scipy.signal
+        import scipy.io.wavfile as wavfile
+        import numpy as np
+
+        data, sr = sf.read(str(wav_path), dtype="float32")
+        channels = 1 if data.ndim == 1 else data.shape[1]
+        needs_mono = channels > 1
+        needs_resample = sr != target_sr
+
+        if not needs_mono and not needs_resample:
+            return wav_path
+
+        print(f"[TTS] Voice WAV mismatch ({sr}Hz, {channels}ch) -> Auto-converting {wav_path.name} to {target_sr}Hz mono 16-bit PCM...")
+        if needs_mono:
+            data = data.mean(axis=1)
+        if needs_resample:
+            num_samples = int(round(len(data) * target_sr / sr))
+            data = scipy.signal.resample(data, num_samples)
+
+        max_val = np.max(np.abs(data))
+        if max_val > 0:
+            data = data / max_val * 0.95
+        data_int16 = (data * 32767.0).astype(np.int16)
+        wavfile.write(str(wav_path), target_sr, data_int16)
+        print(f"[TTS] Converted {wav_path.name} to {target_sr}Hz mono 16-bit PCM successfully.")
+        return wav_path
+    except Exception as exc:
+        print(f"[TTS][ERROR] Auto-conversion of voice WAV {wav_path} failed: {exc}")
+        return wav_path
+
+
 def _recv_exact(sock: socket.socket, size: int) -> bytes:
     chunks = bytearray()
     while len(chunks) < size:
@@ -86,6 +123,14 @@ def prerequisites() -> tuple[bool, str]:
         return False, f"Pocket-TTS voice state missing: {POCKET_VOICE}"
     if not WORKER_PATH.exists():
         return False, f"Pocket-TTS worker missing: {WORKER_PATH}"
+
+    # Validate and auto-convert voice reference audio if necessary
+    try:
+        ensure_compatible_voice_wav(POCKET_VOICE)
+    except Exception as e:
+        print(f"[TTS][ERROR] Voice audio integrity check failed: {e}")
+        return False, f"Voice WAV format invalid: {e}"
+
     return True, f"Pocket-TTS configured for {POCKET_DEVICE}; voice={POCKET_VOICE.name}"
 
 
@@ -106,6 +151,7 @@ def start_engine(timeout: float = 45.0) -> bool:
         if not ok:
             _ready = False
             get_registry().set_status("VOICE_TTS", SubsystemState.DEGRADED, detail)
+            print(f"[TTS][ERROR] Prerequisites failed: {detail}")
             return False
 
         if _worker is not None and _worker.poll() is None:
@@ -128,7 +174,7 @@ def start_engine(timeout: float = 45.0) -> bool:
         env["JARVIS_POCKET_TTS_VOICE"] = str(POCKET_VOICE)
         env["JARVIS_POCKET_TTS_DEVICE"] = POCKET_DEVICE
 
-        print(f"[TTS] Starting persistent Pocket-TTS worker on {POCKET_DEVICE}...")
+        print(f"[TTS] Starting persistent Pocket-TTS worker on {POCKET_DEVICE} (port {POCKET_PORT})...")
         _worker = subprocess.Popen(
             [str(POCKET_PYTHON), str(WORKER_PATH)],
             cwd=str(BASE_DIR),
@@ -141,7 +187,9 @@ def start_engine(timeout: float = 45.0) -> bool:
 
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
-            if _worker.poll() is not None:
+            poll_code = _worker.poll()
+            if poll_code is not None:
+                print(f"[TTS][ERROR] Pocket-TTS worker process exited prematurely with exit code {poll_code}")
                 break
             if _probe_worker(timeout=0.4):
                 _ready = True
@@ -154,9 +202,9 @@ def start_engine(timeout: float = 45.0) -> bool:
             time.sleep(0.15)
 
         _ready = False
-        detail = "Pocket-TTS worker failed to become ready"
+        detail = f"Pocket-TTS worker failed to become ready on port {POCKET_PORT}"
         get_registry().set_status("VOICE_TTS", SubsystemState.DEGRADED, detail)
-        print(f"[TTS] {detail}; Edge-TTS/SAPI fallback remains available.")
+        print(f"[TTS][ERROR] {detail}; Edge-TTS/SAPI fallback remains available.")
         return False
 
 
@@ -178,6 +226,7 @@ def generate_speech_wav(text: str, output_wav_path: Optional[str] = None) -> Opt
     if not text or not text.strip():
         return None
     if not is_ready() and not start_engine():
+        print("[TTS][ERROR] Engine start failed during generate_speech_wav request")
         return None
 
     if output_wav_path is None:
@@ -192,8 +241,11 @@ def generate_speech_wav(text: str, output_wav_path: Optional[str] = None) -> Opt
             reply = _recv_json(sock)
             if reply.get("ok") and os.path.exists(output_wav_path) and os.path.getsize(output_wav_path) > 44:
                 return output_wav_path
-            raise RuntimeError(reply.get("error") or "Pocket-TTS WAV generation failed")
+            err = reply.get("error") or "Pocket-TTS WAV generation failed"
+            print(f"[TTS][ERROR] WAV synthesis failed: {err}")
+            raise RuntimeError(err)
     except Exception as exc:
+        print(f"[TTS][ERROR] Pocket-TTS WAV generation exception: {exc}")
         error_handler.log_and_demote(
             subsystem="VOICE_TTS",
             exception=exc,
@@ -223,12 +275,13 @@ def stream_speech(
     if not text or not text.strip():
         return False
     if not is_ready() and not start_engine():
+        print("[TTS][ERROR] Engine start failed during stream_speech request")
         return False
 
     try:
         import sounddevice as sd
     except Exception as exc:
-        print(f"[TTS] sounddevice unavailable for streaming: {exc}")
+        print(f"[TTS][ERROR] sounddevice unavailable for streaming: {exc}")
         return False
 
     started_at = time.perf_counter()
@@ -241,7 +294,9 @@ def stream_speech(
             _send_json(sock, {"op": "stream", "text": text})
             header = _recv_json(sock)
             if not header.get("ok"):
-                raise RuntimeError(header.get("error") or "Pocket-TTS stream rejected")
+                err = header.get("error") or "Pocket-TTS stream rejected"
+                print(f"[TTS][ERROR] Stream rejected by worker: {err}")
+                raise RuntimeError(err)
 
             sample_rate = int(header["sample_rate"])
             channels = int(header.get("channels", 1))
@@ -289,7 +344,7 @@ def stream_speech(
                         # Windows can invalidate an already-open MME endpoint when
                         # headphones/Bluetooth/default output changes.  Let the
                         # caller fall back cleanly instead of pretending synthesis failed.
-                        print(f"[TTS] playback device became unavailable: {playback_exc}")
+                        print(f"[TTS][ERROR] playback device became unavailable: {playback_exc}")
                         try:
                             sd._terminate()
                             sd._initialize()
@@ -306,6 +361,7 @@ def stream_speech(
             return True
 
     except Exception as exc:
+        print(f"[TTS][ERROR] Pocket-TTS streaming failed: {exc}")
         error_handler.log_and_demote(
             subsystem="VOICE_TTS",
             exception=exc,
