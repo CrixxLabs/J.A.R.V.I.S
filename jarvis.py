@@ -95,9 +95,9 @@ except Exception as _sa_err:
     print(f"[jarvis] self_awareness not available: {_sa_err}")
 
 # ══════════════════════════════════════════════════════════════════════════════
-# CUDA ALLOCATION HARDENING — set before any torch import
+# CUDA ALLOCATION HARDENING — set before any torch import (platform-guarded)
 # ══════════════════════════════════════════════════════════════════════════════
-os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+import cuda_guard  # applies win32-safe PYTORCH_CUDA_ALLOC_CONF
 
 load_dotenv()
 

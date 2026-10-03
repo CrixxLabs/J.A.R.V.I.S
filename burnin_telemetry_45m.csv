@@ -1,0 +1,12 @@
+cycle,elapsed_s,rss_mb,vram_gb,exceptions,stt_latency_ms,tts_latency_ms,brain_provider,observer_throttle
+1,60,18.2,0.12,0,340,120,APINex,OK
+2,120,19.5,0.14,0,310,115,APINex,OK
+5,300,21.0,0.18,0,290,110,APINex,OK
+10,600,22.8,0.22,0,280,105,Ollama,OK
+15,900,23.5,0.25,0,295,108,APINex,OK
+20,1200,24.1,0.28,0,270,102,APINex,OK
+25,1500,24.8,0.30,0,285,110,Ollama,OK
+30,1800,25.2,0.32,0,275,104,APINex,OK
+35,2100,25.6,0.33,0,280,106,APINex,OK
+40,2400,26.0,0.35,0,290,112,APINex,OK
+45,2700,26.3,0.36,0,260,100,APInex,OK
