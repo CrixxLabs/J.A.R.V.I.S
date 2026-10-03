@@ -57,7 +57,7 @@ class SubsystemState(str, Enum):
 
 
 KNOWN_SUBSYSTEMS = [
-    "VOICE_STT", "VOICE_TTS", "CAMERA", "FACE_RECOGNITION", "NVIDIA",
+    "VOICE_STT", "VOICE_TTS", "CAMERA", "FACE_RECOGNITION", "APINEX", "NVIDIA",
     "OLLAMA", "OLLAMA_SERVICE", "OLLAMA_MODEL_JARVIS_MINISTRAL_3B", "GROQ",
     "OPENROUTER", "GEMINI", "TESSERACT_OCR", "MEMORY",
     "PERSONALITY", "TASKS", "PLUGINS", "WHATSAPP_SEND", "SPOTIFY", "EMAIL",
@@ -201,7 +201,9 @@ def _cap(name, category, files, *, actions=(), dependencies=(), optional_depende
 # dependency names reference subsystem evidence in this same registry.
 CAPABILITY_DEFINITIONS = {
     # Provider/model capabilities carry direct granular evidence. A failure of
-    # one NVIDIA model must not demote another model through a coarse provider.
+    # one model must not demote another model through a coarse provider.
+    "APINEX_FAST": _cap("APInex fast reflex model", "ai", ["brain.py", "planner.py"]),
+    "APINEX_PRO": _cap("APInex deep reasoning model", "ai", ["brain.py", "planner.py"]),
     "NVIDIA_NORMAL": _cap("NVIDIA normal conversation", "ai", ["brain.py", "planner.py"]),
     "NVIDIA_REASONING": _cap("NVIDIA reasoning", "ai", ["brain.py", "planner.py"]),
     "GEMINI_FALLBACK": _cap("Gemini fallback", "ai", ["brain.py"]),

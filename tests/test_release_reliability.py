@@ -13,23 +13,25 @@ def test_debugging_request_is_complex():
     assert brain._is_complex_query("debug this architecture and explain why the race condition occurs") is True
 
 
+@patch("brain._apinex_call", return_value=("", "offline"))
 @patch("brain._gemini_call", return_value=("", "offline"))
 @patch("brain._nvidia_call", return_value=("", "offline"))
 @patch("brain._ollama_call", return_value=("local answer", "ok"))
-def test_routine_query_uses_local_first(mock_ollama, mock_nvidia, mock_gemini):
+def test_routine_query_uses_local_first(mock_ollama, mock_nvidia, mock_gemini, mock_apinex):
     assert brain.ask_llm("how are you", allow_actions=False) == "local answer"
     mock_ollama.assert_called_once()
     mock_nvidia.assert_not_called()
     mock_gemini.assert_not_called()
 
 
+@patch("brain._apinex_call", return_value=("", "offline"))
 @patch("brain._gemini_call", return_value=("", "offline"))
 @patch("brain._ollama_call", return_value=("", "offline"))
 @patch("brain._nvidia_call", return_value=("cloud answer", "ok"))
-def test_complex_query_uses_nemotron_first(mock_nvidia, mock_ollama, mock_gemini):
+def test_complex_query_uses_nemotron_first(mock_nvidia, mock_ollama, mock_gemini, mock_apinex):
     assert brain.ask_llm("debug this architecture", allow_actions=False) == "cloud answer"
     mock_nvidia.assert_called_once()
-    mock_ollama.assert_not_called()
+    mock_ollama.assert_called_once()
 
 
 def test_system_prompt_forbids_unverified_global_health_claims():

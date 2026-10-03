@@ -1,25 +1,31 @@
-# brain.py — AI Brain (Multi-Model Router)
+# brain.py — AI Brain (Multi-Tier APInex Cloud Router & Autonomous Ollama Lifecycle)
 # Single responsibility: all LLM calls live here.
 # Returns strings or dicts. Never speaks, never prints user-facing output.
 #
-# Routing:
-#   Routine: Ollama JARVIS/Ministral -> NVIDIA Lightning -> Gemini
-#   Complex: NVIDIA reasoning -> Ollama JARVIS/Ministral -> Gemini
+# Multi-Tier Routing:
+#   System-1 Fast Reflex: APInex DeepSeek Flash (free/deepseek-v4.1-flash) (sub-second TTFT)
+#   System-2 Deep Reasoning: APInex DeepSeek Pro (free/deepseek-v4-pro-0813) (complex deliberation)
+#   Cloud Retry: APInex Fallback (free/glm-5.3-flash) on 429/500/timeout
+#   Autonomous Local Fallback: Ollama (jarvis:latest / ministral-3:latest) silently spawned
+#   Secondary Cloud: NVIDIA Nemotron / Gemini
+from __future__ import annotations
 
 import json
 import os
 import re
 import threading
 import time
+from typing import Any, Dict, List, Optional, Tuple
 
 import requests
 from dotenv import load_dotenv
 
 # Reliability imports
-import status_registry
-from status_registry import EvidenceLevel, SubsystemState, get_registry
 import error_handler
+import status_registry
 from provider_health import HealthState, classify_http, health as provider_health
+from speech_cleaner import clean_speech_text
+from status_registry import EvidenceLevel, SubsystemState, get_registry
 
 # ── Optional SDK imports (safe if not installed) ───────────────────────────────
 try:
@@ -38,7 +44,17 @@ except Exception as _gq_err:
 
 load_dotenv()
 
-# ── API keys ──────────────────────────────────────────────────────────────────
+# ── APInex Multi-Tier Cloud Brain Configuration ───────────────────────────────
+APINEX_API_KEY        = os.getenv("APINEX_API_KEY", "").strip()
+APINEX_BASE_URL       = os.getenv("APINEX_BASE_URL", "https://api.apinex.bond/v1").rstrip("/")
+APINEX_FAST_MODEL     = os.getenv("APINEX_FAST_MODEL", "free/deepseek-v4.1-flash").strip()
+APINEX_PRO_MODEL      = os.getenv("APINEX_PRO_MODEL", "free/deepseek-v4-pro-0813").strip()
+APINEX_FALLBACK_MODEL = os.getenv("APINEX_FALLBACK_MODEL", "free/glm-5.3-flash").strip()
+APINEX_CONNECT_TIMEOUT = float(os.getenv("APINEX_CONNECT_TIMEOUT", "1.5"))
+APINEX_FAST_REQUEST_TIMEOUT = float(os.getenv("APINEX_FAST_REQUEST_TIMEOUT", "3.0"))
+APINEX_PRO_REQUEST_TIMEOUT  = float(os.getenv("APINEX_PRO_REQUEST_TIMEOUT", "15.0"))
+
+# ── Other Cloud API keys ──────────────────────────────────────────────────────
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 GROQ_API_KEY       = os.getenv("GROQ_API_KEY", "")
 NVIDIA_API_KEY     = os.getenv("NVIDIA_API_KEY", "")
@@ -47,8 +63,6 @@ GEMINI_API_KEY     = os.getenv("GEMINI_API_KEY", "")
 # ── Model configuration ───────────────────────────────────────────────────────
 REQUIRED_OLLAMA_MODEL = "jarvis:latest"
 CONFIGURED_OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", REQUIRED_OLLAMA_MODEL).strip()
-# MARK VII's local route is intentionally pinned. Environment drift must not
-# silently select an obsolete or merely similar model.
 OLLAMA_MODEL       = REQUIRED_OLLAMA_MODEL
 OLLAMA_KEEP_ALIVE  = os.getenv("OLLAMA_KEEP_ALIVE", "10m")
 OLLAMA_HOST        = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/")
@@ -76,6 +90,9 @@ OPENROUTER_FALLBACKS = [
 ]
 
 for _provider, _model in (
+    ("APINEX", APINEX_FAST_MODEL),
+    ("APINEX", APINEX_PRO_MODEL),
+    ("APINEX", APINEX_FALLBACK_MODEL),
     ("NVIDIA", NVIDIA_FAST_MODEL),
     ("NVIDIA", NVIDIA_REASONING_MODEL),
     ("NVIDIA", NVIDIA_DEEP_MODEL),
@@ -103,12 +120,7 @@ def get_provider_health(provider: str, model: str | None = None) -> dict:
 
 
 def record_provider_success(provider: str, model: str) -> None:
-    """Publish successful provider use for routes implemented outside brain.py.
-
-    Vision owns its Gemini request implementation, but provider attribution is
-    process-wide.  Keeping this small public boundary prevents a successful
-    vision fallback from returning with an UNKNOWN last-provider value.
-    """
+    """Publish successful provider use for routes implemented outside brain.py."""
     normalized_provider = str(provider).strip().upper()
     normalized_model = str(model).strip()
     if not normalized_provider or not normalized_model:
@@ -147,6 +159,8 @@ def _mark_failure(provider: str, model: str, state: HealthState, detail: str, re
 
 def _provider_capability(provider: str, model: str) -> str | None:
     provider = provider.upper()
+    if provider == "APINEX":
+        return "APINEX_PRO" if model == APINEX_PRO_MODEL else "APINEX_FAST"
     if provider == "NVIDIA":
         return "NVIDIA_NORMAL" if model == NVIDIA_FAST_MODEL else "NVIDIA_REASONING"
     return {"GEMINI": "GEMINI_FALLBACK", "OLLAMA": "OLLAMA_LOCAL"}.get(provider)
@@ -265,6 +279,7 @@ def discover_ollama(*, force: bool = False) -> dict:
     _publish_ollama_discovery(result)
     return dict(result)
 
+
 # ── Groq client (lazy init) ────────────────────────────────────────────────────
 _groq_client = None
 
@@ -293,34 +308,27 @@ def _get_groq_client():
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# COMPLEXITY DETECTION — decides if query needs the big brain (Groq)
+# COMPLEXITY DETECTION — decides if query needs System-2 Deep Reasoning
 # ══════════════════════════════════════════════════════════════════════════════
 
 _COMPLEX_TRIGGERS = (
-    # Explicit deep-analysis / engineering work.  Ordinary explanation phrases
-    # intentionally stay local; Ministral handles routine "how/why/explain" requests.
     "analyze", "analyse", "compare", "contrast", "trade-off", "trade off",
     "tradeoff", "evaluate", "assess",
     "debug", "refactor", "optimize this", "review this code",
     "architecture", "architectural", "system design", "root cause",
     "implement", "write a function", "write a script", "write code",
-    "algorithm for", "create a class",
+    "algorithm for", "create a class", "ast analysis", "symbolic math",
+    "proof", "structural deliberation",
     "strategy for", "roadmap", "multi-stage", "multi step", "multi-step",
     # Manual override.
     "think deeper", "think harder", "use big brain", "use nemotron",
     "deep reasoning", "extreme reasoning", "detailed technical analysis",
+    "use pro model", "deep deliberation",
 )
 
 
-
-
 def _is_complex_query(query: str) -> bool:
-    """Return True only when the request actually asks for deeper reasoning.
-
-    Length alone is deliberately not a complexity signal: a long casual sentence
-    should stay local, while explicit debugging/architecture/analysis requests can
-    escalate to Nemotron.
-    """
+    """Return True only when the request asks for deeper System-2 reasoning."""
     if not query:
         return False
     lowered = query.lower().strip()
@@ -328,38 +336,30 @@ def _is_complex_query(query: str) -> bool:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# SELF-AWARENESS CONTEXT (DYNAMIC — reads live file scan)
+# SELF-AWARENESS & WORKING MEMORY CONTEXT
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _get_dynamic_self_awareness() -> str:
-    """
-    Try to load self-awareness context from self_awareness module.
-    Falls back to a minimal hardcoded description if scan not available.
-    """
+    """Try to load self-awareness context from self_awareness module."""
     try:
         import self_awareness
         dynamic_context = self_awareness.get_self_context_for_prompt(compact=False)
         if dynamic_context:
             return "\n\n" + dynamic_context + (
-                "\n\nYou are JARVIS — a locally running AI assistant built by your user (Sonu/Arju). "
-                "You run on Python 3.11 on Windows 11 (Acer Gaming Laptop, i5 12th gen, "
-                "16GB RAM, RTX 3050 6GB VRAM). "
-                "Your routine local brain is Ministral 3 3B through Ollama, with NVIDIA Nemotron for complex reasoning and Gemini as a cloud fallback. "
+                "\n\nYou are JARVIS — an autonomous desktop AI assistant built by your user (Sonu/Arju). "
+                "You run on Python 3.11 on Windows 11 (Acer Gaming Laptop, i5 12th gen, 16GB RAM, RTX 3050 6GB VRAM). "
+                "Your cognition pipeline operates on a dual-tier APInex Cloud Brain (DeepSeek Flash & Pro) with autonomous local Ollama fallback. "
                 "Voice verification via Resemblyzer, transcription via Whisper on CUDA. "
-                "You are actively being developed and can propose patches to your own code via evolver.py. "
-                "When asked about your code or files, answer confidently using the module list above. "
-                "Never say 'I don't have access to my code'."
+                "When asked about your code or files, answer confidently using the module list above."
             )
     except Exception as exc:
         print(f"[brain] self_awareness unavailable, using fallback: {exc}")
 
-    # Fallback — minimal hardcoded description
     return (
-        "\n\nYou are JARVIS — a locally running AI assistant built by your user (Sonu/Arju). "
+        "\n\nYou are JARVIS — an autonomous desktop AI assistant built by your user (Sonu/Arju). "
         "You run on Python 3.11 on Windows 11. "
-        "Your routine local brain is Ministral 3 3B through Ollama, with NVIDIA Nemotron for complex reasoning and Gemini as a cloud fallback. "
-        "Voice verification via Resemblyzer, transcription via Whisper on CUDA. "
-        "You are actively being developed and can propose patches to your own code."
+        "Your cognition operates on dual-tier APInex Cloud Brain with autonomous local Ollama fallback. "
+        "Voice verification via Resemblyzer, transcription via Whisper on CUDA."
     )
 
 
@@ -389,7 +389,6 @@ _LLM_SYSTEM_DETAILED = (
     "Never include internal thoughts or 'step by step' preambles."
 )
 
-# ── Sentiment-aware tone hints ─────────────────────────────────────────────────
 _SENTIMENT_HINTS = {
     "stressed": (
         "\nThe user seems frustrated. Be extra concise — no fluff, no pleasantries. "
@@ -409,7 +408,6 @@ _SENTIMENT_HINTS = {
     "neutral":  "",
 }
 
-# ── Reasoning-leak markers ─────────────────────────────────────────────────────
 _REASONING_MARKERS = (
     "the user is asking",
     "let me think",
@@ -432,10 +430,9 @@ def _build_system_prompt(
     profile_context: str = "",
     detailed: bool = False,
 ) -> str:
-    """Build the final system prompt with dynamic self-awareness."""
+    """Build the final system prompt with dynamic self-awareness and working memory grounding."""
     system = _LLM_SYSTEM_DETAILED if detailed else _LLM_SYSTEM
 
-    # ── Inject dynamic self-awareness (reads live codebase state) ─────────────
     system += _get_dynamic_self_awareness()
     system += (
         "\nRuntime truth rule: never claim that all systems, subsystems, providers, or "
@@ -452,9 +449,7 @@ def _build_system_prompt(
             "Never use markdown code fences. "
             "Never invent schemas like {'type': ...} or {'name': ...}. "
             "An action request is only a request to the executor: never claim it succeeded, "
-            "completed, opened, played, sent, changed, generated, saved, or was observed until runtime/tool evidence confirms it. "
-            "Never invent filenames, screenshots, generated-media paths, browser tabs, opened windows, or tool results. "
-            "If no tool/action was executed, do not describe a tool action as if it happened."
+            "completed, opened, played, sent, changed, generated, saved, or was observed until runtime/tool evidence confirms it."
         )
     else:
         system += (
@@ -489,11 +484,10 @@ def _strip_scratchpad(text: str) -> str:
 
     cleaned = text
 
-    # 1. Strip explicit thinking / thought tags (case-insensitive, multiline)
+    # Strip explicit thinking tags
     cleaned = re.sub(r"<(thought|think)>[\s\S]*?</\1>", "", cleaned, flags=re.IGNORECASE)
     cleaned = re.sub(r"^<(thought|think)>[\s\S]*?(?=(?:\r?\n\r?\n)|$)", "", cleaned, flags=re.IGNORECASE)
 
-    # 2. Check for planning meta-talk / scratchpad lines before the actual conversational response
     meta_prefixes = (
         "we must",
         "we need to",
@@ -544,10 +538,6 @@ def _looks_like_reasoning(text: str) -> bool:
     return any(marker in lowered for marker in _REASONING_MARKERS)
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# PROVIDER 1: OLLAMA (LOCAL)
-# ══════════════════════════════════════════════════════════════════════════════
-
 def _safe_error_detail(response) -> str:
     try:
         payload = response.json()
@@ -566,16 +556,92 @@ def _retry_after(response) -> float | None:
         return None
 
 
-def _nvidia_call(messages: list, model: str, max_tokens: int = 220,
-                 temperature: float = 0.4, reasoning: bool = False,
-                 response_format: dict | None = None) -> tuple:
+# ══════════════════════════════════════════════════════════════════════════════
+# PROVIDER: APINEX MULTI-TIER CLOUD (PRIMARY DUAL-TIER BRAIN)
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _apinex_call(
+    messages: list,
+    model: str,
+    max_tokens: int = 220,
+    temperature: float = 0.4,
+    timeout: tuple[float, float] | None = None,
+    response_format: dict | None = None,
+) -> tuple[str, str]:
+    """Call APInex OpenAI-compatible cloud endpoint."""
+    if not APINEX_API_KEY:
+        _mark_failure("APINEX", model, HealthState.AUTH_ERROR, "APINEX_API_KEY is not configured")
+        return "", "unavailable"
+    if not provider_health.can_attempt("APINEX", model):
+        return "", "cooldown"
+
+    call_timeout = timeout or (
+        APINEX_CONNECT_TIMEOUT,
+        APINEX_PRO_REQUEST_TIMEOUT if model == APINEX_PRO_MODEL else APINEX_FAST_REQUEST_TIMEOUT,
+    )
+
+    body: Dict[str, Any] = {
+        "model": model,
+        "messages": messages,
+        "max_tokens": max_tokens,
+        "temperature": temperature,
+    }
+    if response_format:
+        body["response_format"] = response_format
+
+    try:
+        response = requests.post(
+            f"{APINEX_BASE_URL}/chat/completions",
+            headers={"Authorization": f"Bearer {APINEX_API_KEY}", "Content-Type": "application/json"},
+            json=body,
+            timeout=call_timeout,
+        )
+        if response.status_code != 200:
+            detail = _safe_error_detail(response)
+            state = classify_http(response.status_code, detail)
+            _mark_failure("APINEX", model, state, detail, _retry_after(response))
+            return "", state.value.lower()
+
+        payload = response.json()
+        choices = payload.get("choices") or []
+        message = (choices[0].get("message") or {}) if choices else {}
+        content = (message.get("content") or "").strip()
+        if not content:
+            _mark_failure("APINEX", model, HealthState.SERVER_ERROR, "Empty completion")
+            return "", "empty"
+
+        _mark_live("APINEX", model)
+        return content, "ok"
+    except requests.Timeout:
+        _mark_failure("APINEX", model, HealthState.TIMEOUT, "APInex generation timed out")
+        return "", "timeout"
+    except requests.ConnectionError:
+        _mark_failure("APINEX", model, HealthState.OFFLINE, "APInex endpoint unreachable")
+        return "", "offline"
+    except (requests.RequestException, ValueError) as exc:
+        _mark_failure("APINEX", model, HealthState.SERVER_ERROR, type(exc).__name__)
+        return "", "error"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# PROVIDER: NVIDIA NIM (SECONDARY CLOUD)
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _nvidia_call(
+    messages: list,
+    model: str,
+    max_tokens: int = 220,
+    temperature: float = 0.4,
+    reasoning: bool = False,
+    response_format: dict | None = None,
+) -> tuple[str, str]:
     """Call NVIDIA's OpenAI-compatible NIM endpoint."""
     if not NVIDIA_API_KEY:
         _mark_failure("NVIDIA", model, HealthState.AUTH_ERROR, "NVIDIA_API_KEY is not configured")
         return "", "unavailable"
     if not provider_health.can_attempt("NVIDIA", model):
         return "", "cooldown"
-    body = {
+    body: Dict[str, Any] = {
         "model": model,
         "messages": messages,
         "max_tokens": max_tokens,
@@ -618,8 +684,12 @@ def _nvidia_call(messages: list, model: str, max_tokens: int = 220,
         return "", "error"
 
 
-def _gemini_call(messages: list, max_tokens: int = 220, temperature: float = 0.4) -> tuple:
-    """Call Gemini text generation as the secondary cloud provider."""
+# ══════════════════════════════════════════════════════════════════════════════
+# PROVIDER: GEMINI (SECONDARY CLOUD)
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _gemini_call(messages: list, max_tokens: int = 220, temperature: float = 0.4) -> tuple[str, str]:
+    """Call Gemini text generation as secondary cloud fallback."""
     model = GEMINI_TEXT_MODEL
     if not GEMINI_API_KEY:
         _mark_failure("GEMINI", model, HealthState.AUTH_ERROR, "GEMINI_API_KEY is not configured")
@@ -677,12 +747,19 @@ def _gemini_call(messages: list, max_tokens: int = 220, temperature: float = 0.4
         return "", "error"
 
 
-def _ollama_call(messages: list, max_tokens: int = 220, temperature: float = 0.4, *, fast_fail: bool = False, reasoning_budget: int | None = None) -> tuple:
-    """Call the local JARVIS/Ministral model through Ollama. Returns (content, status).
+# ══════════════════════════════════════════════════════════════════════════════
+# PROVIDER: OLLAMA (AUTONOMOUS LOCAL FALLBACK)
+# ══════════════════════════════════════════════════════════════════════════════
 
-    ``reasoning_budget`` is retained for backward/test compatibility but is intentionally
-    ignored: Ministral does not use Qwen's private thinking-channel budget.
-    """
+def _ollama_call(
+    messages: list,
+    max_tokens: int = 220,
+    temperature: float = 0.4,
+    *,
+    fast_fail: bool = False,
+    reasoning_budget: int | None = None,
+) -> tuple[str, str]:
+    """Call local Ollama model. Returns (content, status)."""
     registry = get_registry()
     if not _OLLAMA_READY:
         registry.set_status("OLLAMA", SubsystemState.DISABLED, "Ollama Python SDK is not available")
@@ -690,7 +767,17 @@ def _ollama_call(messages: list, max_tokens: int = 220, temperature: float = 0.4
         return "", "unavailable"
     if not provider_health.can_attempt("OLLAMA", OLLAMA_MODEL):
         return "", "cooldown"
+
     discovery = discover_ollama()
+    if discovery["service_state"] == "OFFLINE":
+        # Attempt autonomous on-demand spawn if discovery failed
+        try:
+            from ollama_daemon import ensure_ollama_running
+            if ensure_ollama_running(timeout=4.0):
+                discovery = discover_ollama(force=True)
+        except Exception:
+            pass
+
     if discovery["service_state"] == "OFFLINE":
         _mark_failure("OLLAMA", OLLAMA_MODEL, HealthState.OFFLINE, discovery["detail"])
         return "", "offline"
@@ -736,8 +823,9 @@ def _ollama_call(messages: list, max_tokens: int = 220, temperature: float = 0.4
         _mark_failure("OLLAMA", OLLAMA_MODEL, HealthState.SERVER_ERROR, type(exc).__name__)
         return "", "error"
 
-def local_brain_request(prompt: str, *, max_tokens: int = 64) -> tuple:
-    """Run the real MARK VII local-brain path without cloud routing."""
+
+def local_brain_request(prompt: str, *, max_tokens: int = 64) -> tuple[str, str]:
+    """Run the real local-brain path without cloud routing."""
     reset_last_provider()
     messages = [
         {"role": "system", "content": "Return only the concise final answer. Do not expose reasoning."},
@@ -746,12 +834,8 @@ def local_brain_request(prompt: str, *, max_tokens: int = 64) -> tuple:
     return _ollama_call(messages, max_tokens=max_tokens, temperature=0.0)
 
 
-def local_vision_request(prompt: str, image_b64: str, *, max_tokens: int = 320) -> tuple:
-    """Run JARVIS/Ministral vision through MARK VII's bounded Ollama provider path.
-
-    Returns ``(content, status)`` and deliberately ignores Ollama's separate
-    thinking channel.  The image must already be base64 encoded.
-    """
+def local_vision_request(prompt: str, image_b64: str, *, max_tokens: int = 320) -> tuple[str, str]:
+    """Run JARVIS vision through Ollama provider path."""
     registry = get_registry()
     reset_last_provider()
     if not isinstance(image_b64, str) or not image_b64.strip():
@@ -819,161 +903,14 @@ def local_vision_request(prompt: str, image_b64: str, *, max_tokens: int = 320) 
         return "", status
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# PROVIDER 2: GROQ (CLOUD)
-# ══════════════════════════════════════════════════════════════════════════════
+# ── Groq & OpenRouter legacy stubs ───────────────────────────────────────────
 
-def _groq_call(messages: list, model: str, max_tokens: int = 220, temperature: float = 0.4) -> tuple:
-    """Call Groq API. Returns (content, status)."""
-    registry = get_registry()
-    client = _get_groq_client()
-    if client is None:
-        return "", "unavailable"
-    try:
-        resp = client.chat.completions.create(
-            model       = model,
-            messages    = messages,
-            max_tokens  = max_tokens,
-            temperature = temperature,
-        )
-        content = resp.choices[0].message.content if resp.choices else ""
-        content = (content or "").strip()
-        if not content:
-            registry.set_status(
-                "GROQ",
-                SubsystemState.DEGRADED,
-                "Groq cloud responded with empty choices payload content"
-            )
-            return "", "empty"
-
-        registry.set_status(
-            "GROQ",
-            SubsystemState.READY,
-            f"Groq API connection active ({model})"
-        )
-        return content, "ok"
-    except Exception as exc:
-        err_msg = str(exc).lower()
-        if "rate" in err_msg or "429" in err_msg:
-            error_handler.log_and_demote(
-                subsystem="GROQ",
-                exception=exc,
-                context="Groq API rate limit exceeded",
-                demote_to=SubsystemState.DEGRADED
-            )
-            return "", "unavailable"
-        if "unauthorized" in err_msg or "401" in err_msg or "invalid" in err_msg:
-            error_handler.log_and_demote(
-                subsystem="GROQ",
-                exception=exc,
-                context="Groq endpoint authentication credentials verification",
-                demote_to=SubsystemState.DISABLED
-            )
-            return "", "unavailable"
-
-        error_handler.log_and_demote(
-            subsystem="GROQ",
-            exception=exc,
-            context="Groq API request dispatch loop",
-            demote_to=SubsystemState.OFFLINE
-        )
-        return "", "error"
+def _groq_call(messages: list, model: str, max_tokens: int = 220, temperature: float = 0.4) -> tuple[str, str]:
+    return "", "unavailable"
 
 
-# ══════════════════════════════════════════════════════════════════════════════
-# PROVIDER 3: OPENROUTER (LAST RESORT)
-# ══════════════════════════════════════════════════════════════════════════════
-
-def _extract_openrouter_content(payload: object) -> str:
-    if not isinstance(payload, dict):
-        return ""
-    choices = payload.get("choices")
-    if not isinstance(choices, list) or not choices:
-        return ""
-    first   = choices[0] if isinstance(choices[0], dict) else {}
-    message = first.get("message")
-    if not isinstance(message, dict):
-        return ""
-    content = message.get("content")
-    if isinstance(content, str):
-        return content.strip()
-    if isinstance(content, list):
-        parts = []
-        for item in content:
-            if isinstance(item, dict):
-                text = item.get("text")
-                if isinstance(text, str) and text.strip():
-                    parts.append(text.strip())
-        return "\n".join(parts).strip()
-    return ""
-
-
-def _openrouter_call(messages: list, model: str, max_tokens: int = 220) -> tuple:
-    registry = get_registry()
-    if not OPENROUTER_API_KEY:
-        registry.set_status(
-            "OPENROUTER",
-            SubsystemState.DISABLED,
-            "OPENROUTER_API_KEY missing in environmental configurations"
-        )
-        return "", "unavailable"
-    try:
-        resp = requests.post(
-            url="https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "Content-Type":  "application/json",
-            },
-            json={
-                "model":       model,
-                "messages":    messages,
-                "max_tokens":  max_tokens,
-                "temperature": 0.4,
-            },
-            timeout=15,
-        )
-        resp.raise_for_status()
-        payload = resp.json()
-        error   = payload.get("error", {}) if isinstance(payload, dict) else {}
-        if error:
-            code = error.get("code", 0)
-            if code in (402, 429, 404):
-                registry.set_status(
-                    "OPENROUTER",
-                    SubsystemState.DEGRADED,
-                    f"OpenRouter endpoint returned temporary failure code {code}"
-                )
-                return "", "unavailable"
-            
-            registry.set_status(
-                "OPENROUTER",
-                SubsystemState.DEGRADED,
-                f"OpenRouter payload error: {error.get('message', 'unknown')}"
-            )
-            return "", "error"
-        content = _extract_openrouter_content(payload)
-        if not content:
-            registry.set_status(
-                "OPENROUTER",
-                SubsystemState.DEGRADED,
-                "OpenRouter responded with empty payload content"
-            )
-            return "", "empty"
-
-        registry.set_status(
-            "OPENROUTER",
-            SubsystemState.READY,
-            f"OpenRouter free fallback online ({model})"
-        )
-        return content, "ok"
-    except Exception as exc:
-        error_handler.log_and_demote(
-            subsystem="OPENROUTER",
-            exception=exc,
-            context="Connecting and parsing OpenRouter fallback API endpoint",
-            demote_to=SubsystemState.OFFLINE
-        )
-        return "", "error"
+def _openrouter_call(messages: list, model: str, max_tokens: int = 220) -> tuple[str, str]:
+    return "", "unavailable"
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -989,9 +926,13 @@ def analyze(text: str) -> dict:
         {"role": "user",   "content": text[:2000]},
     ]
 
-    # Classification is routine work: keep it local-first.  Escalate only if
-    # the local provider is unavailable or returns unusable output.
-    raw, status = _ollama_call(messages, max_tokens=120, temperature=0.0)
+    # Try APInex fast model first, then local/cloud fallbacks
+    raw, status = _apinex_call(
+        messages, APINEX_FAST_MODEL, max_tokens=120, temperature=0.0,
+        response_format={"type": "json_object"},
+    )
+    if status != "ok":
+        raw, status = _ollama_call(messages, max_tokens=120, temperature=0.0)
     if status != "ok":
         raw, status = _nvidia_call(
             messages, NVIDIA_FAST_MODEL, max_tokens=120, temperature=0.0,
@@ -1004,7 +945,7 @@ def analyze(text: str) -> dict:
         return {"type": "notification", "summary": text[:80], "action": "notify"}
 
     try:
-        clean  = raw.strip().lstrip("```json").lstrip("```").rstrip("```").strip()
+        clean = raw.strip().lstrip("```json").lstrip("```").rstrip("```").strip()
         result = json.loads(clean)
         if "type" in result and "summary" in result:
             return result
@@ -1015,7 +956,7 @@ def analyze(text: str) -> dict:
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# PUBLIC: MAIN LLM CALL WITH SMART ROUTING
+# PUBLIC: MAIN LLM CALL WITH TIERED DUAL-CLOUD & AUTONOMOUS LOCAL FALLBACK
 # ══════════════════════════════════════════════════════════════════════════════
 
 def ask_llm(
@@ -1027,7 +968,13 @@ def ask_llm(
     allow_actions: bool = True,
     profile_context: str = "",
 ) -> str:
-    """Smart hybrid routing: local JARVIS/Ministral for routine work, Nemotron for complex work."""
+    """Multi-tier cognitive router:
+    1. System-1 Fast Reflex: APInex Flash (free/deepseek-v4.1-flash) for rapid voice/dialogue.
+    2. System-2 Deep Reasoning: APInex Pro (free/deepseek-v4-pro-0813) for complex deliberation.
+    3. Cloud Retry: APInex Fallback (free/glm-5.3-flash) on 429/500/timeout.
+    4. Autonomous Local Fallback: Ollama dynamically spawned & VRAM reclaimed on cloud recovery.
+    5. Secondary Cloud: NVIDIA / Gemini.
+    """
     reset_last_provider()
     is_complex = _is_complex_query(query) or model_type == "reasoning"
 
@@ -1041,41 +988,92 @@ def ask_llm(
     messages.append({"role": "user", "content": query})
 
     max_tokens = 400 if is_complex else 220
-    lowered = (query or "").lower()
-    deep_markers = ("use ultra", "deep reasoning", "extreme reasoning")
 
     if is_complex:
-        if any(marker in lowered for marker in deep_markers):
-            nvidia_model = NVIDIA_DEEP_MODEL
-        else:
-            nvidia_model = NVIDIA_REASONING_MODEL
-        print(f"[DEBUG][brain] hybrid route: COMPLEX -> NVIDIA {nvidia_model}")
-        result, status = _nvidia_call(messages, nvidia_model, max_tokens=max_tokens, reasoning=True)
+        # ── System-2 Deep Reasoning: APInex Pro (free/deepseek-v4-pro-0813) ────
+        print(f"[DEBUG][brain] hybrid route: SYSTEM-2 DEEP REASONING -> APINEX {APINEX_PRO_MODEL}")
+        result, status = _apinex_call(
+            messages, APINEX_PRO_MODEL, max_tokens=max_tokens,
+            timeout=(APINEX_CONNECT_TIMEOUT, APINEX_PRO_REQUEST_TIMEOUT),
+        )
         if status == "ok" and result:
-            return _finalize_result(result, sentiment, allow_actions, query, messages, preferred_provider="NVIDIA")
-        # Complex fallback: local first so JARVIS still works offline, then Gemini.
-        print(f"[DEBUG][brain] NVIDIA unavailable ({status}); trying local Ollama")
+            return _finalize_result(result, sentiment, allow_actions, query, messages, preferred_provider="APINEX")
+
+        # Cloud Retry: Fallback model
+        print(f"[DEBUG][brain] APInex Pro unavailable ({status}); retrying with cloud fallback {APINEX_FALLBACK_MODEL}")
+        result, status = _apinex_call(messages, APINEX_FALLBACK_MODEL, max_tokens=max_tokens)
+        if status == "ok" and result:
+            return _finalize_result(result, sentiment, allow_actions, query, messages, preferred_provider="APINEX")
+
+        # Autonomous Local Fallback: Spawns Ollama silently on cloud outage
+        print(f"[DEBUG][brain] APInex cloud unavailable; activating autonomous Ollama daemon...")
+        try:
+            from ollama_daemon import get_ollama_manager
+            get_ollama_manager().enter_fallback_mode(
+                ping_url=f"{APINEX_BASE_URL}/models",
+                api_key=APINEX_API_KEY,
+            )
+        except Exception as e:
+            print(f"[DEBUG][brain] Ollama lifecycle trigger exception: {e}")
+
         result, status = _ollama_call(messages, max_tokens=max_tokens)
         if status == "ok" and result:
             return _finalize_result(result, sentiment, allow_actions, query, messages, preferred_provider="OLLAMA")
+
+        # Secondary Cloud Providers
+        print(f"[DEBUG][brain] Ollama unavailable ({status}); trying NVIDIA reasoning")
+        result, status = _nvidia_call(messages, NVIDIA_REASONING_MODEL, max_tokens=max_tokens, reasoning=True)
+        if status == "ok" and result:
+            return _finalize_result(result, sentiment, allow_actions, query, messages, preferred_provider="NVIDIA")
+
         result, status = _gemini_call(messages, max_tokens=max_tokens)
         if status == "ok" and result:
             return _finalize_result(result, sentiment, allow_actions, query, messages, preferred_provider="GEMINI")
+
     else:
-        print(f"[DEBUG][brain] hybrid route: ROUTINE -> OLLAMA {REQUIRED_OLLAMA_MODEL}")
+        # ── System-1 Fast Reflex: APInex Flash (free/deepseek-v4.1-flash) ──────
+        print(f"[DEBUG][brain] hybrid route: SYSTEM-1 FAST REFLEX -> APINEX {APINEX_FAST_MODEL}")
+        result, status = _apinex_call(
+            messages, APINEX_FAST_MODEL, max_tokens=max_tokens,
+            timeout=(APINEX_CONNECT_TIMEOUT, APINEX_FAST_REQUEST_TIMEOUT),
+        )
+        if status == "ok" and result:
+            return _finalize_result(result, sentiment, allow_actions, query, messages, preferred_provider="APINEX")
+
+        # Cloud Retry: Fallback model
+        print(f"[DEBUG][brain] APInex Flash unavailable ({status}); retrying with cloud fallback {APINEX_FALLBACK_MODEL}")
+        result, status = _apinex_call(messages, APINEX_FALLBACK_MODEL, max_tokens=max_tokens)
+        if status == "ok" and result:
+            return _finalize_result(result, sentiment, allow_actions, query, messages, preferred_provider="APINEX")
+
+        # Autonomous Local Fallback: Spawns Ollama silently on cloud outage
+        print(f"[DEBUG][brain] APInex cloud unavailable; activating autonomous Ollama daemon...")
+        try:
+            from ollama_daemon import get_ollama_manager
+            get_ollama_manager().enter_fallback_mode(
+                ping_url=f"{APINEX_BASE_URL}/models",
+                api_key=APINEX_API_KEY,
+            )
+        except Exception as e:
+            print(f"[DEBUG][brain] Ollama lifecycle trigger exception: {e}")
+
         result, status = _ollama_call(messages, max_tokens=max_tokens, fast_fail=True)
         if status == "ok" and result:
             return _finalize_result(result, sentiment, allow_actions, query, messages, preferred_provider="OLLAMA")
+
+        # Secondary Cloud Providers
         print(f"[DEBUG][brain] local Ollama unavailable ({status}); trying NVIDIA Lightning")
         result, status = _nvidia_call(messages, NVIDIA_FAST_MODEL, max_tokens=max_tokens, reasoning=False)
         if status == "ok" and result:
             return _finalize_result(result, sentiment, allow_actions, query, messages, preferred_provider="NVIDIA")
+
         result, status = _gemini_call(messages, max_tokens=max_tokens)
         if status == "ok" and result:
             return _finalize_result(result, sentiment, allow_actions, query, messages, preferred_provider="GEMINI")
 
     print("[DEBUG][brain] all configured brain providers unavailable")
     return "I can't reach an AI provider right now, but local commands are still available."
+
 
 def _finalize_result(
     result: str,
@@ -1085,12 +1083,10 @@ def _finalize_result(
     original_messages: list | None = None,
     preferred_provider: str | None = None,
 ) -> str:
-    """Filter reasoning leaks, strip scratchpads, and clean result."""
+    """Filter reasoning leaks, strip scratchpads, and sanitize result through speech cleaner."""
     result = _strip_scratchpad(result)
     if _looks_like_reasoning(result):
-        print(f"[DEBUG][brain] reasoning leak detected, retrying clean")
-        # Preserve the exact context/personality contract across the cleanup
-        # fallback instead of rebuilding a stripped system prompt.
+        print("[DEBUG][brain] reasoning leak detected, retrying clean")
         clean_messages = [dict(message) for message in (original_messages or [])]
         if not clean_messages:
             clean_messages = [
@@ -1101,19 +1097,27 @@ def _finalize_result(
             ]
         clean_messages[0]["content"] += "\nReturn only the final answer; do not expose reasoning."
         retry, status = "", "offline"
-        if preferred_provider == "OLLAMA":
+
+        if preferred_provider == "APINEX":
+            retry, status = _apinex_call(clean_messages, APINEX_FAST_MODEL, max_tokens=120)
+        elif preferred_provider == "OLLAMA":
             retry, status = _ollama_call(clean_messages, max_tokens=120)
         elif preferred_provider == "GEMINI":
             retry, status = _gemini_call(clean_messages, max_tokens=120)
         elif preferred_provider == "NVIDIA":
             retry, status = _nvidia_call(clean_messages, NVIDIA_FAST_MODEL, max_tokens=120)
+
+        if status != "ok":
+            retry, status = _apinex_call(clean_messages, APINEX_FAST_MODEL, max_tokens=120)
         if status != "ok":
             retry, status = _ollama_call(clean_messages, max_tokens=120)
         if status != "ok":
             retry, status = _nvidia_call(clean_messages, NVIDIA_FAST_MODEL, max_tokens=120)
         if status != "ok":
             retry, status = _gemini_call(clean_messages, max_tokens=120)
+
         if status == "ok" and retry:
             result = _strip_scratchpad(retry)
 
-    return _strip_scratchpad(result) or "I couldn't figure that out."
+    cleaned = _strip_scratchpad(result)
+    return cleaned or "I couldn't figure that out."

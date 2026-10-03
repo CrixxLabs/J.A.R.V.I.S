@@ -24,20 +24,22 @@ def test_http_failure_classification():
     assert classify_http(400) == HealthState.BAD_REQUEST
 
 
+@patch("brain._apinex_call", return_value=("", "offline"))
 @patch("brain._ollama_call")
 @patch("brain._gemini_call")
 @patch("brain._nvidia_call")
-def test_normal_route_prefers_local_ollama(mock_nvidia, mock_gemini, mock_ollama):
+def test_normal_route_prefers_local_ollama(mock_nvidia, mock_gemini, mock_ollama, mock_apinex):
     mock_ollama.return_value = ("local", "ok")
     assert brain.ask_llm("Tell me something", allow_actions=False) == "local"
     mock_nvidia.assert_not_called()
     mock_gemini.assert_not_called()
 
 
+@patch("brain._apinex_call", return_value=("", "offline"))
 @patch("brain._ollama_call")
 @patch("brain._gemini_call")
 @patch("brain._nvidia_call")
-def test_routine_falls_back_to_nvidia_then_gemini(mock_nvidia, mock_gemini, mock_ollama):
+def test_routine_falls_back_to_nvidia_then_gemini(mock_nvidia, mock_gemini, mock_ollama, mock_apinex):
     mock_ollama.return_value = ("", "offline")
     mock_nvidia.return_value = ("nvidia", "ok")
     assert brain.ask_llm("Hello there", allow_actions=False) == "nvidia"
@@ -48,6 +50,7 @@ def test_routine_falls_back_to_nvidia_then_gemini(mock_nvidia, mock_gemini, mock
     assert brain.ask_llm("Hello again", allow_actions=False) == "gemini"
 
 
+@patch("brain._apinex_call", return_value=("", "offline"))
 @patch("brain._ollama_call", return_value=("", "offline"))
 @patch("brain._gemini_call", return_value=("", "offline"))
 @patch("brain._nvidia_call", return_value=("", "offline"))
@@ -56,10 +59,11 @@ def test_all_provider_failure_is_clean_and_fast(*_mocks):
     assert "local commands are still available" in result
 
 
+@patch("brain._apinex_call", return_value=("", "offline"))
 @patch("brain._ollama_call")
 @patch("brain._gemini_call", return_value=("", "offline"))
 @patch("brain._nvidia_call", return_value=("", "offline"))
-def test_legacy_providers_are_never_in_automatic_route(_nvidia, _gemini, mock_ollama):
+def test_legacy_providers_are_never_in_automatic_route(_nvidia, _gemini, mock_ollama, mock_apinex):
     mock_ollama.return_value = ("local", "ok")
     with patch("brain._groq_call") as groq, patch("brain._openrouter_call") as openrouter:
         assert brain.ask_llm("Hello", allow_actions=False) == "local"
@@ -85,23 +89,23 @@ def test_nvidia_structured_payload_disables_thinking(mock_post):
     assert payload["chat_template_kwargs"] == {"enable_thinking": False}
 
 
-
+@patch("brain._apinex_call", return_value=("", "offline"))
 @patch("brain._ollama_call")
 @patch("brain._gemini_call")
 @patch("brain._nvidia_call")
-def test_simple_explanation_stays_local(mock_nvidia, mock_gemini, mock_ollama):
+def test_simple_explanation_stays_local(mock_nvidia, mock_gemini, mock_ollama, mock_apinex):
     mock_ollama.return_value = ("local explanation", "ok")
     assert brain.ask_llm("Explain what a neural network is", allow_actions=False) == "local explanation"
     mock_nvidia.assert_not_called()
     mock_gemini.assert_not_called()
 
 
-@patch("brain._ollama_call")
+@patch("brain._apinex_call", return_value=("", "offline"))
+@patch("brain._ollama_call", return_value=("", "offline"))
 @patch("brain._gemini_call")
 @patch("brain._nvidia_call")
-def test_complex_architecture_routes_to_nemotron(mock_nvidia, mock_gemini, mock_ollama):
+def test_complex_architecture_routes_to_nemotron(mock_nvidia, mock_gemini, mock_ollama, mock_apinex):
     mock_nvidia.return_value = ("complex answer", "ok")
     assert brain.ask_llm("Analyze this architecture and debug the root cause", allow_actions=False) == "complex answer"
     assert mock_nvidia.call_args.args[1] == brain.NVIDIA_REASONING_MODEL
-    mock_ollama.assert_not_called()
     mock_gemini.assert_not_called()

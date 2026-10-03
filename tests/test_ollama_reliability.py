@@ -146,7 +146,8 @@ def test_cloud_failure_reaches_actual_local_path(monkeypatch):
     client.chat.return_value = {"message": {"content": "LOCAL_OK", "thinking": "hidden"}}
     monkeypatch.setattr(brain, "discover_ollama", lambda **kwargs: _available())
     monkeypatch.setattr(brain, "_get_ollama_client", lambda: client)
-    with patch("brain._nvidia_call", return_value=("", "offline")), \
+    with patch("brain._apinex_call", return_value=("", "offline")), \
+         patch("brain._nvidia_call", return_value=("", "offline")), \
          patch("brain._gemini_call", return_value=("", "offline")):
         result = brain.ask_llm("hello", allow_actions=False)
     assert result == "LOCAL_OK"

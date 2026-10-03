@@ -997,11 +997,22 @@ def ask(user_input: str, image_b64=None, extra_context: str = "") -> tuple:
                 "runtime action produced it. Do not invent file paths."
             )
 
+        try:
+            from working_memory_pager import get_working_memory_pager
+            wm_brief = get_working_memory_pager().synthesize_reentry_brief()
+            if wm_brief and (wm_brief.active_goals or wm_brief.active_constraints):
+                wm_context = f"Working Memory State:\n- Active Goals: {', '.join(wm_brief.active_goals[:2]) or 'None'}\n- Active Constraints: {', '.join(wm_brief.active_constraints[:2]) or 'None'}"
+            else:
+                wm_context = ""
+        except Exception:
+            wm_context = ""
+
         system_context = (
             f"Known context: {context_hint}\n{facts}\nMemory: {mem_summary or 'none'}\n"
             f"{creative_context}\n"
             f"Self Capability State: {self_model_str}\n\n"
-            f"{conversation_context}"
+            + (f"{wm_context}\n\n" if wm_context else "")
+            + f"{conversation_context}"
             + (f"\n{extra_context}" if extra_context else "")
         )
 
