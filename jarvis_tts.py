@@ -114,6 +114,21 @@ def _probe_worker(timeout: float = 0.6) -> bool:
 
 
 def prerequisites() -> tuple[bool, str]:
+    # Kill stale worker on port 18777 pre-flight
+    try:
+        import psutil
+        for proc in psutil.process_iter(attrs=["pid", "name", "cmdline"]):
+            cmdline = " ".join(str(p) for p in (proc.info.get("cmdline") or []))
+            if "pocket_tts_worker" in cmdline:
+                try:
+                    p = psutil.Process(proc.info["pid"])
+                    p.kill()
+                    print(f"[TTS] Killed stale pocket_tts_worker PID={proc.info['pid']}")
+                except Exception:
+                    pass
+    except Exception:
+        pass
+
     if POCKET_PYTHON is None:
         return False, "JARVIS_POCKET_TTS_PYTHON not set in .env — see MARK_VII_SETUP.md"
     if POCKET_VOICE is None:
@@ -121,7 +136,13 @@ def prerequisites() -> tuple[bool, str]:
     if not POCKET_PYTHON.exists():
         return False, f"Pocket-TTS Python missing: {POCKET_PYTHON}"
     if not POCKET_VOICE.exists():
-        return False, f"Pocket-TTS voice state missing: {POCKET_VOICE}"
+        # Fall back to canonical default if configured path is missing
+        fallback = str(BASE_DIR / "Voices" / "Jarvis.wav")
+        if Path(fallback).exists():
+            print(f"[TTS] Configured voice missing; falling back to {fallback}")
+            POCKET_VOICE = Path(fallback)
+        else:
+            return False, f"Pocket-TTS voice state missing: {POCKET_VOICE}"
     if not WORKER_PATH.exists():
         return False, f"Pocket-TTS worker missing: {WORKER_PATH}"
 
@@ -173,7 +194,16 @@ def start_engine(timeout: float = 45.0) -> bool:
         env["JARVIS_POCKET_TTS_HOST"] = POCKET_HOST
         env["JARVIS_POCKET_TTS_PORT"] = str(POCKET_PORT)
         env["JARVIS_POCKET_TTS_VOICE"] = str(POCKET_VOICE)
-        env["JARVIS_POCKET_TTS_DEVICE"] = POCKET_DEVICE
+        # VRAM-pressure fallback: switch worker to CPU if CUDA device requested but unavailable / contested
+        device_for_env = POCKET_DEVICE
+        try:
+            import torch
+            if POCKET_DEVICE == "cuda" and (not torch.cuda.is_available() or torch.cuda.memory_allocated() > 4 * 1024**3):
+                device_for_env = "cpu"
+                print("[TTS] VRAM pressure detected — falling back Pocket-TTS worker to CPU")
+        except Exception:
+            pass
+        env["JARVIS_POCKET_TTS_DEVICE"] = device_for_env
 
         print(f"[TTS] Starting persistent Pocket-TTS worker on {POCKET_DEVICE} (port {POCKET_PORT})...")
         _worker = subprocess.Popen(

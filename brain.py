@@ -54,6 +54,13 @@ APINEX_CONNECT_TIMEOUT = float(os.getenv("APINEX_CONNECT_TIMEOUT", "1.5"))
 APINEX_FAST_REQUEST_TIMEOUT = float(os.getenv("APINEX_FAST_REQUEST_TIMEOUT", "3.0"))
 APINEX_PRO_REQUEST_TIMEOUT  = float(os.getenv("APINEX_PRO_REQUEST_TIMEOUT", "15.0"))
 
+# ── Inception Labs (Mercury Diffusion) ────────────────────────────────────────
+INCEPTION_API_KEY     = os.getenv("INCEPTION_API_KEY", "").strip()
+INCEPTION_BASE_URL    = os.getenv("INCEPTION_BASE_URL", "https://api.inceptionlabs.ai/v1").rstrip("/")
+INCEPTION_MODEL       = os.getenv("INCEPTION_MODEL", "mercury-2.5").strip()
+INCEPTION_CONNECT_TIMEOUT = float(os.getenv("INCEPTION_CONNECT_TIMEOUT", "1.5"))
+INCEPTION_REQUEST_TIMEOUT   = float(os.getenv("INCEPTION_REQUEST_TIMEOUT", "30.0"))
+
 # ── Other Cloud API keys ──────────────────────────────────────────────────────
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 GROQ_API_KEY       = os.getenv("GROQ_API_KEY", "")
@@ -93,6 +100,7 @@ for _provider, _model in (
     ("APINEX", APINEX_FAST_MODEL),
     ("APINEX", APINEX_PRO_MODEL),
     ("APINEX", APINEX_FALLBACK_MODEL),
+    ("INCEPTION", INCEPTION_MODEL),
     ("NVIDIA", NVIDIA_FAST_MODEL),
     ("NVIDIA", NVIDIA_REASONING_MODEL),
     ("NVIDIA", NVIDIA_DEEP_MODEL),
@@ -161,6 +169,8 @@ def _provider_capability(provider: str, model: str) -> str | None:
     provider = provider.upper()
     if provider == "APINEX":
         return "APINEX_PRO" if model == APINEX_PRO_MODEL else "APINEX_FAST"
+    if provider == "INCEPTION":
+        return "INCEPTION_MAIN"
     if provider == "NVIDIA":
         return "NVIDIA_NORMAL" if model == NVIDIA_FAST_MODEL else "NVIDIA_REASONING"
     return {"GEMINI": "GEMINI_FALLBACK", "OLLAMA": "OLLAMA_LOCAL"}.get(provider)
@@ -685,6 +695,55 @@ def _nvidia_call(
 
 
 # ══════════════════════════════════════════════════════════════════════════════
+# PROVIDER: INCEPTION LABS / MERCURY DIFFUSION (MERKURY TIER)
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _inception_call(messages: list, model: str, max_tokens: int = 220, temperature: float = 0.4) -> tuple[str, str]:
+    """Call Inception Labs Mercury Diffusion (Mercury-2.5) via its OpenAI-compatible API."""
+    if not INCEPTION_API_KEY:
+        _mark_failure("INCEPTION", model, HealthState.AUTH_ERROR, "INCEPTION_API_KEY is not configured")
+        return "", "unavailable"
+    if not provider_health.can_attempt("INCEPTION", model):
+        return "", "cooldown"
+    body: Dict[str, Any] = {
+        "model": model,
+        "messages": messages,
+        "max_tokens": max_tokens,
+        "temperature": temperature,
+    }
+    try:
+        response = requests.post(
+            f"{INCEPTION_BASE_URL}/chat/completions",
+            headers={"Authorization": f"Bearer {INCEPTION_API_KEY}", "Content-Type": "application/json"},
+            json=body,
+            timeout=(INCEPTION_CONNECT_TIMEOUT, INCEPTION_REQUEST_TIMEOUT),
+        )
+        if response.status_code != 200:
+            detail = _safe_error_detail(response)
+            state = classify_http(response.status_code, detail)
+            _mark_failure("INCEPTION", model, state, detail, _retry_after(response))
+            return "", state.value.lower()
+        payload = response.json()
+        choices = payload.get("choices") or []
+        message = (choices[0].get("message") or {}) if choices else {}
+        content = (message.get("content") or "").strip()
+        if not content:
+            _mark_failure("INCEPTION", model, HealthState.SERVER_ERROR, "Empty completion")
+            return "", "empty"
+        _mark_live("INCEPTION", model)
+        return content, "ok"
+    except requests.Timeout:
+        _mark_failure("INCEPTION", model, HealthState.TIMEOUT, "Generation timed out")
+        return "", "timeout"
+    except requests.ConnectionError:
+        _mark_failure("INCEPTION", model, HealthState.OFFLINE, "Endpoint unreachable")
+        return "", "offline"
+    except (requests.RequestException, ValueError) as exc:
+        _mark_failure("INCEPTION", model, HealthState.SERVER_ERROR, type(exc).__name__)
+        return "", "error"
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # PROVIDER: GEMINI (SECONDARY CLOUD)
 # ══════════════════════════════════════════════════════════════════════════════
 
@@ -973,7 +1032,7 @@ def ask_llm(
     2. System-2 Deep Reasoning: APInex Pro (free/deepseek-v4-pro-0813) for complex deliberation.
     3. Cloud Retry: APInex Fallback (free/glm-5.3-flash) on 429/500/timeout.
     4. Autonomous Local Fallback: Ollama dynamically spawned & VRAM reclaimed on cloud recovery.
-    5. Secondary Cloud: NVIDIA / Gemini.
+    5. Secondary Cloud: Inception Mercury-2.5, then NVIDIA / Gemini.
     """
     reset_last_provider()
     is_complex = _is_complex_query(query) or model_type == "reasoning"
@@ -1021,7 +1080,12 @@ def ask_llm(
             return _finalize_result(result, sentiment, allow_actions, query, messages, preferred_provider="OLLAMA")
 
         # Secondary Cloud Providers
-        print(f"[DEBUG][brain] Ollama unavailable ({status}); trying NVIDIA reasoning")
+        print(f"[DEBUG][brain] Ollama unavailable ({status}); trying Inception Mercury-2.5")
+        result, status = _inception_call(messages, INCEPTION_MODEL, max_tokens=max_tokens)
+        if status == "ok" and result:
+            return _finalize_result(result, sentiment, allow_actions, query, messages, preferred_provider="INCEPTION")
+
+        print(f"[DEBUG][brain] Inception Mercury unavailable ({status}); trying NVIDIA reasoning")
         result, status = _nvidia_call(messages, NVIDIA_REASONING_MODEL, max_tokens=max_tokens, reasoning=True)
         if status == "ok" and result:
             return _finalize_result(result, sentiment, allow_actions, query, messages, preferred_provider="NVIDIA")
@@ -1062,7 +1126,12 @@ def ask_llm(
             return _finalize_result(result, sentiment, allow_actions, query, messages, preferred_provider="OLLAMA")
 
         # Secondary Cloud Providers
-        print(f"[DEBUG][brain] local Ollama unavailable ({status}); trying NVIDIA Lightning")
+        print(f"[DEBUG][brain] local Ollama unavailable ({status}); trying Inception Mercury-2.5")
+        result, status = _inception_call(messages, INCEPTION_MODEL, max_tokens=max_tokens)
+        if status == "ok" and result:
+            return _finalize_result(result, sentiment, allow_actions, query, messages, preferred_provider="INCEPTION")
+
+        print(f"[DEBUG][brain] Inception Mercury unavailable ({status}); trying NVIDIA Lightning")
         result, status = _nvidia_call(messages, NVIDIA_FAST_MODEL, max_tokens=max_tokens, reasoning=False)
         if status == "ok" and result:
             return _finalize_result(result, sentiment, allow_actions, query, messages, preferred_provider="NVIDIA")

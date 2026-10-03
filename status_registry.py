@@ -204,6 +204,7 @@ CAPABILITY_DEFINITIONS = {
     # one model must not demote another model through a coarse provider.
     "APINEX_FAST": _cap("APInex fast reflex model", "ai", ["brain.py", "planner.py"]),
     "APINEX_PRO": _cap("APInex deep reasoning model", "ai", ["brain.py", "planner.py"]),
+    "INCEPTION_MAIN": _cap("Inception Mercury-2.5 conversational AI", "ai", ["brain.py"]),
     "NVIDIA_NORMAL": _cap("NVIDIA normal conversation", "ai", ["brain.py", "planner.py"]),
     "NVIDIA_REASONING": _cap("NVIDIA reasoning", "ai", ["brain.py", "planner.py"]),
     "GEMINI_FALLBACK": _cap("Gemini fallback", "ai", ["brain.py"]),

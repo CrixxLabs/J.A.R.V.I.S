@@ -176,9 +176,33 @@ def _load_whisper():
         try:
             import whisper
             import torch
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-            print(f"[Listener] Loading Whisper ({WHISPER_MODEL_SIZE}) on {device}...")
-            _whisper_model = whisper.load_model(WHISPER_MODEL_SIZE, device=device)
+            # VRAM guard before loading
+            free_vram = 0
+            try:
+                if torch.cuda.is_available():
+                    props = torch.cuda.get_device_properties(0)
+                    free_vram = props.total_memory - torch.cuda.memory_allocated(0)
+                    free_vram_gb = free_vram / (1024**3)
+            except Exception:
+                pass
+            if free_vram > 0 and free_vram_gb < 1.5:
+                print(f"[Listener] VRAM contested ({free_vram_gb:.2f}GB < 1.5GB) — forcing Whisper CPU / small")
+                device = "cpu"
+                model_size = "base"
+            else:
+                device = "cuda" if torch.cuda.is_available() else "cpu"
+                model_size = WHISPER_MODEL_SIZE
+            print(f"[Listener] Loading Whisper ({model_size}) on {device}...")
+            try:
+                _whisper_model = whisper.load_model(model_size, device=device)
+            except torch.OutOfMemoryError:
+                print("[Listener] Whiser CUDA OOM — clearing cache and retrying on CPU")
+                try:
+                    torch.cuda.empty_cache()
+                except Exception:
+                    pass
+                _whisper_model = whisper.load_model("base", device="cpu")
+                device = "cpu"
             print(f"[Listener] OK Whisper loaded on {device}")
         except Exception as e:
             error_handler.log_and_demote(

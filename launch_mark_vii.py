@@ -78,6 +78,7 @@ class FullGuiLauncher:
         env = os.environ.copy()
         env["PYTHONUNBUFFERED"] = "1"
         env["JARVIS_LAUNCH_OWNER_PID"] = str(os.getpid())
+        env["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
         command = [self.python_executable, str(self.root / "jarvis.py")]
         print(f"[Launcher] Starting owned runtime: {' '.join(command)}")
         self.runtime_process = self._popen(

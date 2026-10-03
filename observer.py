@@ -213,16 +213,26 @@ def _screen_observer():
     last_hash = None
     while not _shutdown_event.is_set():
         try:
-            with mss() as sct:
-                img = np.array(sct.grab(sct.monitors[1]))
-            # Downsample for speed
+            try:
+                with mss() as sct:
+                    # Use first monitor only; avoid allocating full-screen when contested
+                    mon = sct.monitors[1] if len(sct.monitors) > 1 else sct.monitors[0]
+                    img = np.array(sct.grab(mon))
+            except (MemoryError, Exception) as cap_exc:
+                # Buffer / capture failure should never crash observer thread
+                print(f"[Observer] Screen capture warning ({type(cap_exc).__name__}); sleeping...")
+                _shutdown_event.wait(2.5)
+                continue
+            # Downsample immediately after grab to keep memory bounded
             small = cv2.resize(img, (160, 90))
-            gray  = cv2.cvtColor(small, cv2.COLOR_BGR2GRAY)
-            h     = hash(gray.tobytes())
+            # Explicit release of large frame
+            del img
+            gray = cv2.cvtColor(small, cv2.COLOR_BGR2GRAY)
+            h = hash(gray.tobytes())
             changed = (last_hash is not None and h != last_hash)
             with _lock:
-                state["screen_changed"]     = changed
-                state["last_screen_hash"]   = h
+                state["screen_changed"] = changed
+                state["last_screen_hash"] = h
                 if changed:
                     state["screen_change_time"] = time.time()
                     try:
@@ -234,21 +244,22 @@ def _screen_observer():
                     except Exception:
                         pass
             last_hash = h
-            
+            # Throttle: minimum 1.0s, preferred 2.5s between frames
+            _shutdown_event.wait(2.0)
             registry.set_evidence("VISION", EvidenceLevel.LIVE, "Observer captured screen pixels",
                                   source="observer screen loop")
             registry.set_capability_evidence("SCREEN_CAPTURE", EvidenceLevel.LIVE,
                                              "Observer captured screen pixels",
                                              source="observer screen loop")
         except Exception as exc:
-            # If screen grabbing is completely broken (e.g. display disconnected/admin block), OCR is OFFLINE
             error_handler.log_and_demote(
                 subsystem="VISION",
                 exception=exc,
                 context="Screen capture loop for AI parsing",
                 demote_to=SubsystemState.OFFLINE
             )
-        _shutdown_event.wait(4)
+        # Hard floor — never spin continuously
+        _shutdown_event.wait(1.0)
 
 
 # ── YouTube Time Tracker ──

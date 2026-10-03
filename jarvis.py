@@ -94,6 +94,11 @@ except Exception as _sa_err:
     _SELF_AWARENESS_READY = False
     print(f"[jarvis] self_awareness not available: {_sa_err}")
 
+# ══════════════════════════════════════════════════════════════════════════════
+# CUDA ALLOCATION HARDENING — set before any torch import
+# ══════════════════════════════════════════════════════════════════════════════
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+
 load_dotenv()
 
 VOICE = "en-US-GuyNeural"

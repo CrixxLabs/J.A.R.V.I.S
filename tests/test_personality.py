@@ -181,6 +181,7 @@ def test_provider_fallback_and_reasoning_retry_preserve_personality(monkeypatch)
     # This is a provider-specific unit test. It must never escape into other providers.
     monkeypatch.setattr(brain, "_apinex_call", lambda *args, **kwargs: ("", "offline"))
     monkeypatch.setattr(brain, "_ollama_call", lambda *args, **kwargs: ("", "offline"))
+    monkeypatch.setattr(brain, "_inception_call", lambda *args, **kwargs: ("", "offline"))
     monkeypatch.setattr(brain, "_nvidia_call", nvidia)
     result = brain.ask_llm("question", profile_context="UNIQUE-PERSONALITY", allow_actions=False)
     assert result == "final"
@@ -198,6 +199,7 @@ def test_cloud_prompt_never_contains_full_or_restricted_profile(tmp_path, monkey
 
     monkeypatch.setattr(brain, "_apinex_call", lambda *args, **kwargs: ("", "offline"))
     monkeypatch.setattr(brain, "_ollama_call", lambda *args, **kwargs: ("", "offline"))
+    monkeypatch.setattr(brain, "_inception_call", lambda *args, **kwargs: ("", "offline"))
     monkeypatch.setattr(brain, "_nvidia_call", nvidia)
     brain.ask_llm("concise answer", profile_context=profile_context, allow_actions=False)
     system = captured["system"]

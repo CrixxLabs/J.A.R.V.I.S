@@ -29,6 +29,9 @@ if not VOICE.exists():
         "Set JARVIS_POCKET_TTS_VOICE in .env or place Jarvis.wav in D:\\J.A.R.V.I.S\\Voices\\"
     )
 DEVICE = os.getenv("JARVIS_POCKET_TTS_DEVICE", "cuda")
+if DEVICE == "cuda" and (not torch.cuda.is_available() or not torch.cuda.device_count()):
+    print("[PocketWorker] CUDA unavailable — switching to CPU")
+    DEVICE = "cpu"
 
 _shutdown = threading.Event()
 _generation_lock = threading.Lock()
@@ -106,12 +109,40 @@ def _as_int16(chunk: torch.Tensor) -> np.ndarray:
 print(f"[PocketWorker] Loading Pocket-TTS model...")
 try:
     model = TTSModel.load_model()
-    model.to(DEVICE)
-    if DEVICE.startswith("cuda"):
-        if not torch.cuda.is_available():
-            raise RuntimeError("CUDA requested but torch.cuda.is_available() is False")
+    # VRAM guard: try CUDA; fall back to CPU on OOM
+    try:
+        model.to(DEVICE)
+        if DEVICE.startswith("cuda"):
+            if torch.cuda.is_available():
+                vram_free = torch.cuda.get_device_properties(0).total_memory - torch.cuda.memory_allocated(0)
+                if vram_free / (1024**3) < 0.5:
+                    print(f"[PocketWorker] VRAM near exhaustion ({vram_free/1024**3:.2f}GB free); switching model to CPU")
+                    model.to("cpu")
+            else:
+                print("[PocketWorker] CUDA unavailable; using CPU")
+                model.to("cpu")
+    except torch.OutOfMemoryError:
+        print("[PocketWorker] CUDA OOM loading model; switching to CPU and clearing cache")
+        try:
+            torch.cuda.empty_cache()
+        except Exception:
+            pass
+        model.to("cpu")
+    # Final device label
+    device_label = "cpu" if not (DEVICE.startswith("cuda") and torch.cuda.is_available() and model.device.type == "cuda") else DEVICE
+    if device_label.startswith("cuda"):
         print(f"[PocketWorker] CUDA: {torch.cuda.get_device_name(0)}")
+    else:
+        print(f"[PocketWorker] Device: CPU")
 
+    # Verify / fall back voice file
+    _voice_fallback = str(Path(__file__).parent / "Voices" / "Jarvis.wav")
+    if not VOICE.exists():
+        if Path(_voice_fallback).exists():
+            VOICE = Path(_voice_fallback)
+            print(f"[PocketWorker] Fallback voice: {VOICE}")
+        else:
+            raise EnvironmentError(f"Voice WAV missing: {VOICE} (and no fallback at {_voice_fallback})")
     VOICE = ensure_compatible_voice_wav(VOICE)
     print(f"[PocketWorker] Loading precomputed voice: {VOICE}")
     voice_state = model.get_state_for_audio_prompt(str(VOICE))
