@@ -1,0 +1,19 @@
+{
+  "total_turns": 500,
+  "successful_turns": 500,
+  "failed_turns": 0,
+  "duration_seconds": 1913.25,
+  "peak_rss_mb": 882.48,
+  "peak_vram_mb": 4312.82,
+  "p50_latency_ms": 2818.81,
+  "p95_latency_ms": 13015.34,
+  "p99_latency_ms": 15209.94,
+  "errors": [],
+  "battery_breakdown": {
+    "Battery A": 100,
+    "Battery B": 100,
+    "Battery C": 100,
+    "Battery D": 100,
+    "Battery E": 100
+  }
+}

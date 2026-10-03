@@ -35,6 +35,11 @@ from status_registry import EvidenceLevel, get_registry
 
 log = logging.getLogger("jarvis.working_memory_pager")
 
+BASE_DIR = Path(__file__).parent.resolve()
+DATA_DIR = BASE_DIR / "data"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+DEFAULT_DB_PATH = str(DATA_DIR / "working_memory.db")
+
 _lock = threading.RLock()
 
 
@@ -110,7 +115,7 @@ class WorkingMemoryPager:
 
     def __init__(
         self,
-        db_path: Optional[str] = None,
+        db_path: Optional[str] = ":memory:",
         cowan_capacity: int = 4,
         decay_d: float = 0.5,
         s_max: float = 2.0,
@@ -123,47 +128,85 @@ class WorkingMemoryPager:
         self._items: Dict[str, WorkingMemoryItem] = {}
 
         # SQLite persistence for L2/L3 backing
-        if db_path is None:
+        if db_path is None or db_path == ":memory:":
             self._db_path = ":memory:"
+            self._mem_conn = sqlite3.connect(":memory:", check_same_thread=False)
         else:
             self._db_path = db_path
+            self._mem_conn = None
+
         self._init_db()
+        self._load_from_db()
+
+    def _get_conn(self) -> sqlite3.Connection:
+        if self._mem_conn is not None:
+            return self._mem_conn
+        return sqlite3.connect(self._db_path, timeout=15.0)
 
     def _init_db(self) -> None:
         with _lock:
-            conn = sqlite3.connect(self._db_path)
-            cur = conn.cursor()
-            cur.execute(
-                """
-                CREATE TABLE IF NOT EXISTS working_memory_store (
-                    item_id TEXT PRIMARY KEY,
-                    category TEXT,
-                    tier TEXT,
-                    content TEXT,
-                    created_at REAL,
-                    data_json TEXT
+            conn = self._get_conn()
+            try:
+                cur = conn.cursor()
+                cur.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS working_memory_store (
+                        item_id TEXT PRIMARY KEY,
+                        category TEXT,
+                        tier TEXT,
+                        content TEXT,
+                        created_at REAL,
+                        data_json TEXT
+                    )
+                    """
                 )
-                """
-            )
-            conn.commit()
-            conn.close()
+                conn.commit()
+            finally:
+                if self._mem_conn is None:
+                    conn.close()
+
+    def _load_from_db(self) -> None:
+        with _lock:
+            try:
+                conn = self._get_conn()
+                try:
+                    cur = conn.cursor()
+                    cur.execute("SELECT item_id, data_json FROM working_memory_store")
+                    rows = cur.fetchall()
+                    for item_id, data_json in rows:
+                        if data_json:
+                            try:
+                                d = json.loads(data_json)
+                                item = WorkingMemoryItem.from_dict(d)
+                                self._items[item_id] = item
+                            except Exception:
+                                pass
+                finally:
+                    if self._mem_conn is None:
+                        conn.close()
+            except Exception as e:
+                log.warning(f"[WorkingMemoryPager] DB load error: {e}")
 
     def _persist_item_to_db(self, item: WorkingMemoryItem) -> None:
-        try:
-            conn = sqlite3.connect(self._db_path)
-            cur = conn.cursor()
-            data_json = json.dumps(item.to_dict())
-            cur.execute(
-                """
-                INSERT OR REPLACE INTO working_memory_store (item_id, category, tier, content, created_at, data_json)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                (item.item_id, item.category.value, item.tier.value, item.content, item.created_at, data_json),
-            )
-            conn.commit()
-            conn.close()
-        except Exception as e:
-            log.warning(f"[WorkingMemoryPager] DB persistence error: {e}")
+        with _lock:
+            try:
+                conn = self._get_conn()
+                try:
+                    cur = conn.cursor()
+                    data_json = json.dumps(item.to_dict())
+                    cur.execute(
+                        """
+                        INSERT OR REPLACE INTO working_memory_store (item_id, category, tier, content, created_at, data_json)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        """,
+                        (item.item_id, item.category.value, item.tier.value, item.content, item.created_at, data_json),
+                    )
+                    conn.commit()
+                finally:
+                    if self._mem_conn is None:
+                        conn.close()
+            except Exception as e:
+                log.warning(f"[WorkingMemoryPager] DB persistence error: {e}")
 
     # ------------------------------------------------------------------
     # Item Ingestion and ACT-R Activation
@@ -351,13 +394,20 @@ class WorkingMemoryPager:
         with _lock:
             self._rebalance_cowan_focus()
 
+            now = time.time()
+            scored_items = sorted(
+                self._items.values(),
+                key=lambda it: self.compute_actr_activation(it, now=now),
+                reverse=True,
+            )
+
             goals = []
             decisions = []
             questions = []
             constraints = []
             stale_items = []
 
-            for item in self._items.values():
+            for item in scored_items:
                 if item.is_stale:
                     stale_items.append(f"[{item.category.value}] {item.content} (Files diverged: {list(item.stale_details.keys())})")
 
@@ -420,7 +470,7 @@ def get_working_memory_pager() -> WorkingMemoryPager:
     if _pager_instance is None:
         with _lock:
             if _pager_instance is None:
-                _pager_instance = WorkingMemoryPager()
+                _pager_instance = WorkingMemoryPager(db_path=DEFAULT_DB_PATH)
     return _pager_instance
 
 

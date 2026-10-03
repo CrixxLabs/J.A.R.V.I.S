@@ -500,6 +500,9 @@ def probe_hardware_resources() -> Tuple[SubsystemState, str]:
 
 
 
+
+
+
 def run_smoke_test() -> bool:
     """Run active probes across all baseline subsystems and update status registry."""
     print("=" * 70)

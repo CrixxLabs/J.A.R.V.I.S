@@ -752,6 +752,20 @@ def ask(user_input: str, image_b64=None, extra_context: str = "") -> tuple:
         "reentry brief",
         "re-entry brief",
         "what did we do last",
+        "active goals",
+        "active constraints",
+        "active architectural decisions",
+        "active architecture",
+        "development roadmap",
+        "system invariants",
+        "system invariant",
+        "briefing on our system invariants",
+        "working memory",
+        "recorded in working memory",
+        "layout of the 4-tier working memory",
+        "memory layout of the 4-tier",
+        "memory layout of the",
+        "where did we leave off with the codebase",
     )
     if any(phrase in lowered_input for phrase in _REENTRY_PHRASES):
         from working_memory_pager import generate_conversational_reentry_brief

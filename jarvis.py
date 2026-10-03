@@ -2,15 +2,18 @@
 # =======================================================================
 # Initializes hardware, starts observers, handles vocal transactions,
 # and coordinates planner dispatches and experience verification logging.
+from __future__ import annotations
 
 import asyncio
 import datetime
 import os
 import random
 import re
+import sys
 import tempfile
 import threading
 import time
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 _runtime_instance_guard = None
 if __name__ == "__main__":
@@ -188,10 +191,8 @@ _face_module = None
 
 def jarvisify_response(text):
     if not text:
-        return text
-    result = text
-    result = re.sub(r"```(?:json)?", "", result, flags=re.IGNORECASE)
-    result = result.replace("```", "")
+        return ""
+    result = clean_speech_text(text)
     for phrase in _STRIP_PHRASES:
         result = re.sub(re.escape(phrase), "", result, flags=re.IGNORECASE)
     result = re.sub(r"\s{2,}", " ", result).strip()
@@ -199,7 +200,7 @@ def jarvisify_response(text):
     result = result.lstrip(".,! ")
     if result:
         result = result[0].upper() + result[1:]
-    return result or text
+    return result
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -287,13 +288,35 @@ def _get_smart_error_message(action_name: str, raw_error: str) -> str:
 # SPEAK WITH INTERRUPT SUPPORT
 # ══════════════════════════════════════════════════════════════════════════════
 
+_SPOKEN_HOOKS = []
+_LAST_SPOKEN_TEXT = ""
+
+
+def register_spoken_hook(hook):
+    """Register a callback that receives every cleaned text passed to the speech system."""
+    if hook not in _SPOKEN_HOOKS:
+        _SPOKEN_HOOKS.append(hook)
+
+
+def get_last_spoken_text() -> str:
+    """Retrieve the most recent string sent to the speech system."""
+    return _LAST_SPOKEN_TEXT
+
+
 @runtime_visuals.visual_activity("speaking", "current_jarvis_response")
 def speak(text):
-    global stop_speaking, is_speaking
+    global stop_speaking, is_speaking, _LAST_SPOKEN_TEXT
 
     final_text = clean_speech_text(text)
     if not final_text:
         return
+
+    _LAST_SPOKEN_TEXT = final_text
+    for hook in _SPOKEN_HOOKS:
+        try:
+            hook(final_text)
+        except Exception:
+            pass
 
     runtime_visuals.update(current_jarvis_response=final_text)
     print(f"Jarvis: {final_text}")
@@ -301,6 +324,10 @@ def speak(text):
     memory.log_activity("speak", final_text[:60])
     stop_speaking = False
     is_speaking = True
+
+    if "--headless-test" in sys.argv or getattr(sys, "_jarvis_headless_test", False):
+        is_speaking = False
+        return
 
     # Do not arm interruption while TTS audio is still being generated.
     # The watcher is started only when playback actually begins, otherwise
@@ -1031,8 +1058,11 @@ def startup() -> bool:
             _publish_vision_status()
 
         def start_voice():
-            print("[Startup] Calibrating audio listener...")
-            listener.calibrate_ambient_noise()
+            if "--headless-test" in sys.argv or getattr(sys, "_jarvis_headless_test", False):
+                print("[Startup] Headless test mode: bypassing physical listener calibration.")
+            else:
+                print("[Startup] Calibrating audio listener...")
+                listener.calibrate_ambient_noise()
             if USE_POCKET_TTS and _JARVIS_TTS_AVAILABLE:
                 # Pay model/CUDA/voice-state startup cost once.
                 # Failure is non-fatal: speak() retains Edge-TTS -> SAPI fallback.
@@ -1086,6 +1116,105 @@ def _handle_follow_up(command):
         planner.clear_pending_followup()
         return None, "Alright."
     return None
+
+
+def handle_command(command: str) -> Optional[str]:
+    """Execute a single command string through fast paths, follow-ups, planner, and executor."""
+    if not command:
+        return None
+
+    cmd = _preprocess_command(command)
+    if _is_interrupt_only_command(cmd):
+        print(f"[DEBUG][loop] interrupt-only command received: '{cmd}'")
+        return None
+
+    if "register my face" in cmd or "register face" in cmd:
+        speak("Alright. Look at the camera.")
+        threading.Thread(
+            target=lambda: (
+                _face_module.register_face() if _face_module else None,
+                speak("Face registered."),
+            ),
+            daemon=True,
+        ).start()
+        return "Face registered."
+
+    if any(keyword in cmd for keyword in EXIT_KEYWORDS):
+        conversation_manager.reset_conversation()
+        msg = random.choice(BYES)
+        speak(msg)
+        memory.log_activity("exit", "user said goodbye")
+        save_session()
+        return "exit"
+
+    if handle_fast_command(cmd):
+        print("[DEBUG][loop] handled by fast command path")
+        return "fast_path"
+
+    follow_up_result = _handle_follow_up(cmd)
+    if follow_up_result is not None:
+        action, response = follow_up_result
+        if action:
+            success, exec_message = execute_with_feedback(action, original_input=cmd)
+            if exec_message:
+                spoken = jarvisify_response(exec_message)
+                speak(spoken)
+                return spoken
+            elif response and success:
+                spoken = jarvisify_response(response)
+                speak(spoken)
+                return spoken
+            elif not success:
+                speak("Something went wrong.")
+                return "Something went wrong."
+        else:
+            spoken = jarvisify_response(response)
+            speak(spoken)
+            return spoken
+
+    try:
+        print(f"[DEBUG][planner] input: {cmd}")
+        brain.reset_last_provider()
+        action, spoken_response, _model_type = planner.ask(cmd)
+        runtime_visuals.update(provider_model=brain.get_last_provider_model())
+        _publish_vision_status()
+        log_event("planner_output", {"action": action, "response": spoken_response})
+        print(f"[DEBUG][planner] output: action={action}, response={spoken_response}")
+
+        if action and action.get("action") == "save_login" and action.get("needs_dialog"):
+            _handle_save_login_flow(action)
+            return "save_login"
+
+        final_response = spoken_response
+        if action:
+            if action.get("action") == "exit":
+                conversation_manager.reset_conversation()
+                msg = random.choice(BYES)
+                speak(msg)
+                memory.log_activity("exit", "action triggered exit")
+                save_session()
+                return "exit"
+            success, exec_message = execute_with_feedback(action, original_input=cmd)
+            if exec_message:
+                final_response = exec_message
+            elif not success and not final_response:
+                final_response = "Something went wrong."
+
+        if final_response:
+            cleaned = jarvisify_response(final_response)
+            if cleaned:
+                speak(cleaned)
+                return cleaned
+
+        fallback_clean = clean_speech_text(spoken_response)
+        if fallback_clean:
+            speak(fallback_clean)
+            return fallback_clean
+        return ""
+    except Exception as exc:
+        print(f"[DEBUG][loop] unhandled error: {exc}")
+        speak("Something went wrong.")
+        return "Something went wrong."
 
 
 if __name__ == "__main__":
@@ -1156,81 +1285,9 @@ if __name__ == "__main__":
             consecutive_empty = 0
             last_active = time.time()
 
-            command = _preprocess_command(command)
-
-            if _is_interrupt_only_command(command):
-                print(f"[DEBUG][loop] interrupt-only command received: '{command}'")
-                continue
-
-            if "register my face" in command or "register face" in command:
-                speak("Alright. Look at the camera.")
-                threading.Thread(
-                    target=lambda: (
-                        _face_module.register_face() if _face_module else None,
-                        speak("Face registered."),
-                    ),
-                    daemon=True,
-                ).start()
-                continue
-
-            if any(keyword in command for keyword in EXIT_KEYWORDS):
-                conversation_manager.reset_conversation()
-                speak(random.choice(BYES))
-                memory.log_activity("exit", "user said goodbye")
-                save_session()
+            res = handle_command(command)
+            if res == "exit":
                 break
-
-            if handle_fast_command(command):
-                print("[DEBUG][loop] handled by fast command path")
-                continue
-
-            follow_up_result = _handle_follow_up(command)
-            if follow_up_result is not None:
-                action, response = follow_up_result
-                if action:
-                    success, exec_message = execute_with_feedback(action, original_input=command)
-                    if exec_message:
-                        speak(jarvisify_response(exec_message))
-                    elif response and success:
-                        speak(jarvisify_response(response))
-                    elif not success:
-                        speak("Something went wrong.")
-                else:
-                    speak(jarvisify_response(response))
-                continue
-
-            try:
-                print(f"[DEBUG][planner] input: {command}")
-                brain.reset_last_provider()
-                action, spoken_response, _model_type = planner.ask(command)
-                runtime_visuals.update(provider_model=brain.get_last_provider_model())
-                _publish_vision_status()
-                log_event("planner_output", {"action": action, "response": spoken_response})
-                print(f"[DEBUG][planner] output: action={action}, response={spoken_response}")
-
-                if action and action.get("action") == "save_login" and action.get("needs_dialog"):
-                    _handle_save_login_flow(action)
-                    continue
-
-                final_response = spoken_response
-                if action:
-                    if action.get("action") == "exit":
-                        conversation_manager.reset_conversation()
-                        speak(random.choice(BYES))
-                        memory.log_activity("exit", "action triggered exit")
-                        save_session()
-                        break
-                    success, exec_message = execute_with_feedback(action, original_input=command)
-                    if exec_message:
-                        final_response = exec_message
-                    elif not success and not final_response:
-                        final_response = "Something went wrong."
-
-                if final_response:
-                    speak(jarvisify_response(final_response))
-            except Exception as exc:
-                print(f"[DEBUG][loop] unhandled error: {exc}")
-                speak("Something went wrong.")
     except KeyboardInterrupt:
         pass
     finally:

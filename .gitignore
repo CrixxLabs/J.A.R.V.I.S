@@ -96,6 +96,14 @@ user_voice.npy
 cognitive_graph.db
 cognitive_graph.db-wal
 cognitive_graph.db-shm
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+data/*.db
+Data/*.db
+data/*.db-*
+Data/*.db-*
 evolver_backups/
 
 # Voice model files (download separately)

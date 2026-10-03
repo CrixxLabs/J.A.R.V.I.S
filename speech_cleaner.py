@@ -26,26 +26,12 @@ _CONVERSATIONAL_KEYS = (
     "answer",
 )
 
-# Common markdown & artifact patterns
-_MARKDOWN_PATTERNS = [
-    (re.compile(r"```(?:json|python|bash|sh|cmd|powershell)?[\s\S]*?```", re.IGNORECASE), " "),
-    (re.compile(r"`([^`]+)`"), r"\1"),
-    (re.compile(r"\*\*([^*]+)\*\*"), r"\1"),
-    (re.compile(r"\*([^*]+)\*"), r"\1"),
-    (re.compile(r"__([^_]+)__"), r"\1"),
-    (re.compile(r"(?<!\w)_([^_]+)_(?!\w)"), r"\1"),
-    (re.compile(r"^\s*#{1,6}\s*", re.MULTILINE), ""),
-    (re.compile(r"^\s*[-*+]\s+", re.MULTILINE), ""),
-    (re.compile(r"^\s*\d+\.\s+", re.MULTILINE), ""),
-    (re.compile(r"\[([^\]]+)\]\([^\)]+\)"), r"\1"),
-    (re.compile(r"<[^>]+>"), " "),
-]
-
 # Action leak & dangling artifact patterns
 _LEAKED_PATTERNS = [
     re.compile(r"action_use_[a-z0-9_]+", re.IGNORECASE),
     re.compile(r"\baction_[a-z0-9_]+\b", re.IGNORECASE),
     re.compile(r"\bcmd_[a-z0-9_]+\b", re.IGNORECASE),
+    re.compile(r"\btask_[a-z0-9_]+\b", re.IGNORECASE),
     re.compile(r"\{\s*['\"]?action['\"]?\s*:[^}]*\}?", re.IGNORECASE),
     re.compile(r"['\"]?action['\"]?\s*:\s*\{[^}]*\}?", re.IGNORECASE),
 ]
@@ -133,12 +119,12 @@ def clean_speech_text(text: str) -> str:
 
     cleaned = text.strip()
 
-    # If it starts or contains standalone JSON or code fence
-    if cleaned.startswith("```") and cleaned.endswith("```"):
-        cleaned = re.sub(r"^```(?:json|python|bash|sh|cmd|powershell)?\s*", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"\s*```$", "", cleaned)
+    # 1. Strip raw code fences (both enclosed and unclosed/trailing)
+    cleaned = re.sub(r"```(?:json|python|bash|sh|cmd|powershell|[a-z0-9_]+)?", " ", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"`([^`]+)`", r"\1", cleaned)
+    cleaned = re.sub(r"`+", " ", cleaned)
 
-    # If it's a raw JSON dict string
+    # 2. If it's a raw JSON dict string or has conversational key
     if cleaned.startswith("{") and cleaned.endswith("}"):
         try:
             parsed = json.loads(cleaned)
@@ -164,31 +150,40 @@ def clean_speech_text(text: str) -> str:
                 cleaned = match.group(1).strip()
                 break
 
-    # Remove leaked action patterns first
+    # 3. Remove leaked action patterns
     for pattern in _LEAKED_PATTERNS:
         cleaned = pattern.sub(" ", cleaned)
 
-    # Apply markdown removal patterns
-    for pattern, replacement in _MARKDOWN_PATTERNS:
-        cleaned = pattern.sub(replacement, cleaned)
+    # 4. Remove markdown headers, list markers, links, tags
+    cleaned = re.sub(r"^\s*#{1,6}\s*", "", cleaned, flags=re.MULTILINE)
+    cleaned = re.sub(r"^\s*[-*+]\s+", "", cleaned, flags=re.MULTILINE)
+    cleaned = re.sub(r"^\s*\d+\.\s+", "", cleaned, flags=re.MULTILINE)
+    cleaned = re.sub(r"\[([^\]]+)\]\([^\)]+\)", r"\1", cleaned)
+    cleaned = re.sub(r"<[^>]+>", " ", cleaned)
 
-    # Strip raw JSON tokens/syntax remnants
+    # 5. Remove bold/italics markers and dangling asterisks/underscores
+    cleaned = re.sub(r"\*{1,3}", "", cleaned)
+    cleaned = re.sub(r"(?<!\w)_+|_+(?!\w)", " ", cleaned)
+
+    # 6. Strip raw JSON tokens/syntax remnants
     cleaned = re.sub(r"[{}\[\]]", " ", cleaned)
     cleaned = re.sub(r'["\']\s*:\s*["\']', " ", cleaned)
-    cleaned = re.sub(r'["\']\s*:\s*\{', " ", cleaned)
+    cleaned = re.sub(r'["\']\s*:\s*\{?', " ", cleaned)
 
-    # Strip cut token fragments like `**JAR` or dangling `**`
-    cleaned = re.sub(r"\*\*[A-Za-z0-9_]*$", "", cleaned)
-    cleaned = re.sub(r"\*[A-Za-z0-9_]*$", "", cleaned)
-
-    # Strip unwanted prefix tags like [TTS], [Planner], etc.
+    # 7. Strip unwanted prefix tags like [TTS], [Planner], etc.
     cleaned = re.sub(r"^\[[A-Za-z0-9_\-\s]+\]\s*", "", cleaned)
 
-    # Normalize whitespace
+    # 8. Normalize space before punctuation marks (. , ! ? : ;)
+    cleaned = re.sub(r"\s+([,.!?:;])", r"\1", cleaned)
+
+    # 9. Normalize whitespace
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
 
-    # If only punctuation or digits remain, clean it
+    # 10. If only punctuation or single digits remain, return empty
     if cleaned in ("", ".", ",", "!", "?", "-", ":", ";", "'", '"'):
         return ""
+
+    # 11. Strip leading dangling punctuation
+    cleaned = re.sub(r"^[\s,.:;!?-]+", "", cleaned).strip()
 
     return cleaned
