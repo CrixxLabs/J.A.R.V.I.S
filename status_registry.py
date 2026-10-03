@@ -80,6 +80,11 @@ KNOWN_SUBSYSTEMS = [
     "NOVELTY_GYM", "STATE_ABSTRACTOR", "PROGRAM_WORLD_MODEL",
     "EXPERIMENT_ENGINE", "OPTION_DISCOVERY", "ANALOGICAL_TRANSFER",
     "HOMEOSTATIC_DRIVE", "LATENT_PREDICTOR",
+    # Stage 4D & 4E — Layer 5 & 6 Mark VIII Frontier
+    "OVERSIGHT_KERNEL", "IDENTITY_KERNEL", "META_ONTOLOGY",
+    "RESEARCH_ENGINE", "NEGOTIATION_SIMULATOR", "SPATIAL_SIMULATOR",
+    "REPRESENTATION_LEARNER", "CONCEPT_MANIFOLD", "COUNTERFACTUAL_ENGINE",
+    "GOAL_GENERATOR", "SYSTEM1_COMPILER", "SUBSTRATE_MANAGER",
 ]
 
 _TEST_ARTIFACT_NAMES = {"FAIL_COMP", "HIGH_PRIORITY", "LOW_PRIORITY", "TEST"}
@@ -305,6 +310,20 @@ CAPABILITY_DEFINITIONS = {
     "ANALOGICAL_TRANSFER": _cap("Structure-Mapping Engine analogical transfer and inference projection", "reasoning", ["analogical_transfer.py"], actions=["align", "best_mapping"]),
     "HOMEOSTATIC_DRIVE": _cap("Learning-progress curiosity and homeostatic drive regulation", "learning", ["homeostatic_drive.py"], actions=["update_drive", "record_prediction_error", "compute_learning_progress", "attention_allocation"]),
     "LATENT_PREDICTOR": _cap("JEPA-lite latent feature transition predictor", "learning", ["latent_predictor.py"], actions=["encode", "predict_next", "observe", "mean_surprise"]),
+    # Layer 5 — Longitudinal Integrity & Oversight (Modules AJ, AE, AF, AG, AH, AI)
+    "OVERSIGHT_KERNEL": _cap("Cryptographic BLAKE2b audit chain, SPC drift monitoring and dead-man switch", "security", ["oversight_kernel.py"], actions=["record_audit_event", "verify_chain_integrity", "update_spc_metric", "check_deadman_switch", "detect_rubber_stamp"]),
+    "IDENTITY_KERNEL": _cap("Ed25519-signed constitution, JSD drift probes and sycophancy guard", "security", ["identity_kernel.py"], actions=["verify_constitution", "evaluate_policy_drift", "classify_user_feedback"]),
+    "META_ONTOLOGY": _cap("Stitch-style primitive discovery, formal concept lattices and bitemporal schema evolution", "reasoning", ["meta_ontology.py"], actions=["discover_primitives", "induce_formal_concepts", "evolve_concept_schema"]),
+    "RESEARCH_ENGINE": _cap("Pre-registration gate, alpha-investing FDR control and empirical claims ledger", "reasoning", ["research_engine.py"], actions=["preregister_hypothesis", "evaluate_hypothesis", "record_claim"]),
+    "NEGOTIATION_SIMULATOR": _cap("Game-theoretic counterpart profiling, Faratin concession and assertion ledger", "planning", ["negotiation_simulator.py"], actions=["compute_concession_level", "profile_counterpart", "compute_pareto_and_nash", "verify_outbound_assertion"]),
+    "SPATIAL_SIMULATOR": _cap("3D point cloud/TSDF voxelization, intuitive physics and actuation safety envelopes", "system", ["spatial_simulator.py"], actions=["ingest_depth_map", "voxelize_point_cloud", "simulate_rigid_body", "estimate_physics_parameters", "validate_actuation_command"]),
+    # Layer 6 — Representation Learning & Continuity (Modules AK, AL, AM, AN, AO, AP)
+    "REPRESENTATION_LEARNER": _cap("Non-parametric kNN-LM exemplar store and fast/slow rank-4 weight adaptation", "learning", ["representation_learner.py"], actions=["add_exemplar", "query_knn", "interpolate_predictions", "update_fast_weights", "merge_fast_to_slow"]),
+    "CONCEPT_MANIFOLD": _cap("Incremental growing neural gas prototype clustering and bootstrap symbol emergence", "reasoning", ["concept_manifold.py"], actions=["add_sample", "evaluate_symbol_emergence"]),
+    "COUNTERFACTUAL_ENGINE": _cap("Programmatic SCM and Pearlian abduction-action-prediction counterfactual reasoning", "reasoning", ["counterfactual_engine.py"], actions=["add_variable", "evaluate_counterfactual"]),
+    "GOAL_GENERATOR": _cap("Grammar-based goal synthesis, Goldilocks difficulty filtering and ratification", "planning", ["goal_generator.py"], actions=["synthesize_goals", "filter_goldilocks_goals", "ratify_goal"]),
+    "SYSTEM1_COMPILER": _cap("Trace compilation and Beta-Binomial lower credible bound System-1 fast path", "reasoning", ["system1_compiler.py"], actions=["record_trace", "query_fast_path", "report_execution_result"]),
+    "SUBSTRATE_MANAGER": _cap("Model-agnostic cognitive state schema, migration validation and cold-boot disaster recovery", "system", ["substrate_manager.py"], actions=["export_cognitive_state", "evaluate_candidate_substrate", "reconstruct_from_cold_boot"]),
 }
 
 
