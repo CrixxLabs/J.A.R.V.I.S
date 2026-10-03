@@ -18,6 +18,7 @@ from typing import Callable, Optional
 from dotenv import load_dotenv
 
 import error_handler
+from speech_cleaner import clean_speech_text
 from status_registry import SubsystemState, get_registry
 
 load_dotenv()
@@ -223,6 +224,7 @@ def is_f5_ready() -> bool:
 
 def generate_speech_wav(text: str, output_wav_path: Optional[str] = None) -> Optional[str]:
     """Compatibility/non-streaming path. Uses the resident worker, never the Pocket CLI."""
+    text = clean_speech_text(text)
     if not text or not text.strip():
         return None
     if not is_ready() and not start_engine():
@@ -272,6 +274,7 @@ def stream_speech(
     The model/voice stay resident in the worker. The first decoded PCM chunks
     are sent immediately; playback begins before the complete utterance exists.
     """
+    text = clean_speech_text(text)
     if not text or not text.strip():
         return False
     if not is_ready() and not start_engine():

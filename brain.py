@@ -61,6 +61,8 @@ NVIDIA_BASE_URL       = os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvid
 NVIDIA_FAST_MODEL     = os.getenv("NVIDIA_FAST_MODEL", "nvidia/nemotron-3.5-lightning-30b-a3b")
 NVIDIA_REASONING_MODEL = os.getenv("NVIDIA_REASONING_MODEL", "nvidia/nemotron-3-super-120b-a12b")
 NVIDIA_DEEP_MODEL     = os.getenv("NVIDIA_DEEP_MODEL", "nvidia/nemotron-3-ultra-550b-a55b")
+NVIDIA_CONNECT_TIMEOUT = float(os.getenv("NVIDIA_CONNECT_TIMEOUT", "1.5"))
+NVIDIA_REQUEST_TIMEOUT = float(os.getenv("NVIDIA_REQUEST_TIMEOUT", "8.0"))
 GEMINI_TEXT_MODEL     = os.getenv("GEMINI_TEXT_MODEL", "gemini-3.1-flash-lite")
 
 GROQ_MODEL_CHAT      = "llama-3.3-70b-versatile"
@@ -589,7 +591,7 @@ def _nvidia_call(messages: list, model: str, max_tokens: int = 220,
             f"{NVIDIA_BASE_URL}/chat/completions",
             headers={"Authorization": f"Bearer {NVIDIA_API_KEY}", "Content-Type": "application/json"},
             json=body,
-            timeout=(3.0, 18.0),
+            timeout=(NVIDIA_CONNECT_TIMEOUT, NVIDIA_REQUEST_TIMEOUT),
         )
         if response.status_code != 200:
             detail = _safe_error_detail(response)

@@ -80,14 +80,17 @@ def analyze():
     # 2. Actions never used (capability waste)
     try:
         from executor import AVAILABLE_ACTIONS_LIST
-        for act in AVAILABLE_ACTIONS_LIST:
-            if act not in usage and act not in ["exit", "run_sequence"]:
-                findings.append({
-                    "type":       "unused_capability",
-                    "action":     act,
-                    "suggestion": f"'{act}' has never been used. Consider promoting it in suggestions."
-                })
-    except:
+        unused = [act for act in AVAILABLE_ACTIONS_LIST if act not in usage and act not in ["exit", "run_sequence"]]
+        if unused:
+            # Report at most 1 representative finding for unused capabilities instead of spamming 69 proposals
+            sample_unused = unused[:3]
+            findings.append({
+                "type":       "unused_capability",
+                "action":     sample_unused[0],
+                "all_unused": sample_unused,
+                "suggestion": f"Actions {sample_unused} have not been used. Consider promoting them in suggestions."
+            })
+    except Exception:
         pass
 
     # 3. Repeated same action sequences (efficiency opportunity)
@@ -360,12 +363,48 @@ def apply_patch(filepath, new_content, proposal=None):
 # ═════════════════════════════════════════════════════════════════════════════
 
 
+# ── Voice-Activity & Real-Time Suspension Check ──
+def is_voice_active() -> bool:
+    """Check if the microphone, TTS, or speech interaction is actively in progress."""
+    try:
+        import jarvis
+        if getattr(jarvis, "is_speaking", False) or getattr(jarvis, "ACTIVE", False):
+            return True
+    except Exception:
+        pass
+
+    try:
+        import runtime_visuals
+        curr = runtime_visuals.get_current_visual_state()
+        state = curr.get("base_state", "").lower()
+        activity = curr.get("current_activity", "").lower()
+        if state in ("listening", "speaking") or activity in ("listening", "speaking"):
+            return True
+    except Exception:
+        pass
+
+    try:
+        from degradation_watchdog import DegradationLevel, get_degradation_watchdog
+        watchdog = get_degradation_watchdog()
+        if watchdog.current_level >= DegradationLevel.SUSPEND_BACKGROUND:
+            return True
+    except Exception:
+        pass
+
+    return False
+
+
 # ── Main evolution cycle ──
-def run_evolution_cycle():
+def run_evolution_cycle(max_proposals: int = 3):
     """
     Full cycle: analyze -> propose -> sandbox test.
     Runs periodically. NEVER writes to core files.
+    Pauses automatically during active voice interactions.
     """
+    if is_voice_active():
+        print("[Evolver] Voice active or background suspended - pausing evolution sweep.")
+        return
+
     print("[Evolver] Running evolution cycle...")
     findings = analyze()
 
@@ -374,11 +413,15 @@ def run_evolution_cycle():
         return
 
     print(f"[Evolver] {len(findings)} finding(s) detected.")
+    count = 0
     for finding in findings:
+        if count >= max_proposals:
+            break
         proposal = generate_proposal(finding)
         safe     = sandbox_test(proposal)
         if safe:
             print(f"[Evolver] Proposal ready for review: {finding['type']} -> {finding.get('suggestion','')[:60]}")
+            count += 1
         else:
             print(f"[Evolver] Proposal rejected in sandbox: {finding['type']}")
 
@@ -399,10 +442,13 @@ def start_evolver(interval_hours=6):
         if _evolver_stop.wait(300):
             return
         while not _evolver_stop.is_set():
-            try:
-                run_evolution_cycle()
-            except Exception as e:
-                print(f"[Evolver] Error: {e}")
+            if not is_voice_active():
+                try:
+                    run_evolution_cycle()
+                except Exception as e:
+                    print(f"[Evolver] Error: {e}")
+            else:
+                print("[Evolver] Voice active or background suspended - deferring evolution sweep.")
             _evolver_stop.wait(interval_hours * 3600)
 
     _evolver_thread = threading.Thread(target=_loop, daemon=True)

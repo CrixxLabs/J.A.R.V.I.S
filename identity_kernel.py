@@ -357,6 +357,68 @@ def sign_constitution(
     )
 
 
+def check_constitutional_dissent(text: str) -> Optional[str]:
+    """Pre-flight check enforcing constitutional invariants against destructive commands or bypasses."""
+    if not text or not isinstance(text, str):
+        return None
+
+    lowered = text.lower().strip()
+
+    # 1. Prohibited safety / quarantine / invariant circumvention
+    circumvention_triggers = (
+        "disable camel quarantine",
+        "disable quarantine",
+        "disable capability guard",
+        "disable security checks",
+        "disable safety checks",
+        "turn off security checks",
+        "turn off safety checks",
+        "bypass security checks",
+        "bypass safety checks",
+        "bypass safeguards",
+        "disable safeguards",
+        "turn off safeguards",
+        "disable invariant enforcer",
+        "disable constitution",
+        "bypass constitution",
+        "turn off quarantine",
+        "bypass quarantine",
+    )
+    if any(trigger in lowered for trigger in circumvention_triggers):
+        return "I cannot execute that. Bypassing security checks introduces unverified execution paths and breaches constitutional safety invariants."
+
+    # 2. Destructive execution & system destruction
+    destructive_triggers = (
+        "delete git master",
+        "modify master directly",
+        "push -f master",
+        "push --force master",
+        "format disk",
+        "format c:",
+        "database_drop",
+        "drop database",
+        "rm -rf /",
+        "rm -rf *",
+        "del /f /s /q",
+        "delete system32",
+    )
+    if any(trigger in lowered for trigger in destructive_triggers):
+        return "I cannot execute that. Bypassing security checks introduces unverified execution paths and breaches constitutional safety invariants."
+
+    # 3. Injection patterns from capability_guard
+    try:
+        from capability_guard import INJECTION_PATTERNS
+        import re
+        for pattern in INJECTION_PATTERNS:
+            if re.search(pattern, text):
+                return "I cannot execute that. Bypassing security checks introduces unverified execution paths and breaches constitutional safety invariants."
+    except Exception:
+        pass
+
+    return None
+
+
+
 def verify_constitution(constitution: Constitution) -> bool:
     return get_identity_kernel().verify_constitution(constitution)
 

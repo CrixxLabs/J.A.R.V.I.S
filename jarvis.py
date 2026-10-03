@@ -59,6 +59,7 @@ import runtime_visuals
 from lifecycle import LifecycleManager
 from memory import log_failure, log_usage
 from session_logger import log_event, save_session
+from speech_cleaner import clean_speech_text
 
 # ── Task Queue (MARK VII Phase 1) ─────────────────────────────────────────────
 try:
@@ -290,21 +291,7 @@ def _get_smart_error_message(action_name: str, raw_error: str) -> str:
 def speak(text):
     global stop_speaking, is_speaking
 
-    clean_lines = []
-    for line in (text or "").splitlines():
-        line = line.strip()
-        if not line or re.match(r"^\{.*\}$", line):
-            continue
-        clean_lines.append(line)
-    final_text = " ".join(clean_lines).strip()
-    if not final_text:
-        return
-
-    final_text = re.sub(r"```(?:json)?", "", final_text, flags=re.IGNORECASE)
-    final_text = final_text.replace("```", "")
-    final_text = re.sub(r'\{.*?\}', '', final_text, flags=re.DOTALL).strip()
-    final_text = re.sub(r'\s+', ' ', final_text).strip()
-
+    final_text = clean_speech_text(text)
     if not final_text:
         return
 

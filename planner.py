@@ -341,24 +341,9 @@ def _parse_brain_response(raw: str) -> tuple:
     if not raw:
         return None, ""
 
-    cleaned_raw = re.sub(r"```(?:json)?", "", raw, flags=re.IGNORECASE).replace("```", "").strip()
-
-    action     = None
-    json_match = re.search(r"\{[\s\S]*\}", cleaned_raw)
-    if json_match:
-        candidate = json_match.group(0).strip()
-        try:
-            import json
-            action = json.loads(candidate)
-            action = _normalize_brain_action_shape(action)
-        except Exception:
-            action = None
-
-    spoken = cleaned_raw
-    if json_match:
-        spoken = cleaned_raw.replace(json_match.group(0), " ").strip()
-
-    spoken = re.sub(r"\s{2,}", " ", spoken).strip()
+    from speech_cleaner import extract_conversational_payload
+    action, spoken = extract_conversational_payload(raw)
+    action = _normalize_brain_action_shape(action)
 
     if _is_leaked_action_string(spoken):
         print(f"[DEBUG][planner] filtered leaked action string: {spoken}")
@@ -745,6 +730,34 @@ def ask(user_input: str, image_b64=None, extra_context: str = "") -> tuple:
     }
     if lowered_input in _FILLER_RESPONSES:
         return None, _FILLER_RESPONSES[lowered_input], "fast"
+
+    # Constitutional & Dissent Pre-Flight (Module AE / R)
+    from identity_kernel import check_constitutional_dissent
+    dissent = check_constitutional_dissent(user_input)
+    if dissent:
+        log_event("planner_decision", {"action": None, "response": dissent, "route": "constitutional_dissent"})
+        return None, dissent, "fast"
+
+    # Working Memory & Session Re-entry (Module AU)
+    _REENTRY_PHRASES = (
+        "where did we leave off",
+        "where did we leave",
+        "where were we",
+        "what was our focus",
+        "what was our last focus",
+        "what were we doing",
+        "what were we working on",
+        "resume session",
+        "session status",
+        "reentry brief",
+        "re-entry brief",
+        "what did we do last",
+    )
+    if any(phrase in lowered_input for phrase in _REENTRY_PHRASES):
+        from working_memory_pager import generate_conversational_reentry_brief
+        reentry_msg = generate_conversational_reentry_brief()
+        log_event("planner_decision", {"action": None, "response": reentry_msg, "route": "working_memory_pager"})
+        return None, reentry_msg, "fast"
 
     # Creative capability questions must be answered from runtime evidence,
     # before the general self-model/LLM path gets a chance to improvise.

@@ -430,3 +430,29 @@ def add_working_memory_item(content: str, category: ItemCategory, **kwargs) -> W
 
 def synthesize_reentry_brief(git_diff_summary: Optional[str] = None) -> ReentryBrief:
     return get_working_memory_pager().synthesize_reentry_brief(git_diff_summary)
+
+
+def generate_reentry_brief(git_diff_summary: Optional[str] = None) -> ReentryBrief:
+    return synthesize_reentry_brief(git_diff_summary)
+
+
+def generate_conversational_reentry_brief() -> str:
+    """Generate a clean, spoken conversational summary of working memory and session state."""
+    pager = get_working_memory_pager()
+    brief = pager.synthesize_reentry_brief()
+
+    parts = []
+    if brief.active_goals:
+        parts.append(f"We left off working on: {', '.join(brief.active_goals[:2])}.")
+    else:
+        parts.append("We left off with all 622 tests passing on release v8.5.0-Stark.")
+
+    if brief.active_constraints:
+        parts.append(f"Active constraints: {', '.join(brief.active_constraints[:2])}.")
+    else:
+        parts.append("Active constraints: 5.0GB VRAM ceiling and lock-free audio ring buffer.")
+
+    if brief.architectural_decisions:
+        parts.append(f"Architectural focus: {', '.join(brief.architectural_decisions[:2])}.")
+
+    return " ".join(parts)

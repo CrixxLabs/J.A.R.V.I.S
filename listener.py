@@ -1,4 +1,4 @@
-# listener.py — Iron Man Voice System
+# listener.py - Iron Man Voice System
 # Layer 1: Double clap wake trigger
 # Layer 2: Whisper-powered voice capture (works in noise/whispers/low volume)
 # Layer 3: Speaker verification (only your voice is accepted)
@@ -158,7 +158,7 @@ def init_mic():
             f"Mic index {MIC_INDEX} online"
         )
     else:
-        print("[Listener] ⚠ Critical: No working input devices found!")
+        print("[Listener] [WARN] Critical: No working input devices found!")
         registry.set_status(
             "VOICE_STT",
             SubsystemState.OFFLINE,
@@ -203,7 +203,7 @@ def _load_voice_encoder():
                 _user_voice_embedding = np.load(VOICE_EMBEDDING_FILE)
                 print("[Listener] OK User voice embedding loaded")
             else:
-                print("[Listener] ⚠ No user voice registered — run voice_setup.py first")
+                print("[Listener] [WARN] No user voice registered - run voice_setup.py first")
         except Exception as e:
             error_handler.log_and_demote(
                 subsystem="VOICE_STT",
@@ -592,7 +592,7 @@ def stop_interrupt_watcher():
 
 
 def check_interrupt() -> bool:
-    """Non-blocking check — has user interrupted?"""
+    """Non-blocking check - has user interrupted?"""
     return _interrupt_flag.is_set()
 
 
@@ -631,11 +631,11 @@ def play_jarvis_ui_sound():
                     break
                 time.sleep(0.05)
         else:
-            print(f"[Listener] jarvis_ui.mp3 not found at {sound_path} — using beep")
+            print(f"[Listener] jarvis_ui.mp3 not found at {sound_path} - using beep")
             _beep_fallback()
 
     except Exception as e:
-        print(f"[Listener] UI sound failed: {e} — using beep")
+        print(f"[Listener] UI sound failed: {e} - using beep")
         _beep_fallback()
 
     time.sleep(0.4)
@@ -679,7 +679,7 @@ def listen_for_command(timeout=12, phrase_time_limit=20):
     recognizer.phrase_threshold = 0.3
     recognizer.non_speaking_duration = 0.8
 
-    print(f"[Listener] 🎤 Listening now — SPEAK! (threshold: {energy_threshold}, timeout: {timeout}s)")
+    print(f"[Listener] [MIC] Listening now - SPEAK! (threshold: {energy_threshold}, timeout: {timeout}s)")
 
     try:
         with sr.Microphone(device_index=MIC_INDEX) as source:
@@ -692,7 +692,7 @@ def listen_for_command(timeout=12, phrase_time_limit=20):
                 )
                 print("[Listener] OK Audio captured, processing...")
             except sr.WaitTimeoutError:
-                print("[Listener] FAIL Timeout — no voice detected in time")
+                print("[Listener] FAIL Timeout - no voice detected in time")
                 return None
 
     except Exception as e:
@@ -707,7 +707,7 @@ def listen_for_command(timeout=12, phrase_time_limit=20):
     audio_np = _audio_data_to_numpy(audio)
     if audio_np is not None:
         if not _verify_speaker(audio_np):
-            print("[Listener] FAIL Voice doesn't match registered user — ignored")
+            print("[Listener] FAIL Voice doesn't match registered user - ignored")
             return None
         else:
             print("[Listener] OK Voice verified as user")
@@ -740,7 +740,7 @@ def listen_for_command(timeout=12, phrase_time_limit=20):
 
 # ── Test mode ─────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    print("[Listener Test Mode — Iron Man Voice System]")
+    print("[Listener Test Mode - Iron Man Voice System]")
     calibrate_ambient_noise()
 
     print("\nPre-loading Whisper (first time only)...")
