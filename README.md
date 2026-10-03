@@ -1,23 +1,25 @@
 <p align="center">
   <img src="https://img.shields.io/badge/MARK_VIII-Operational-00d4aa?style=for-the-badge&labelColor=0d1117" alt="MARK VIII Status" />
+  <img src="https://img.shields.io/badge/Release-v8.5.0--Stark-ffaa00?style=for-the-badge&labelColor=0d1117" alt="Release" />
   <img src="https://img.shields.io/badge/Python-3.11+-3776ab?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/.NET-8.0-512bd4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET" />
   <img src="https://img.shields.io/badge/Platform-Windows_11-0078d4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows" />
-  <img src="https://img.shields.io/badge/Tests-581_passing-2ea043?style=for-the-badge" alt="Tests" />
-  <img src="https://img.shields.io/badge/Architecture-42_Module_Cognitive_Substrate-blueviolet?style=for-the-badge" alt="Architecture" />
+  <img src="https://img.shields.io/badge/Tests-608_passing-2ea043?style=for-the-badge" alt="Tests" />
+  <img src="https://img.shields.io/badge/Architecture-48_Module_Cognitive_Substrate-blueviolet?style=for-the-badge" alt="Architecture" />
 </p>
 
-<h1 align="center">J.A.R.V.I.S — MARK VIII</h1>
+<h1 align="center">J.A.R.V.I.S — MARK VIII (v8.5.0-Stark)</h1>
 
 <p align="center">
-  <strong>Full-Spectrum Neurosymbolic Autonomous Cognitive Substrate — engineered for verified execution, longitudinal integrity, active representation learning, and lifelong epistemic self-governance.</strong>
+  <strong>Full-Spectrum Neurosymbolic Autonomous Cognitive Substrate & Movie-Accurate Interaction Co-Pilot — engineered for verified execution, longitudinal integrity, active representation learning, deictic co-presence, and lifelong epistemic self-governance.</strong>
 </p>
 
 <p align="center">
   Ed25519 Constitutional Kernel · Cryptographic BLAKE2b Audit Chain · CUSUM/EWMA Process Control<br/>
+  Zero-Latency Duplex Acoustic Choreography · ACT-R Cowan-4 Working Memory · Trust-Calibrated Initiative<br/>
+  Continuous Ambient Deixis Fusion · Teleological Intention Projection & Dissent · Spatial CAD Canvas & Pareto Engine<br/>
   Program-Induction World Models (CEGIS) · Pearlian Counterfactual SCM · Active Inference EIG (QbC)<br/>
-  Structure-Mapping Engine (SME) · Fast/Slow LoRA Adaptation · Growing Neural Gas Concept Manifold<br/>
-  Bayesian System-1 Compiler · Non-Parametric Exemplar kNN-LM · Substrate Succession Disaster Recovery
+  Structure-Mapping Engine (SME) · Fast/Slow LoRA Adaptation · Growing Neural Gas Concept Manifold
 </p>
 
 ---
@@ -28,7 +30,7 @@ J.A.R.V.I.S. MARK VIII operates under strict hardware boundary invariants tailor
 * **Host Platform:** Windows 11 Home / Pro (x86_64, Python 3.11.x, .NET 8.0).
 * **GPU Budget:** Dedicated NVIDIA GeForce RTX 3050 (6.0 GB VRAM).
 * **Peak VRAM Ceiling:** $\le 5.0\text{ GB}$ peak VRAM under simultaneous vision, generative synthesis, and reasoning loads.
-* **Single-GPU Tenancy:** All non-parametric exemplar retrieval, concept manifolds, graph traversals, and statistical process controls execute strictly on **CPU / NumPy / SciPy / SQLite / FAISS**.
+* **Single-GPU Tenancy:** All non-parametric exemplar retrieval, concept manifolds, graph traversals, acoustic turn gating, structural surrogates, and statistical process controls execute strictly on **CPU / NumPy / SciPy / SQLite / FAISS**.
 * **P3 Compute Leases:** Weight consolidation and fine-tuning execute exclusively within scheduled P3 maintenance windows guarded by the Cognitive OS scheduler (`cognitive_os.py`).
 
 ---
@@ -49,13 +51,23 @@ J.A.R.V.I.S. MARK VIII operates under strict hardware boundary invariants tailor
 
 ---
 
-## 🏛️ Comprehensive 42-Module Cognitive Architecture (Layers 1–6)
+## 🏛️ Comprehensive 48-Module Cognitive Architecture (Layers 1–7)
 
 ```
                                   ┌────────────────────────┐
                                   │      USER INTENT       │
                                   │  Voice · Web · Desktop │
                                   └───────────┬────────────┘
+                                              │
+ ┌────────────────────────────────────────────┴────────────────────────────────────────────┐
+ │ LAYER 7: MOVIE-J.A.R.V.I.S. INTERACTION, DEIXIS & CO-PILOT                              │
+ │ • duplex_choreography.py (Module AS): Logistic Turn-End Gating, Barge-In & Backchanneling │
+ │ • working_memory_pager.py (Mod AU)  : ACT-R Activation, Cowan-4 Focus & Hash Staleness  │
+ │ • initiative_governor.py (Module AV): Expected Utility Decisions & Worktree Isolation    │
+ │ • ambient_copresence.py (Module AQ) : Multimodal LSP/Focus Deixis & Parametric Replay    │
+ │ • intention_projector.py (Module AT): Inverse Plan Recognition & Constructive Dissent    │
+ │ • spatial_engineering.py (Module AR): Parametric CAD CSG, Beam Surrogates & Pareto Trade-Off│
+ └────────────────────────────────────────────┬────────────────────────────────────────────┘
                                               │
  ┌────────────────────────────────────────────┴────────────────────────────────────────────┐
  │ LAYER 5: LONGITUDINAL INTEGRITY, CONSTITUTION & OVERSIGHT                               │
@@ -145,6 +157,12 @@ J.A.R.V.I.S. MARK VIII operates under strict hardware boundary invariants tailor
 | **AN**| `goal_generator.py` | Grammar-based goal synthesis, Goldilocks difficulty filter ($0.2 \le p \le 0.8$) | Mutation Grammar |
 | **AO**| `system1_compiler.py` | Beta-Binomial 95% lower credible bound trace compiler & decompiler | SciPy Beta / CPU |
 | **AP**| `substrate_manager.py`| Model-agnostic cognitive export, succession protocol, cold-boot DR | JSON / Crypto DR |
+| **AQ**| `ambient_copresence.py`| Multimodal event fusion, referent salience, and parametric replay | CPU Monotonic |
+| **AR**| `spatial_engineering.py`| Programmatic CAD CSG, beam deflection surrogates, Pareto frontier | Analytical / CPU |
+| **AS**| `duplex_choreography.py`| Logistic turn-end gating, decision-theoretic audio gate, barge-in | Acoustic / Stats |
+| **AT**| `intention_projector.py`| Inverse plan recognition, speculative pre-mortem, constructive dissent | Plan SCM / AST |
+| **AU**| `working_memory_pager.py`| Multi-tier ACT-R working memory, Cowan-4 capacity, hash staleness | SQLite / CPU |
+| **AV**| `initiative_governor.py`| Expected utility mixed-initiative arbiter, worktree safety isolation | SciPy Beta / Git |
 
 ---
 
@@ -153,18 +171,21 @@ J.A.R.V.I.S. MARK VIII operates under strict hardware boundary invariants tailor
 MARK VIII maintains a **100% green passing baseline** across all unit and integration test suites:
 
 ```bash
-# Execute complete Mark VIII test suite (581 non-mocked tests)
+# Execute complete Mark VIII test suite (608 non-mocked tests)
 python -m pytest -q tests
 ```
 
 ```text
-........................................................................ [ 49%]
-........................................................................ [ 61%]
-........................................................................ [ 74%]
-........................................................................ [ 86%]
-........................................................................ [ 99%]
-.....                                                                    [100%]
-581 passed, 4 warnings in 76.85s (0:01:16)
+........................................................................ [ 11%]
+........................................................................ [ 23%]
+........................................................................ [ 35%]
+........................................................................ [ 47%]
+........................................................................ [ 59%]
+........................................................................ [ 71%]
+........................................................................ [ 82%]
+........................................................................ [ 94%]
+................................                                         [100%]
+608 passed, 4 warnings in 68.86s (0:01:08)
 ```
 
 ---

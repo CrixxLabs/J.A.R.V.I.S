@@ -85,6 +85,9 @@ KNOWN_SUBSYSTEMS = [
     "RESEARCH_ENGINE", "NEGOTIATION_SIMULATOR", "SPATIAL_SIMULATOR",
     "REPRESENTATION_LEARNER", "CONCEPT_MANIFOLD", "COUNTERFACTUAL_ENGINE",
     "GOAL_GENERATOR", "SYSTEM1_COMPILER", "SUBSTRATE_MANAGER",
+    # Layer 7 — Movie-J.A.R.V.I.S. Interaction & Co-Pilot (Modules AQ-AV)
+    "DUPLEX_CHOREOGRAPHY", "WORKING_MEMORY_PAGER", "INITIATIVE_GOVERNOR",
+    "AMBIENT_COPRESENCE", "INTENTION_PROJECTOR", "SPATIAL_ENGINEERING",
 ]
 
 _TEST_ARTIFACT_NAMES = {"FAIL_COMP", "HIGH_PRIORITY", "LOW_PRIORITY", "TEST"}
@@ -324,6 +327,13 @@ CAPABILITY_DEFINITIONS = {
     "GOAL_GENERATOR": _cap("Grammar-based goal synthesis, Goldilocks difficulty filtering and ratification", "planning", ["goal_generator.py"], actions=["synthesize_goals", "filter_goldilocks_goals", "ratify_goal"]),
     "SYSTEM1_COMPILER": _cap("Trace compilation and Beta-Binomial lower credible bound System-1 fast path", "reasoning", ["system1_compiler.py"], actions=["record_trace", "query_fast_path", "report_execution_result"]),
     "SUBSTRATE_MANAGER": _cap("Model-agnostic cognitive state schema, migration validation and cold-boot disaster recovery", "system", ["substrate_manager.py"], actions=["export_cognitive_state", "evaluate_candidate_substrate", "reconstruct_from_cold_boot"]),
+    # Layer 7 — Movie-J.A.R.V.I.S. Interaction & Co-Pilot (Modules AQ-AV)
+    "DUPLEX_CHOREOGRAPHY": _cap("Zero-latency duplex acoustic choreography, turn-end gating and barge-in", "voice", ["duplex_choreography.py"], actions=["predict_turn_end", "evaluate_audio_gate", "check_backchannel_opportunity", "classify_barge_in"]),
+    "WORKING_MEMORY_PAGER": _cap("Neuromorphic working memory, ACT-R activation and context paging", "memory", ["working_memory_pager.py"], actions=["add_or_update_item", "compute_actr_activation", "verify_staleness", "synthesize_reentry_brief"]),
+    "INITIATIVE_GOVERNOR": _cap("Trust-calibrated mixed-initiative governor, expected utility and worktree safety", "planning", ["initiative_governor.py"], actions=["evaluate_intervention", "record_feedback", "enforce_worktree_isolation", "check_interruption_budget"]),
+    "AMBIENT_COPRESENCE": _cap("Continuous ambient co-presence, multimodal fusion and deictic resolution", "system", ["ambient_copresence.py"], actions=["ingest_event", "resolve_deixis", "replay_parametric_action"]),
+    "INTENTION_PROJECTOR": _cap("Teleological intention projection, speculative pre-mortem and constructive dissent", "reasoning", ["intention_projector.py"], actions=["infer_goal_posteriors", "run_premortem_simulation", "evaluate_constructive_dissent"]),
+    "SPATIAL_ENGINEERING": _cap("Multimodal spatial CAD canvas, structural surrogates and Pareto trade-offs", "system", ["spatial_engineering.py"], actions=["compute_cantilever_beam", "compute_euler_buckling", "explore_pareto_tradeoffs", "check_interference"]),
 }
 
 
