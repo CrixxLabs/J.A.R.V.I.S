@@ -1,0 +1,15 @@
+{"instruction": "Solve math problem #0", "input": "x = 0", "output": "Answer is 0"}
+{"instruction": "Solve math problem #1", "input": "x = 1", "output": "Answer is 2"}
+{"instruction": "Solve math problem #2", "input": "x = 2", "output": "Answer is 4"}
+{"instruction": "Solve math problem #3", "input": "x = 3", "output": "Answer is 6"}
+{"instruction": "Solve math problem #4", "input": "x = 4", "output": "Answer is 8"}
+{"instruction": "Solve math problem #5", "input": "x = 5", "output": "Answer is 10"}
+{"instruction": "Solve math problem #6", "input": "x = 6", "output": "Answer is 12"}
+{"instruction": "Solve math problem #7", "input": "x = 7", "output": "Answer is 14"}
+{"instruction": "Solve math problem #8", "input": "x = 8", "output": "Answer is 16"}
+{"instruction": "Solve math problem #9", "input": "x = 9", "output": "Answer is 18"}
+{"instruction": "You are J.A.R.V.I.S., a sharp, loyal, and highly capable AI assistant.", "input": "Query #10", "output": "Response #10"}
+{"instruction": "You are J.A.R.V.I.S., a sharp, loyal, and highly capable AI assistant.", "input": "Query #11", "output": "Response #11"}
+{"instruction": "You are J.A.R.V.I.S., a sharp, loyal, and highly capable AI assistant.", "input": "Query #12", "output": "Response #12"}
+{"instruction": "You are J.A.R.V.I.S., a sharp, loyal, and highly capable AI assistant.", "input": "Query #13", "output": "Response #13"}
+{"instruction": "You are J.A.R.V.I.S., a sharp, loyal, and highly capable AI assistant.", "input": "Query #14", "output": "Response #14"}

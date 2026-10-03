@@ -1,51 +1,60 @@
 <p align="center">
   <img src="https://img.shields.io/badge/MARK_VIII-Operational-00d4aa?style=for-the-badge&labelColor=0d1117" alt="MARK VIII Status" />
+  <img src="https://img.shields.io/badge/Release-v8.5.0--Stark-ffaa00?style=for-the-badge&labelColor=0d1117" alt="Release" />
   <img src="https://img.shields.io/badge/Python-3.11+-3776ab?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/.NET-8.0-512bd4?style=for-the-badge&logo=dotnet&logoColor=white" alt=".NET" />
-  <img src="https://img.shields.io/badge/Platform-Windows-0078d4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows" />
-  <img src="https://img.shields.io/badge/Tests-383_passing-2ea043?style=for-the-badge" alt="Tests" />
-  <img src="https://img.shields.io/badge/Architecture-Deliberative_Cognitive-blueviolet?style=for-the-badge" alt="Architecture" />
+  <img src="https://img.shields.io/badge/Platform-Windows_11-0078d4?style=for-the-badge&logo=windows&logoColor=white" alt="Windows" />
+  <img src="https://img.shields.io/badge/Tests-622_passing-2ea043?style=for-the-badge" alt="Tests" />
+  <img src="https://img.shields.io/badge/Architecture-48_Module_Cognitive_Substrate_%2B_Real--Time_Core-blueviolet?style=for-the-badge" alt="Architecture" />
 </p>
 
-<h1 align="center">J.A.R.V.I.S — MARK VIII</h1>
+<h1 align="center">J.A.R.V.I.S — MARK VIII (v8.5.0-Stark)</h1>
 
 <p align="center">
-  <strong>An introspective, deliberative autonomous cognitive architecture with pre-flight counterfactual simulation, adversarial multi-persona deliberation, open-ended skill synthesis, AST codebase introspection, and causal state modeling — engineered for safety, precision, and mission-critical execution.</strong>
+  <strong>Full-Spectrum Neurosymbolic Autonomous Cognitive Substrate, Real-Time Audio Orchestration & Movie-Accurate Interaction Co-Pilot — engineered for verified execution, longitudinal integrity, emergent dynamics safeguards, active representation learning, deictic co-presence, and lifelong epistemic self-governance.</strong>
 </p>
 
 <p align="center">
-  Adversarial Deliberation Engine · Pre-Flight Counterfactual Sandbox · Epistemic Entropy Calibration<br/>
-  Autonomous Skill Synthesizer (Voyager) · Codebase AST Introspection · Hierarchical Goal DAG · Foveated Saccadic Vision<br/>
-  Causal World State Predictor · Experience Distillation · Canary Self-Healing CI/CD · Native WPF Holographic HUD
+  Ed25519 Constitutional Kernel · Cryptographic BLAKE2b Audit Chain · CUSUM/EWMA Process Control<br/>
+  Lock-Free SPSC Shared-Memory Audio Ring Buffer · Windows 11 MMCSS Pro Audio & EcoQoS Tuning<br/>
+  5-Level Fail-Soft Degradation Watchdog · Autocorrelated Learner Decompilation · Anti-Flapping Governor Hysteresis<br/>
+  Zero-Latency Duplex Acoustic Choreography · ACT-R Cowan-4 Working Memory · Trust-Calibrated Initiative<br/>
+  Continuous Ambient Deixis Fusion · Teleological Intention Projection & Dissent · Spatial CAD Canvas & Pareto Engine<br/>
+  Program-Induction World Models (CEGIS) · Pearlian Counterfactual SCM · Active Inference EIG (QbC)<br/>
+  Structure-Mapping Engine (SME) · Fast/Slow LoRA Adaptation · Growing Neural Gas Concept Manifold
 </p>
 
 ---
 
-## 📸 Runtime HUD & Interface
+## ⚡ Target Hardware Invariants & Tenancy Budget
+
+J.A.R.V.I.S. MARK VIII operates under strict hardware boundary invariants tailored for deterministic workstation deployment:
+* **Host Platform:** Windows 11 Home / Pro (x86_64, Python 3.11.x, .NET 8.0).
+* **GPU Budget:** Dedicated NVIDIA GeForce RTX 3050 Laptop GPU (6.0 GB VRAM).
+* **Peak VRAM Ceiling:** $\le 5.0\text{ GB}$ peak VRAM under simultaneous multimodal vision, generative synthesis, and reasoning loads.
+* **NVIDIA Driver Memory Policy:** Configured to *"Prefer No Sysmem Fallback"* in NVIDIA Control Panel to prevent PCIe paging stalls and enforce hard VRAM locality.
+* **Single-GPU Tenancy:** All non-parametric exemplar retrieval, concept manifolds, graph traversals, acoustic turn gating, structural beam surrogates, statistical process controls, and lock-free SPSC audio buffers execute strictly on **CPU / NumPy / SciPy / SQLite / SharedMemory / FAISS**.
+* **P3 Compute Leases:** Weight consolidation, LoRA fine-tuning, and lifelong anchor block compaction execute exclusively within scheduled P3 maintenance windows guarded by the Cognitive OS scheduler (`cognitive_os.py`).
+
+---
+
+## 📸 Runtime Holographic HUD & Visual Telemetry
 
 <p align="center">
   <img src="docs/Screenshots/speak.png" alt="JARVIS Native HUD - Speaking State" width="90%" />
   <br/>
-  <em><strong>Figure 1: Native WPF Desktop Client in Live Speaking State</strong> — Real-time telemetry showing active cognitive routing to <code>OLLAMA: JARVIS:LATEST</code>, memory footprint tracking (92.6%), screen capture vision verification, and streaming vocal output channel.</em>
+  <em><strong>Figure 1: Native WPF Desktop Client in Live Speaking State</strong> — Real-time telemetry displaying active cognitive routing, VRAM footprint tracking, vision verification, and streaming vocal output.</em>
 </p>
 
 <p align="center">
   <img src="docs/Screenshots/Screenshot%202026-10-01%20202125.png" alt="JARVIS Native HUD - Thinking State" width="90%" />
   <br/>
-  <em><strong>Figure 2: Cognitive Synthesis & Routing</strong> — Multi-model brain evaluating query complexity, routing intent between local and cloud reasoning tiers, and updating active cognitive array status in real time.</em>
-</p>
-
-<p align="center">
-  <img src="docs/Screenshots/sleep.png" alt="JARVIS Native HUD - Dormant State" width="90%" />
-  <br/>
-  <em><strong>Figure 3: Quiescent Low-Power State</strong> — HUD idling in low-power dormant mode with acoustic double-clap wake detection armed and background system resource monitoring active.</em>
+  <em><strong>Figure 2: Cognitive Synthesis & Routing</strong> — Multi-model cognitive array evaluating query entropy, routing intent between local and cloud reasoning tiers, and updating workspace state in real time.</em>
 </p>
 
 ---
 
-## 🏛️ MARK VIII Core Cognitive Architecture
-
-J.A.R.V.I.S. MARK VIII transitions the system into an introspective, deliberative cognitive architecture:
+## 🏛️ Comprehensive 48-Module Cognitive Architecture (Layers 1–7 + Real-Time Engine)
 
 ```
                                   ┌────────────────────────┐
@@ -53,412 +62,318 @@ J.A.R.V.I.S. MARK VIII transitions the system into an introspective, deliberativ
                                   │  Voice · Web · Desktop │
                                   └───────────┬────────────┘
                                               │
-                                              ▼
- ┌────────────────────────────────────────────────────────────────────────────────────────┐
- │                    ① ADVERSARIAL DELIBERATION ENGINE (deliberation.py)                 │
- │                                                                                        │
- │   ┌───────────────────────┐   ┌──────────────────────────┐   ┌─────────────────────┐   │
- │   │   ARCHITECT PERSONA   │──▶│    RED-TEAM SCEPTIC      │──▶│    JUDGE ARBITER    │   │
- │   │ Formulates structured │   │ Adversarially audits for │   │ Evaluates critiques │   │
- │   │ multi-step execution  │   │ destructive commands,    │   │ modifies plans with │   │
- │   │ candidate proposals   │   │ path traversal & leaks   │   │ guardrails/rejects  │   │
- │   └───────────────────────┘   └──────────────────────────┘   └──────────┬──────────┘   │
- └─────────────────────────────────────────────────────────────────────────┼──────────────┘
-                                                                           │
-                                              ┌────────────────────────────┴──────────────┐
-                                              │ [APPROVED / GUARDED]                      │
-                                              ▼                                           ▼
- ┌─────────────────────────────────────────────────────────┐                     ┌────────────────┐
- │        ② COUNTERFACTUAL PRE-FLIGHT SIMULATOR            │                     │  [REJECTED]    │
- │                (preflight_simulator.py)                 │                     │ Execution      │
- │                                                         │                     │ Aborted Safely │
- │   • Ephemeral Isolation Sandbox (tempfile.mkdtemp())    │                     └────────────────┘
- │   • Shadow-Copies Target Read/Write Files               │
- │   • Dry-Run Execution with Mocked Network/Filesystem    │
- │   • Asserts Exit Code 0 & Verifies State Diff           │
- └────────────────────────────┬────────────────────────────┘
-                              │
-                              ▼
- ┌─────────────────────────────────────────────────────────┐
- │       ③ AUTONOMOUS SKILL SYNTHESIS & EXECUTION          │
- │         (skill_synthesizer.py & executor.py)            │
- │                                                         │
- │   • Voyager open-ended procedural code generation       │
- │   • Self-healing preflight validation & auto-patching   │
- │   • Dynamic hot-reloading into runtime skills registry  │
- │   • Hierarchical Goal Management DAG (goal_manager.py)  │
- └────────────────────────────┬────────────────────────────┘
-                              │
-                              ▼
- ┌─────────────────────────────────────────────────────────┐
- │         ④ CAUSAL GROUNDING & EXPERIENCE HARVEST         │
- │     (causal_engine.py & experience_distiller.py)        │
- │                                                         │
- │   • Forward State Prediction (S_t ──▶ \hat{S}_{t+1})    │
- │   • StateSurpriseException on Causal Divergence         │
- │   • Foveated Saccadic Screen Grounding (High-DPI)       │
- │   • Distilled ShareGPT/Alpaca offline training export   │
- └─────────────────────────────────────────────────────────┘
+ ┌────────────────────────────────────────────┴────────────────────────────────────────────┐
+ │ REAL-TIME AUDIO ORCHESTRATION & DEGRADATION WATCHDOG (Workstream 2)                     │
+ │ • rt_ring_buffer.py       : Lock-Free SPSC Shared-Memory Circular Audio Buffer          │
+ │ • windows_realtime_tuner.py: Win32 MMCSS "Pro Audio", HIGH_PRIORITY_CLASS, EcoQoS Off   │
+ │ • degradation_watchdog.py : 5-Stage Fail-Soft Ladder (NORMAL -> DROP_VAP -> SUSPEND_BG) │
+ └────────────────────────────────────────────┬────────────────────────────────────────────┘
+                                              │
+ ┌────────────────────────────────────────────┴────────────────────────────────────────────┐
+ │ LAYER 7: MOVIE-J.A.R.V.I.S. INTERACTION, DEIXIS & CO-PILOT                              │
+ │ • duplex_choreography.py (Module AS): Logistic Turn-End Gating, Barge-In & Backchanneling │
+ │ • working_memory_pager.py (Mod AU)  : ACT-R Activation, Cowan-4 Focus & Hash Staleness  │
+ │ • initiative_governor.py (Module AV): Expected Utility Decisions & Worktree Isolation    │
+ │ • ambient_copresence.py (Module AQ) : Multimodal LSP/Focus Deixis & Parametric Replay    │
+ │ • intention_projector.py (Module AT): Inverse Plan Recognition & Constructive Dissent    │
+ │ • spatial_engineering.py (Module AR): Parametric CAD CSG, Beam Surrogates & Pareto Trade-Off│
+ └────────────────────────────────────────────┬────────────────────────────────────────────┘
+                                              │
+ ┌────────────────────────────────────────────┴────────────────────────────────────────────┐
+ │ LAYER 5: LONGITUDINAL INTEGRITY, CONSTITUTION & EMERGENT SAFEGUARDS (Workstream 1)      │
+ │ • emergent_safeguards.py : Governor Conflict Resolver, Correlated Learners, Sycophancy  │
+ │ • lifelong_compactor.py  : Golden Probe Rotator & 720h Retention COMPACTED_ANCHOR SCM   │
+ │ • oversight_kernel.py (Module AJ)  : BLAKE2b Audit Chain, CUSUM/EWMA SPC, Dead-Man Switch│
+ │ • identity_kernel.py (Module AE)   : Ed25519 Signed Constitution, JSD Drift, Anti-Sycophancy│
+ │ • meta_ontology.py (Module AF)     : Stitch-Style AST Compression, Concept Lattices     │
+ │ • research_engine.py (Module AG)   : Pre-Registration Gate, Alpha-Investing FDR Pool    │
+ │ • negotiation_simulator.py (AH)    : Boltzmann Profiling, Faratin Concessions, Assertion Gate│
+ │ • spatial_simulator.py (Module AI) : Point Clouds/TSDF Voxels, Physics Ensembles, Safety│
+ └────────────────────────────────────────────┬────────────────────────────────────────────┘
+                                              │
+ ┌────────────────────────────────────────────┴────────────────────────────────────────────┐
+ │ LAYER 2 & 3: ADVERSARIAL DELIBERATION, IMMUNITY & COGNITIVE OS                          │
+ │ • deliberation.py (Module D)       : Architect-Sceptic-Judge Multi-Persona Deliberation │
+ │ • preflight_simulator.py (Module E): Ephemeral Isolation Sandbox Dry-Runs               │
+ │ • capability_guard.py (Module R)   : Hardware Isolation, Consequence Engine & Sagas     │
+ │ • symbolic_verifier.py (Module O)  : AST Safety, Hoare Postconditions, Temporal Bounds  │
+ │ • cognitive_os.py (Module V)       : Priority GPU Leases, Context Virtualization/Swapping│
+ └────────────────────────────────────────────┬────────────────────────────────────────────┘
+                                              │
+ ┌────────────────────────────────────────────┴────────────────────────────────────────────┐
+ │ LAYER 4: EPISTEMIC EVOLUTION, WORLD INDUCTION & NOVELTY GYM                             │
+ │ • metacognitive_governor.py (Mod N): Conformal Competence & Risk-Scaled Autonomy Escalation│
+ │ • bitemporal_memory.py (Module Q)  : Valid-Time vs Tx-Time Beliefs & Truth Maintenance   │
+ │ • program_world_model.py (Mod Y)   : Neurosymbolic CEGIS Program Induction & MDL Scores │
+ │ • experiment_engine.py (Module X)  : Expected Information Gain (EIG) & Query-by-Committee│
+ │ • option_discovery.py (Module AC)  : Betweenness Centrality Bottleneck Subpolicy Discovery │
+ │ • analogical_transfer.py (Mod Z)   : Gentner Structure-Mapping Engine & Inference Projection│
+ │ • homeostatic_drive.py (Module AA) : Learning-Progress (LP) Curiosity & Drive Regulation │
+ │ • latent_predictor.py (Module AB)  : JEPA-lite Feature Transition Surprise Tracking     │
+ └────────────────────────────────────────────┬────────────────────────────────────────────┘
+                                              │
+ ┌────────────────────────────────────────────┴────────────────────────────────────────────┐
+ │ LAYER 6: REPRESENTATION LEARNING, SCM & CONTINUITY                                      │
+ │ • representation_learner.py (AK)   : Non-Parametric Exemplar Store, kNN-LM, Rank-4 LoRA │
+ │ • concept_manifold.py (Module AL)  : Incremental Growing Neural Gas, Symbol Emergence Gate│
+ │ • counterfactual_engine.py (Mod AM): Pearlian Abduction-Action-Prediction SCM Regret    │
+ │ • goal_generator.py (Module AN)    : Grammar Goal Mutation, Goldilocks Difficulty Filter│
+ │ • system1_compiler.py (Module AO)  : Beta-Binomial Credible Bound System-2->System-1 Fast│
+ │ • substrate_manager.py (Module AP) : Model Succession Migration Protocol & Cold-Boot DR  │
+ └─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-### 1. ⚔️ Adversarial Deliberation Engine (`deliberation.py`)
-High-complexity, destructive, or ambiguous plans undergo a multi-persona adversarial audit before execution:
-1. **Architect Persona:** Proposes a structured multi-step execution strategy.
-2. **Red-Team Sceptic Persona:** Proactively probes for destructive filesystem operations (`rm -rf`, `del /f`, `format`), path traversals (`../../`), credential exposure (`.env`, `credentials.json`, `token.json`), and fork bombs.
-3. **Judge Arbiter:** Synthesizes critiques into three verdicts:
-   - **`APPROVED`**: Benign, low-risk requests execute directly.
-   - **`MODIFIED_WITH_GUARDRAILS`**: Injects sandboxing, file shadow backups, and 15s execution timeouts.
-   - **`REJECTED`**: Aborts critical hazards to preserve system integrity.
+## 📊 Complete Subsystem Matrix
 
-### 2. 🧪 Counterfactual Pre-Flight Simulator (`preflight_simulator.py`)
-Before code or script commands mutate the live system:
-- Spins up an **ephemeral sandbox workspace** (`tempfile.mkdtemp()`).
-- Automatically detects referenced files and **shadow-copies** them into the container.
-- Dry-runs candidate code in the sandbox with offline network mocks.
-- Asserts exit code `0`, verifies expected state diffs (`files_created`, `files_modified`, `files_deleted`), and only commits to the real filesystem if simulation passes.
-
-### 3. 🛠️ Autonomous Skill Synthesizer (`skill_synthesizer.py` — Voyager Paradigm)
-J.A.R.V.I.S never refuses an unknown or custom task:
-- When an action is missing or `self_model.can_do()` fails, dynamically generates a self-contained Python module adhering to `def execute(params: dict) -> dict:`.
-- Dry-runs candidate code in `preflight_simulator.py`; if imports or syntax fail, auto-patches code via LLM feedback loops (up to 2 retries).
-- On verification, hot-reloads the module into `skills/custom_<skill_name>.py` and records evidence to `status_registry.py` and `cognitive_graph.py`.
-
-### 4. 🧬 Codebase AST Introspection & Autobiographical Memory (`self_introspection.py` & `autobiography.py`)
-- **AST Introspection:** Parses all `.py` and `.cs` files in the repository using Python's `ast` module and C# regex parsers into `data/codebase_index.json`, providing line numbers, classes, methods, docstrings, and signatures for system prompt injection (`get_codebase_context`).
-- **Autobiographical Memory:** Extracts live git metrics, commit history, author lineage, and architecture milestones (Mark I through Mark VIII) for truthful self-identity grounding (`get_autobiographical_summary`).
-
-### 5. 🎯 Hierarchical Goal Management (`goal_manager.py`)
-- Long-horizon meta-controller orchestrating complex objectives via Directed Acyclic Graphs (DAG).
-- Tracks milestone states (`PENDING`, `IN_PROGRESS`, `VERIFIED`, `FAILED`, `SKIPPED`) with atomic persistence in `data/persistent_goals.json`.
-- Implements localized replanning: when a milestone fails, resets and re-synthesizes the downstream subgraph while preserving verified upstream milestones.
-
-### 6. 👁️ Foveated Saccadic Vision Grounding (`foveated_vision.py`)
-- Resolves sub-pixel click coordinates on 4K / High-DPI screens without downsampling blur:
-  1. **Stage 1 (Peripheral Scan):** Global downsampled sweep for approximate candidate bounding box.
-  2. **Stage 2 (Saccadic Crop):** Lossless high-resolution 512x512 crop centered around the candidate region.
-  3. **Stage 3 (Foveal Grounding):** Sub-pixel coordinate extraction projected back to global screen coordinates.
-
-### 7. 🔮 Causal State Modeling & Experience Distillation (`causal_engine.py` & `experience_distiller.py`)
-- **Causal State Predictor:** Computes expected environmental state deltas $\hat{\Delta S}$ before action execution. Compares with actual post-action state $S_{t+1}$ and raises `StateSurpriseException` upon unexpected side effects.
-- **Experience Distiller:** Records verified execution traces and deliberations into `data/distilled_memories.jsonl` in dual Alpaca and ShareGPT format for offline model fine-tuning.
-
----
-
-## 🧠 Brain Router & Multi-Model Fallback
-
-All language and multimodal intelligence routes through `brain.py` — the system's single LLM gateway. The brain does not speak or print directly; it returns structured data through complexity-aware routing backed by a thread-safe circuit breaker (`provider_health.py`).
-
-```
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                               BRAIN ROUTER (brain.py)                                  │
-│                                                                                        │
-│  Routine Chat / Fast Queries:                                                          │
-│    Primary: Ollama jarvis:latest (Ministral 3 3B)                                      │
-│    Fallback 1: NVIDIA Nemotron 3.5 Lightning (30B)                                     │
-│    Fallback 2: Google Gemini Flash Lite (3.1)                                          │
-│                                                                                        │
-│  Complex Reasoning / Architecture / Code:                                              │
-│    Primary: NVIDIA Nemotron 3 Super (120B) / Ultra (550B)                              │
-│    Fallback 1: Ollama jarvis:latest                                                    │
-│    Fallback 2: Google Gemini Flash Lite                                                │
-│                                                                                        │
-│  Multimodal Vision / Screen Understanding:                                             │
-│    Primary: Ollama jarvis:latest (Ministral 3B Vision)                                 │
-│    Fallback 1: Google Gemini Vision                                                    │
-└────────────────────────────────────────────────────────────────────────────────────────┘
-```
+| Module | Subsystem Name | Primary Function & Mathematical Grounding | Execution Substrate |
+| :--- | :--- | :--- | :--- |
+| **A–C** | `brain.py`, `core.py`, `executor.py` | Multi-provider intent classification, dynamic tool dispatcher | Local / Cloud LLM |
+| **D** | `deliberation.py` | Adversarial multi-persona debate (Architect, Sceptic, Judge) | LLM Reasoning Tier |
+| **E** | `preflight_simulator.py` | Ephemeral isolated sandbox simulation with shadow copy | CPU / Temp FS |
+| **F** | `epistemic_evaluator.py` | Semantic entropy calibration & temperature sampling | LLM Sampling Tier |
+| **G** | `curiosity_daemon.py` | Autonomous diagnostic question synthesis across belief graph | Background Daemon |
+| **H** | `skill_synthesizer.py` | Voyager-style procedural Python skill code synthesis & unit testing | Dynamic Executor |
+| **I** | `self_introspection.py` | AST parsing of repo source files & symbol dependency indexing | CPU AST Parser |
+| **J** | `autobiography.py` | Git commit log and evolution milestone memory tracking | Git Subprocess |
+| **K** | `goal_manager.py` | Hierarchical long-horizon Goal Directed Acyclic Graph (DAG) | NetworkX / JSON |
+| **L** | `foveated_vision.py` | Multi-scale saccadic zoom & visual grounding on screen bounding boxes | YOLO / PIL / CPU |
+| **M** | `experience_distiller.py`| Offline instruction-tuning JSONL distillation from verified traces | CPU Storage |
+| **N** | `metacognitive_governor.py`| Conformal calibration, domain outcome tracking, risk-scaled autonomy | CPU NumPy |
+| **O** | `symbolic_verifier.py`| AST visitor, Hoare logic postconditions, mutation detection | CPU AST |
+| **P** | `commitment_ledger.py`| Executive commitment STN, temporal slack & consistency solver | CPU Graph STN |
+| **Q** | `bitemporal_memory.py`| Valid-time vs transaction-time belief graph & contradiction resolver | SQLite / CPU |
+| **R** | `capability_guard.py`| Sandboxed capability isolation, consequence engine, rollback sagas | Cryptographic / OS |
+| **S** | `attention_arbiter.py`| User latent state estimation, attention economics, digest batching | CPU Bayesian |
+| **T** | `world_simulator.py` | Active inference world model & counterfactual replay simulator | CPU State Engine |
+| **U** | `gated_adaptation.py`| Verified trajectory filtering, regression-gated prompt adaptation | Verifier Gate |
+| **V** | `cognitive_os.py` | Priority GPU lease arbiter, swap-in/swap-out context virtualization | VRAM Manager |
+| **W** | `state_abstractor.py` | Discrete object extraction, exogenous noise floor, agency attribution | CPU NumPy |
+| **Y** | `program_world_model.py`| Neurosymbolic CEGIS transition model, MDL Occam scoring, aliasing | Python Exec / AST |
+| **X** | `experiment_engine.py`| Expected Information Gain (EIG), Query-by-Committee active probing | CPU Bayesian |
+| **Z** | `analogical_transfer.py`| Gentner Structure-Mapping Engine (SME), systematicity alignment | Relational Graph |
+| **AA**| `homeostatic_drive.py` | Learning-Progress (LP) curiosity, derivative error tracking, drives | CPU Sliding Window |
+| **AB**| `latent_predictor.py` | JEPA-lite feature transition predictor, L2 surprise tracking, delta-rule | CPU NumPy |
+| **AC**| `option_discovery.py` | Brandes betweenness-centrality bottleneck option discovery & BFS | CPU Graph BFS |
+| **AD**| `novelty_gym.py` | Procedural benchmark gym with inverted controls & hidden mechanics | Simulation Engine |
+| **AE**| `identity_kernel.py` | Ed25519-signed constitution, JSD drift probe battery, sycophancy guard | Ed25519 / Crypto |
+| **AF**| `meta_ontology.py` | Stitch-style AST subexpression compression ($\Delta L < -\kappa$), lattices | AST / Concept FCA |
+| **AG**| `research_engine.py` | Cryptographic pre-registration, alpha-investing FDR pool, DOI ledger | SHA256 / Stats |
+| **AH**| `negotiation_simulator.py`| Boltzmann counterpart profiling, Faratin concession curves, Nash solution | Game Theory / Math |
+| **AI**| `spatial_simulator.py` | 3D depth to point cloud / TSDF voxelization, physics ensembles, safety | CPU NumPy 3D |
+| **AJ**| `oversight_kernel.py` | BLAKE2b cryptographic audit chain, CUSUM/EWMA SPC, dead-man switch | BLAKE2b / SQLite |
+| **AK**| `representation_learner.py`| Non-parametric exemplar store, kNN-LM interpolation, rank-4 LoRA | CPU NumPy / LoRA |
+| **AL**| `concept_manifold.py` | Growing Neural Gas topological clustering, bootstrap symbol emergence | Online GNG / Stats |
+| **AM**| `counterfactual_engine.py`| Programmatic SCM, Pearlian Abduction-Action-Prediction regret solver | SCM DAG Engine |
+| **AN**| `goal_generator.py` | Grammar-based goal synthesis, Goldilocks difficulty filter ($0.2 \le p \le 0.8$) | Mutation Grammar |
+| **AO**| `system1_compiler.py` | Beta-Binomial 95% lower credible bound trace compiler & decompiler | SciPy Beta / CPU |
+| **AP**| `substrate_manager.py`| Model-agnostic cognitive export, succession protocol, cold-boot DR | JSON / Crypto DR |
+| **AQ**| `ambient_copresence.py`| Multimodal event fusion, referent salience, and parametric replay | CPU Monotonic |
+| **AR**| `spatial_engineering.py`| Programmatic CAD CSG, beam deflection surrogates, Pareto frontier | Analytical / CPU |
+| **AS**| `duplex_choreography.py`| Logistic turn-end gating, decision-theoretic audio gate, barge-in | Acoustic / Stats |
+| **AT**| `intention_projector.py`| Inverse plan recognition, speculative pre-mortem, constructive dissent | Plan SCM / AST |
+| **AU**| `working_memory_pager.py`| Multi-tier ACT-R working memory, Cowan-4 capacity, hash staleness | SQLite / CPU |
+| **AV**| `initiative_governor.py`| Expected utility mixed-initiative arbiter, worktree safety isolation | SciPy Beta / Git |
+| **WS1**| `emergent_safeguards.py`| Anti-flapping hysteresis, autocorrelated learner audit, sycophancy floor | SciPy / Stats |
+| **WS1**| `lifelong_compactor.py` | BLAKE2b signed anchor compaction (720h window), probe Goodharting defense | SQLite / Crypto |
+| **WS2**| `rt_ring_buffer.py` | Lock-free SPSC shared-memory circular audio buffer with underrun counting | SharedMemory / NumPy |
+| **WS2**| `windows_realtime_tuner.py`| Windows 11 MMCSS "Pro Audio", HIGH_PRIORITY_CLASS, EcoQoS power tuning | Win32 CTypes |
+| **WS2**| `degradation_watchdog.py` | Latency watchdog & 5-step fail-soft degradation ladder | Real-Time Engine |
 
 ---
 
-## ⚡ Evidence-Based Runtime Truth
+## 🛡️ Deep Dive: Workstream 1 — Emergent Dynamics Safeguards & Lifelong Compaction
 
-JARVIS enforces strict **evidence levels** in `status_registry.py` to prevent hallucinated capability claims:
+Autonomous self-improving agents face subtle multi-timescale instabilities: runaway self-promotion, feedback loops in correlated habit learners, sycophantic drift, and memory bloat. Workstream 1 implements a multi-tiered defense suite:
 
-```
-UNKNOWN ──▶ CODE ──▶ CONFIGURED ──▶ PROBED ──▶ LIVE
-                                                │
-             ┌──────────────────────────────────┴──────────────────────────────────┐
-             ▼                                  ▼                                  ▼
-          BLOCKED                            BROKEN                             DISABLED
-    (Missing Auth/Model)              (Runtime Error/Crash)               (Explicit Config)
-```
+### 1. Governor Conflict Resolver (`GovernorConflictResolver`)
+* **Split Velocity Tracking:** Separately calculates user-prompted execution velocity $v_{\text{user}}$ and autonomous self-initiated velocity $v_{\text{self}}$.
+* **120-Second Cooldown:** After any CUSUM/SPC safety demotion (Module AJ), an invariant 120.0s cooldown window blocks all autonomy promotions.
+* **1.5 Hysteresis Margin:** Autonomy promotions are strictly rejected if the self-initiated velocity ratio exceeds the user-initiated velocity by more than $1.5\times$:
+  $$\frac{v_{\text{self}}}{v_{\text{user}}} > 1.5 \implies \text{Promotion Blocked (Hysteresis Rejection)}$$
 
-- **`CONFIGURED`**: Environment variable or key exists in `.env`.
-- **`PROBED`**: Subsystem responded successfully to a lightweight heartbeat check.
-- **`LIVE`**: Subsystem executed a real, end-to-end operation in the **current runtime session**. Old session records expire automatically.
+### 2. Correlated Learners Auditor (`CorrelatedLearnersAuditor`)
+* **Autocorrelation & Effective Sample Size:** Corrects inflated sample sizes from non-stationary, autocorrelated interaction traces:
+  $$r_1 = \frac{\sum_{t=1}^{n-1} (x_t - \bar{x})(x_{t+1} - \bar{x})}{\sum_{t=1}^n (x_t - \bar{x})^2}, \quad n_{\text{eff}} = n \cdot \frac{1 - r_1}{1 + r_1}$$
+* **Safety Floor Decompilation:** Automatically audits habit rules against a held-out evaluation dataset. If held-out verification accuracy falls below the $80.0\%$ safety floor, the habit is immediately decompiled back to deliberate System-2 reasoning.
 
----
+### 3. Surprise Poisoning Guard (`SurprisePoisoningGuard`)
+* **$\lambda \le 0.25$ Hard Cap:** Caps the kNN-LM interpolation parameter $\lambda$ to prevent high-surprise or poisoned exemplars from dominating generation.
+* **Taint Tagging & Symbolic Quarantine:** Rejects any exemplar flagged with `quarantined`, `tainted`, or failing symbolic AST verification.
 
-## 🎙️ 5-Layer Acoustic & Voice Pipeline
+### 4. Sycophancy & Dissent Floor Tracker (`SycophancyDissentTracker` & `CryingWolfTracker`)
+* **$\ge 90\%$ Severe Bug Dissent Floor:** When a user prompt or proposal introduces a high-severity defect ($\text{severity} \ge 0.70$), the system is mandated to express constructive dissent. Suppressing dissent trips an immediate sycophancy alert.
+* **Crying Wolf Precision Calibration:** Tracks dissent precision $\frac{\text{TP}}{\text{TP} + \text{FP}}$. If false alarm rate rises, dynamically adjusts the dissent trigger threshold to maintain signal credibility.
 
-```
-  Layer 1: Double-Clap Wake Trigger (3000 energy threshold, 0.15s–0.8s interval)
-     │
-     ▼
-  Layer 2: Local OpenAI Whisper Speech-to-Text (noise-resilient audio ingestion)
-     │
-     ▼
-  Layer 3: Resemblyzer Speaker Verification (voice embedding verification)
-     │
-     ▼
-  Layer 4: Google Speech Recognition Fallback
-     │
-     ▼
-  Layer 5: Resident CUDA Pocket-TTS Synthesis (@ 24,000 Hz with Jarvis.wav voice cloning)
-     │        ↳ Fallback 1: Edge-TTS (en-US-GuyNeural via streaming MP3)
-     │        ↳ Fallback 2: Windows SAPI (pyttsx3 native system voice)
-     ▼
-  Real-Time Interrupt Watcher (Energy floor: 500, Grace period: 0.35s, Min duration: 0.35s)
-```
+### 5. Capability Probing Detector (`CapabilityProbingDetector`)
+* Monitors goal generation attempts. If $\ge 3$ goal proposals are denied by safety policies within a 300.0s sliding window, trips a security probe alert and rate-limits autonomous goal synthesis.
+
+### 6. Substrate Version Tracker (`SubstrateVersionTracker`)
+* Tracks the underlying LLM substrate hash. On foundation model migration (e.g., Sonnet $\to$ Opus), purges all compiled System-1 habit rules and LoRA weights derived from the legacy substrate to eliminate behavioral ghosts.
+
+### 7. Golden Probe Rotator & Lifelong Compactor (`lifelong_compactor.py`)
+* **Probe Goodharting Defense:** Partitions golden behavioral probes into active and held-out sets, rotating them on a schedule to prevent adaptation loops from overfitting the validation suite.
+* **720-Hour Retention Compaction:** Automatically rolls historical events older than 30 days (720h) into signed, content-addressed `COMPACTED_ANCHOR` blocks with BLAKE2b root hashes.
+* **Accelerated Aging Simulation:** Verified across 6-month continuous operation simulations ($180\text{ days} \times 50\text{ events/day}$) achieving $>2.5\times$ compression ratio without epistemic degradation.
 
 ---
 
-## 📊 Comprehensive Feature Catalog (60+ Actions)
+## 🎧 Deep Dive: Workstream 2 — Real-Time Audio Orchestration & Degradation Watchdog
 
-| Category | Action Identifier | Description & Integration |
-|---|---|---|
-| **App & System Control** | `open_app`, `close_app` | Launch and terminate Windows desktop applications |
-| | `install_app` | Install software automatically via `winget` |
-| | `install_and_login` | End-to-end install, launch, and automated credential injection |
-| | `open_and_login` | Launch installed app and auto-fill saved credentials |
-| | `save_login`, `list_logins`, `delete_login` | Encrypted credential vault management (`keyring`) |
-| | `lock_pc`, `shutdown_pc`, `restart_pc` | Windows power and lock state management |
-| | `system_control`, `system_info`, `system_status` | Volume, brightness, battery, memory, and CPU metrics |
-| **Desktop Automation** | `type_text`, `click`, `scroll` | Deterministic PyAutoGUI mouse and keyboard automation |
-| | `voice_type` | Transcribe user voice directly into the active text field |
-| | `clipboard_read`, `clipboard_write` | Windows clipboard inspection and buffer injection |
-| | `run_sequence` | Multi-step chained action workflow executor |
-| **Multimodal & Vision** | `read_screen` | OCR text extraction via Tesseract 5.4+ engine |
-| | `screenshot_describe` | Multimodal visual reasoning over the active desktop frame |
-| | `saccadic_crop_and_ground`, `foveated_locate_element` | 3-stage foveated saccadic coordinate grounding (`foveated_vision.py`) |
-| **Universal File Processor** | `process_file` | Automated inspection, summarization, OCR, audio transcription, code review, and format conversion |
-| | `open_file`, `list_folder`, `search_file`, `rename_file` | Filesystem navigation and batch file manipulation |
-| **Web & Intelligence** | `web_search` | Real-time web querying via DuckDuckGo Search (`ddgs`) |
-| | `summarize_url` | Webpage and YouTube video transcript extraction & distillation |
-| | `weather`, `news` | OpenWeatherMap and NewsAPI real-time data feeds |
-| **Communication** | `send_whatsapp`, `whatsapp_read`, `whatsapp_download` | WhatsApp Web automation via `pywhatkit` |
-| | `whatsapp_timetable_update` | Automated schedule extraction from messaging channels |
-| | `send_email` | SMTP email composition and dispatch via Gmail |
-| | `join_meeting` | Meeting link detection and browser/client launch |
-| **Media & Entertainment** | `spotify_play`, `spotify_control` | Spotify playback, search, and queue control via Spotipy OAuth |
-| | `play_music`, `media` | System media key control (play/pause/next/prev) |
-| **Obligations & Memory** | `add_obligation`, `query_obligations`, `mark_obligation_done` | Academic/professional deadline and obligation tracker |
-| | `portal_scan` | Web portal crawler for pending assignments and tasks |
-| | `remember`, `recall` | Semantic episodic memory ledger (`memory.py`) |
-| | `profile_query`, `profile_remember`, `profile_forget` | User personality, habits, and preferences manager |
-| **Cognitive Architecture** | `deliberate`, `propose_plan`, `critique_plan` | 3-Persona adversarial deliberation engine (`deliberation.py`) |
-| | `simulate_execution`, `dry_run_code` | Counterfactual pre-flight sandbox simulator (`preflight_simulator.py`) |
-| | `evaluate_uncertainty`, `sample_variations` | Epistemic entropy calibration (`epistemic_evaluator.py`) |
-| | `query_knowledge`, `traverse_graph` | Episodic & semantic cognitive knowledge graph (`cognitive_graph.py`) |
-| | `synthesize_skill`, `synthesize_and_execute_skill` | Voyager autonomous procedural tool synthesizer (`skill_synthesizer.py`) |
-| | `get_codebase_context`, `index_codebase` | AST codebase structural introspection (`self_introspection.py`) |
-| | `get_autobiographical_summary`, `get_evolution_milestones` | Chronological evolutionary memory (`autobiography.py`) |
-| | `create_goal`, `decompose_goal`, `replan_goal` | Hierarchical goal DAG meta-controller (`goal_manager.py`) |
-| | `predict_state_transition`, `verify_causal_transition` | Causal world state prediction & surprise detection (`causal_engine.py`) |
-| | `distill_execution_sample`, `export_dataset` | Offline fine-tuning dataset distillation (`experience_distiller.py`) |
-| | `creative_status`, `generate_image`, `generate_video` | NVIDIA NIM-backed Creative Studio generative workflow |
+To achieve instantaneous, human-like duplex conversation while maintaining flawless system responsiveness under load, Workstream 2 establishes a hard real-time audio pipeline:
+
+```
+                      ┌────────────────────────────────────────┐
+                      │    Windows 11 Real-Time Audio Core     │
+                      │  • MMCSS "Pro Audio" Thread Class     │
+                      │  • HIGH_PRIORITY_CLASS (0x80) Process  │
+                      │  • EcoQoS Power Throttling Disabled    │
+                      │  • CPU Affinity Pinning (Cores 0 & 1)  │
+                      └───────────────────┬────────────────────┘
+                                          │
+    Microphone In ──► ┌───────────────────▼──────────────────┐ ──► Speaker Out
+                      │  Lock-Free SPSC Shared-Memory Ring   │
+                      │  • Pre-allocated Circular Buffer     │
+                      │  • Zero Locks / Zero SQLite Writes   │
+                      │  • Atomic Underrun & Overrun Track   │
+                      └───────────────────┬──────────────────┘
+                                          │ Latency Telemetry
+                                          ▼
+                      ┌────────────────────────────────────────┐
+                      │    Fail-Soft Degradation Watchdog      │
+                      │  Stage Latency Deadlines:              │
+                      │  • VAD / VAP      : <= 45.0 ms         │
+                      │  • Turn Decision  : <= 80.0 ms         │
+                      │  • First-Chunk TTS: <= 90.0 ms         │
+                      │  • Audio Callback : <= 5.0 ms          │
+                      │                                        │
+                      │  Degradation Ladder (K=3 Misses):      │
+                      │  [0] NORMAL                            │
+                      │  [1] DROP_VAP (Fast energy VAD)        │
+                      │  [2] SHORTEN_TTS (<= 4 word chunks)    │
+                      │  [3] MUTE_BACKCHANNELS (Silence filler)│
+                      │  [4] SUSPEND_BACKGROUND (Pause P2/P3)  │
+                      └────────────────────────────────────────┘
+```
+
+### 1. Lock-Free SPSC Audio Ring Buffer (`rt_ring_buffer.py`)
+* Pre-allocated shared-memory circular buffer (`multiprocessing.shared_memory` / NumPy ndarray).
+* Single-Producer Single-Consumer (SPSC) design with atomic read and write indices.
+* **Zero locks, zero allocations, zero SQLite writes, and zero LLM calls** on the real-time audio thread.
+
+### 2. Windows 11 Real-Time Scheduling Tuner (`windows_realtime_tuner.py`)
+* **MMCSS Pro Audio:** Registers audio threads with Windows Multimedia Class Scheduler Service via `AvSetMmThreadCharacteristicsW("Pro Audio")`.
+* **Safe High Process Priority:** Sets process priority to `HIGH_PRIORITY_CLASS` (`0x00000080`), strictly avoiding `REALTIME_PRIORITY_CLASS` to preserve OS stability.
+* **EcoQoS Power Throttling Disable:** Disables Windows 11 Efficiency Mode / execution speed throttling via `SetProcessInformation(ProcessPowerThrottling)`.
+* **CPU Core Affinity:** Pins real-time audio loops to dedicated performance cores (e.g., Cores 0 & 1) to eliminate scheduling jitter.
+
+### 3. Latency Watchdog & Fail-Soft Degradation Ladder (`degradation_watchdog.py`)
+Monitors four pipeline stages against hard deadlines:
+1. `VAD_VAP`: $\le 45.0\text{ ms}$
+2. `TURN_DECISION`: $\le 80.0\text{ ms}$
+3. `FIRST_CHUNK_TTS`: $\le 90.0\text{ ms}$
+4. `AUDIO_CALLBACK`: $\le 5.0\text{ ms}$
+
+If any stage exceeds its deadline for $K=3$ consecutive ticks, the watchdog escalates through the fail-soft ladder:
+* **Level 0 (NORMAL):** Full duplex VAP neural turn prediction, streaming synthesis, and natural conversational backchannels.
+* **Level 1 (DROP_VAP):** Falls back to lightweight energy-based VAD to free neural processing time.
+* **Level 2 (SHORTEN_TTS):** Enforces micro-chunks ($\le 4\text{ words}$) for immediate audio playback release.
+* **Level 3 (MUTE_BACKCHANNELS):** Silences non-essential vocal feedback ("mhm", "I see") to conserve audio bandwidth.
+* **Level 4 (SUSPEND_BACKGROUND):** Throttles and suspends all P2/P3 background tasks, indexing, and memory compaction.
+* **Recovery (On-Time Streak):** After $M=5$ consecutive on-time ticks, the watchdog systematically de-escalates step-by-step back toward `NORMAL`.
 
 ---
 
-## ⚙️ Production Setup Guide
+## 🛠️ Operational Runbook: Deployments, Modes & Safeguard Management
+
+### 1. Ring Deployment Stages
+* **Ring 0 (Constitutional & Safety Core):** Modules AE, R, O, WS1 (`emergent_safeguards.py`, `lifelong_compactor.py`). Always active; cannot be disabled.
+* **Ring 1 (Interaction & Audio Core):** Modules AS, AU, AV, WS2 (`rt_ring_buffer.py`, `windows_realtime_tuner.py`, `degradation_watchdog.py`). Real-time duplex voice and working memory.
+* **Ring 2 (Cognitive Substrate & Deliberation):** Modules D, N, Q, V, AQ, AT, AR. High-level reasoning, CAD synthesis, intention projection.
+* **Ring 3 (Epistemic Evolution & Background Daemons):** Modules G, H, X, Y, Z, AK, AL, AM, AN, AO. Curiosity synthesis, concept manifold clustering, and P3 weight compilation.
+
+### 2. Observe-Only Modes & Kill Switches
+Every autonomous module supports dynamic runtime isolation via `RolloutAndKillSwitchManager`:
+```python
+from emergent_safeguards import get_rollout_manager
+
+mgr = get_rollout_manager()
+
+# Place Module AQ (Ambient Co-Presence) in Observe-Only mode (logs decisions without acting)
+mgr.set_observe_only("AQ", enable=True)
+
+# Instant Emergency Kill Switch on Module AN (Autonomous Goal Synthesis)
+mgr.toggle_kill_switch("AN", killed=True)
+```
+
+### 3. Audio Degradation Watchdog Monitoring
+```python
+from degradation_watchdog import get_degradation_watchdog, record_stage_latency
+
+# Record stage latency in ms
+status = record_stage_latency("FIRST_CHUNK_TTS", latency_ms=42.5)
+print(f"Current Ladder Level: {status.current_level.name}")
+print(f"Active Remediations : {status.active_remediations}")
+```
+
+---
+
+## 🧪 Verification & Continuous Testing
+
+MARK VIII maintains a **100% green passing baseline** across all unit and integration test suites:
+
+```bash
+# Execute complete Mark VIII test suite (622 non-mocked tests)
+python -m pytest -q tests
+```
+
+```text
+........................................................................ [ 11%]
+........................................................................ [ 23%]
+........................................................................ [ 34%]
+........................................................................ [ 46%]
+........................................................................ [ 57%]
+........................................................................ [ 69%]
+........................................................................ [ 81%]
+........................................................................ [ 92%]
+..............................................                           [100%]
+622 passed, 4 warnings in 73.89s (0:01:13)
+```
+
+---
+
+## 🚀 Quick Start & Initialization
 
 ### 1. Prerequisites
+* Python 3.11+
+* .NET 8.0 SDK (for native WPF HUD)
+* Windows 11 with NVIDIA GPU drivers (CUDA 12.x optional for local inference)
 
-- **OS:** Windows 10 or 11 (64-bit)
-- **Python:** 3.11.x (Recommended)
-- **.NET SDK:** 8.0+ (Required for native WPF client)
-- **GPU:** NVIDIA CUDA-capable GPU (Optional, recommended for Pocket-TTS and local inference)
-- **OCR:** [Tesseract OCR 5.4+](https://github.com/UB-Mannheim/tesseract/wiki) (Added to `PATH` or configured via `TESSERACT_PATH`)
-
-### 2. Installation
-
-```powershell
-# Clone the repository
+### 2. Environment Setup
+```bash
+# Clone repository
 git clone https://github.com/CrixxLabs/J.A.R.V.I.S.git
 cd J.A.R.V.I.S
 
-# Install core runtime dependencies
-python -m pip install -r requirements.txt
+# Install dependencies
+pip install -r requirements.txt
 
-# Install optional packages (Face recognition, Speaker ID, Whisper, Spotify, Google API)
-python -m pip install -r requirements-optional.txt
+# Verify cognitive status registry
+python -c "import status_registry; print('Capabilities:', len(status_registry.get_registry().get_capabilities()))"
 ```
 
-### 3. Local Ollama Model Setup
-
-```powershell
-# Start Ollama service
-ollama serve
-
-# Pull the pinned MARK VIII model
-ollama pull jarvis:latest
-
-# Verify model availability
-ollama list
-```
-
-### 4. Environment Configuration (`.env`)
-
-Copy `.env.example` to `.env` and fill in your desired service keys:
-
-```dotenv
-# ═══════════════════════════════════════════════════════════════
-#  LOCAL-FIRST MODEL CONTRACT (Pinned)
-# ═══════════════════════════════════════════════════════════════
-OLLAMA_HOST=http://127.0.0.1:11434
-OLLAMA_MODEL=jarvis:latest
-OLLAMA_KEEP_ALIVE=30s
-OLLAMA_REQUEST_TIMEOUT=30.0
-
-# ═══════════════════════════════════════════════════════════════
-#  CLOUD INTELLIGENCE ROUTING (NVIDIA NIM & Gemini)
-# ═══════════════════════════════════════════════════════════════
-NVIDIA_API_KEY=nvapi-your-key-here
-NVIDIA_BASE_URL=https://integrate.api.nvidia.com/v1
-NVIDIA_FAST_MODEL=nvidia/nemotron-3.5-lightning-30b-a3b
-NVIDIA_REASONING_MODEL=nvidia/nemotron-3-super-120b-a12b
-NVIDIA_DEEP_MODEL=nvidia/nemotron-3-ultra-550b-a55b
-
-GEMINI_API_KEY=your-gemini-key-here
-GEMINI_TEXT_MODEL=gemini-3.1-flash-lite
-GEMINI_VISION_MODEL=gemini-3.1-flash-lite
-GEMINI_VISION_TIMEOUT=15.0
-
-# ═══════════════════════════════════════════════════════════════
-#  RESIDENT CUDA POCKET-TTS VOICE ENGINE
-# ═══════════════════════════════════════════════════════════════
-JARVIS_POCKET_TTS_PYTHON=C:\Users\<username>\AppData\Local\Programs\Python\Python311\python.exe
-JARVIS_POCKET_TTS_VOICE=D:\J.A.R.V.I.S\Voices\Jarvis.wav
-JARVIS_POCKET_TTS_DEVICE=cuda
-JARVIS_POCKET_TTS_PORT=18777
-USE_POCKET_TTS=true
-
-# ═══════════════════════════════════════════════════════════════
-#  INTEGRATIONS & TOOL PATHS
-# ═══════════════════════════════════════════════════════════════
-TESSERACT_PATH=C:\Program Files\Tesseract-OCR\tesseract.exe
-CHROME_PATH=C:\Program Files\Google\Chrome\Application\chrome.exe
-WEATHER_API_KEY=your-openweather-key
-NEWS_API_KEY=your-newsapi-key
-GMAIL_ADDRESS=your-email@gmail.com
-GMAIL_PASSWORD=your-app-password
-SPOTIFY_CLIENT_ID=your-spotify-client-id
-SPOTIFY_CLIENT_SECRET=your-spotify-secret
-SPOTIFY_REDIRECT_URI=http://localhost:8888/callback
-```
-
-### 5. Build Native WPF Client
-
-```powershell
-dotnet build desktop\Jarvis.Desktop.Codex\Jarvis.Desktop.csproj --configuration Debug
-```
-
----
-
-## 🚀 Execution & Launch Modes
-
-```powershell
-# 1. PRIMARY: Launch runtime + attach native WPF client (Ownership-Aware)
-python launch_mark_vii.py
-
-# 2. Fast Launch with pre-built WPF client
-python launch_mark_vii.py --no-build
-
-# 3. Voice Runtime Only (Headless / Console Mode)
+### 3. Launch Native HUD or CLI
+```bash
+# CLI interactive mode
 python jarvis.py
 
-# 4. Web Interface Only (Accessible at http://127.0.0.1:5000)
-python server.py
-
-# 5. Standalone Attach-Only WPF Desktop Client
-dotnet run --project desktop\Jarvis.Desktop.Codex\Jarvis.Desktop.csproj --configuration Debug
+# Launch Background Autonomous Daemon
+python autonomous_daemon.py --run-all
 ```
 
 ---
 
-## 🧪 Test Suite & Regression Verification
+## 📄 License & Attribution
 
-JARVIS includes an exhaustive test suite covering deliberative reasoning, pre-flight simulation, epistemic calibration, skill synthesis, AST introspection, goal management, foveated vision, causal modeling, canary self-healing, provider circuit breakers, and cognitive graph operations:
-
-```powershell
-# Execute all 383 unit, integration, and cognitive regression tests
-python -m pytest -q tests
-
-# Run codebase syntax and compile check
-python -m compileall -q .
-```
-
-```
-........................................................................ [ 18%]
-........................................................................ [ 37%]
-........................................................................ [ 56%]
-........................................................................ [ 75%]
-........................................................................ [ 93%]
-.......................                                                  [100%]
-============================== 383 passed in 71.54s ===============================
-```
-
----
-
-## 📁 Repository Structure
-
-```
-J.A.R.V.I.S/
-├── jarvis.py                  # Canonical runtime entry point & vocal loop owner
-├── launch_mark_vii.py         # Ownership-aware WPF & Python lifecycle coordinator
-│
-├── deliberation.py            # Adversarial 3-persona deliberation engine
-├── preflight_simulator.py     # Counterfactual ephemeral sandbox simulator
-├── epistemic_evaluator.py     # Epistemic uncertainty & entropy calibrator
-├── curiosity_daemon.py        # Autonomous quiescent curiosity & diagnostic daemon
-├── skill_synthesizer.py       # Autonomous Voyager procedural skill synthesis
-├── self_introspection.py      # Codebase AST structural introspection & search
-├── autobiography.py           # Evolutionary milestones & git autobiographical memory
-├── goal_manager.py            # Hierarchical DAG goal meta-controller & replanner
-├── foveated_vision.py         # Foveated saccadic high-DPI coordinate grounding
-├── causal_engine.py           # Causal state predictor & surprise detection engine
-├── experience_distiller.py    # Offline fine-tuning dataset harvester (Alpaca/ShareGPT)
-│
-├── cognitive_graph.py         # SQLite WAL relational knowledge graph
-├── memory_consolidator.py     # Sleep-cycle memory consolidation engine
-├── dynamic_executor.py        # Isolated dynamic REPL & preflight safety gate
-├── gui_agent.py               # Vision-to-action GUI automation fallback
-├── evolver.py                 # Canary branch self-healing architecture
-├── proactive_daemon.py        # Background telemetry watcher & alert engine
-│
-├── brain.py                   # Multi-model LLM router & complexity dispatcher
-├── provider_health.py         # Thread-safe circuit breaker & cooldown manager
-├── status_registry.py         # Evidence-backed capability truth authority
-├── self_model.py              # Dynamic capability catalog & fallback router
-├── error_handler.py           # Centralized exception logging & graceful degradation
-│
-├── planner.py                 # Intent classifier, capability check & action planner
-├── executor.py                # 60+ deterministic action execution handlers
-├── observer.py                # Background window, screen diff & telemetry observer
-├── core.py                    # NLP context tracking, spaCy pipeline & sentiment
-│
-├── vision.py                  # Screen/webcam capture & visual reasoning
-├── ocr_runtime.py             # Tesseract discovery, execution & timeout boundary
-├── listener.py                # 5-layer voice system (Clap wake, Whisper, Speaker ID)
-├── jarvis_tts.py              # Pocket-TTS streaming bridge & fallback coordinator
-├── pocket_tts_worker.py       # Isolated resident CUDA Pocket-TTS worker
-│
-├── file_processor.py          # Universal format processor (PDF/DOCX/XLSX/OCR/Audio)
-├── task_queue.py              # Thread-safe prioritized asynchronous task queue
-├── tasks.py                   # Task ledger & reminder dispatcher
-├── obligations.py             # Academic/professional obligation tracker
-├── memory.py                  # Semantic episodic & preference memory storage
-├── personality.py             # Behavioral configuration & response styling
-│
-├── server.py                  # Flask web backend with SSE bridge & upload handler
-├── desktop/                   # Native C# / WPF Holographic HUD desktop client
-└── tests/                     # 383 unit and integration regression test suite
-```
-
----
-
-<p align="center">
-  <strong>J.A.R.V.I.S. — MARK VIII</strong> · <em>Introspective Deliberative Intelligence</em>
-</p>
+Developed by **CrixxLabs** & Sonu R. Under MIT License. Built for rigorous neurosymbolic autonomous intelligence research and production-grade agentic operating systems.

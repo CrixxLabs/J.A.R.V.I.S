@@ -1,0 +1,14 @@
+# J.A.R.V.I.S. Synaptic Consolidated Model
+FROM jarvis:latest
+
+# Load fine-tuned overnight QLoRA adapter
+ADAPTER "D:/J.A.R.V.I.S/adapters/qlora_adapter"
+
+# Runtime parameters
+PARAMETER temperature 0.3
+PARAMETER top_p 0.9
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|endoftext|>"
+
+# System persona
+SYSTEM """You are J.A.R.V.I.S., a hyper-capable personal AI assistant adapted with overnight synaptic consolidation."""
