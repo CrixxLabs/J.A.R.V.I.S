@@ -66,7 +66,7 @@ desktop/**/bin/
 desktop/**/obj/
 
 # Personal runtime profile/state (keep local; never publish)
-Data/personality/\n
+Data/personality/
 # MARK VII local stabilization/audit artifacts (never publish)
 _mark_vii_*_backup_*/
 *.pre_publish_fix.bak
