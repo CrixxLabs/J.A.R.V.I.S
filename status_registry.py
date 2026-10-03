@@ -76,6 +76,10 @@ KNOWN_SUBSYSTEMS = [
     "SOFTWARE_FORGE", "CONCURRENCY_ARBITER",
     "CAPABILITY_GUARD", "SYMBOLIC_VERIFIER", "COMMITMENT_LEDGER", "COGNITIVE_OS",
     "METACOGNITIVE_GOVERNOR", "BITEMPORAL_MEMORY", "ATTENTION_ARBITER", "WORLD_SIMULATOR", "GATED_ADAPTATION",
+    # Stage 4C — Novel Environments & Program Induction
+    "NOVELTY_GYM", "STATE_ABSTRACTOR", "PROGRAM_WORLD_MODEL",
+    "EXPERIMENT_ENGINE", "OPTION_DISCOVERY", "ANALOGICAL_TRANSFER",
+    "HOMEOSTATIC_DRIVE", "LATENT_PREDICTOR",
 ]
 
 _TEST_ARTIFACT_NAMES = {"FAIL_COMP", "HIGH_PRIORITY", "LOW_PRIORITY", "TEST"}
@@ -292,6 +296,15 @@ CAPABILITY_DEFINITIONS = {
     "ATTENTION_ARBITER": _cap("Latent user state modeling and attention economics", "system", ["attention_arbiter.py"], actions=["estimate_user_state", "should_interrupt", "select_notification_channel", "queue_alert_for_digest", "flush_digest", "record_feedback"]),
     "WORLD_SIMULATOR": _cap("Active-inference world model and counterfactual replay", "reasoning", ["world_simulator.py"], actions=["evaluate_active_inference", "record_event_trace", "replay_counterfactual", "dry_run_action"]),
     "GATED_ADAPTATION": _cap("Verified trajectory filtering and regression-gated adaptation", "learning", ["gated_adaptation.py"], actions=["filter_trajectories", "evaluate_candidate_adaptation", "promote_adaptation", "rollback_adaptation", "get_active_adaptations"], dependencies=["cap:SYMBOLIC_VERIFIER"]),
+    # Stage 4C — Novel Environments & Program Induction
+    "NOVELTY_GYM": _cap("Procedural novelty benchmark gym and evaluation harness", "learning", ["novelty_gym.py"], actions=["make_env", "evaluate_policy", "compute_prediction_accuracy"]),
+    "STATE_ABSTRACTOR": _cap("Affordance and state-abstraction engine", "reasoning", ["state_abstractor.py"], actions=["abstract_state", "sample_exogenous_noise", "attribute_agency", "induce_action_space"]),
+    "PROGRAM_WORLD_MODEL": _cap("Neurosymbolic CEGIS program-induction world model", "reasoning", ["program_world_model.py"], actions=["score_hypothesis", "find_counterexamples", "detect_state_aliasing", "induce_program_model"]),
+    "EXPERIMENT_ENGINE": _cap("EIG Query-by-Committee active experiment selection", "learning", ["experiment_engine.py"], actions=["add_hypothesis", "compute_eig", "select_best_experiment", "record_experiment"]),
+    "OPTION_DISCOVERY": _cap("Betweenness bottleneck temporal-abstraction option discovery", "learning", ["option_discovery.py"], actions=["build_from_transitions", "discover_options"]),
+    "ANALOGICAL_TRANSFER": _cap("Structure-Mapping Engine analogical transfer and inference projection", "reasoning", ["analogical_transfer.py"], actions=["align", "best_mapping"]),
+    "HOMEOSTATIC_DRIVE": _cap("Learning-progress curiosity and homeostatic drive regulation", "learning", ["homeostatic_drive.py"], actions=["update_drive", "record_prediction_error", "compute_learning_progress", "attention_allocation"]),
+    "LATENT_PREDICTOR": _cap("JEPA-lite latent feature transition predictor", "learning", ["latent_predictor.py"], actions=["encode", "predict_next", "observe", "mean_surprise"]),
 }
 
 
